@@ -1,4 +1,4 @@
-/* ---------- vocab: Digia RegTech & Nordic Financial Compliance ---------- */
+/* ---------- vocab: Nordic Financial Compliance ---------- */
 export const STATUSES = [
   { id: 'backlog', name: 'Backlog' },
   { id: 'todo', name: 'To do' },

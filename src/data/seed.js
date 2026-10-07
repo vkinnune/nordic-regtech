@@ -1,4 +1,4 @@
-/* ---------- seed data: Digia RegTech & Nordic Financial Compliance ---------- */
+/* ---------- seed data: Nordic Financial Compliance ---------- */
 import { dOff, minsAgo, uid } from '../core/utils.js';
 
 export function seed() {
@@ -6,7 +6,7 @@ export function seed() {
     {
       id: 'm1',
       name: 'Workspace Owner',
-      email: 'valtteri@digia.com',
+      email: 'owner@example.com',
       role: 'Owner',
       team: 'compliance',
       title: 'Lead Solutions Architect · RegTech',
@@ -18,7 +18,7 @@ export function seed() {
     {
       id: 'm2',
       name: 'Petter',
-      email: 'petter@digia.com',
+      email: 'petter@nordicregtech.io',
       role: 'Admin',
       team: 'compliance',
       title: 'Client Partner · Financial Services',
@@ -30,7 +30,7 @@ export function seed() {
     {
       id: 'm3',
       name: 'Compliance Officer',
-      email: 'ann-sofie.lindqvist@evli.com',
+      email: 'compliance@example.com',
       role: 'Admin',
       team: 'compliance',
       title: 'Chief Compliance Officer (2nd LoD)',
@@ -42,7 +42,7 @@ export function seed() {
     {
       id: 'm4',
       name: 'Risk Manager',
-      email: 'henrik.borgstrom@unitedbankers.fi',
+      email: 'risk@example.com',
       role: 'Member',
       team: 'risk',
       title: 'Head of Operational Risk & DORA Lead',
@@ -54,7 +54,7 @@ export function seed() {
     {
       id: 'm5',
       name: 'AML Officer',
-      email: 'matti.korhonen@digia.com',
+      email: 'aml@example.com',
       role: 'Member',
       team: 'compliance',
       title: 'MLRO & Anti-Financial Crime Lead',
@@ -66,7 +66,7 @@ export function seed() {
     {
       id: 'm6',
       name: 'Legal Counsel',
-      email: 'sofia.nygard@digia.com',
+      email: 'legal@example.com',
       role: 'Member',
       team: 'legal',
       title: 'Senior Regulatory Counsel',
@@ -78,7 +78,7 @@ export function seed() {
     {
       id: 'm7',
       name: 'Fund Operations',
-      email: 'johan.eklund@evli.com',
+      email: 'funds@example.com',
       role: 'Member',
       team: 'funds',
       title: 'Head of Fund Operations & Custody',
@@ -90,7 +90,7 @@ export function seed() {
     {
       id: 'm8',
       name: 'Security Engineer',
-      email: 'tuomas.lehtonen@digia.com',
+      email: 'security@example.com',
       role: 'Member',
       team: 'it_security',
       title: 'Lead ICT Resilience Engineer',
@@ -385,7 +385,7 @@ export function seed() {
     ],
     attachments: [
       { id: 'a3', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200) },
-      { id: 'a4', name: 'Digia_Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400) },
+      { id: 'a4', name: 'Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400) },
     ],
   });
 
@@ -638,7 +638,7 @@ export function seed() {
     { id: 'f2', project: 'p1', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400), task: 't1' },
     { id: 'f3', project: 'p2', name: 'DORA_Regulation_EU_2022_2554_Official_Journal.pdf', type: 'pdf', size: '3.4 MB', by: 'm4', at: minsAgo(5000) },
     { id: 'f4', project: 'p2', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200), task: 't6' },
-    { id: 'f5', project: 'p2', name: 'Digia_Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400), task: 't6' },
+    { id: 'f5', project: 'p2', name: 'Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400), task: 't6' },
     { id: 'f6', project: 'p3', name: 'Finansinspektionen_FFFS_2017_11_Penningtvatt.pdf', type: 'pdf', size: '890 KB', by: 'm5', at: minsAgo(8000) },
     { id: 'f7', project: 'p3', name: 'AML_General_Risk_Assessment_Draft_2026.docx', type: 'doc', size: '2.1 MB', by: 'm5', at: minsAgo(600), task: 't11' },
     { id: 'f8', project: 'p4', name: 'FFFS_2013_9_AIFM_Consolidated.pdf', type: 'pdf', size: '1.6 MB', by: 'm7', at: minsAgo(9500) },
@@ -657,11 +657,11 @@ export function seed() {
   if (tmp) tmp.updated = minsAgo(35);
 
   return {
-    ws: { name: 'Digia RegTech Hub (Nordic Wealth)', url: 'digia-regtech', c: '#0F52BA', brand: true },
+    ws: { name: 'Nordic Sovereign Bank (Mock)', url: 'nordic-sovereign', c: '#0F52BA', brand: true },
     workspaces: [
-      { id: 'w1', name: 'Digia RegTech Hub (Nordic Wealth)', c: '#0F52BA', plan: 'Enterprise', brand: true },
-      { id: 'w2', name: 'Evli Wealth Management (Sandbox)', c: '#23918A', plan: 'Dedicated' },
-      { id: 'w3', name: 'United Bankers Asset Mgmt', c: '#5A67D8', plan: 'Dedicated' },
+      { id: 'w1', name: 'Nordic Sovereign Bank (Mock)', c: '#0F52BA', plan: 'Enterprise', brand: true },
+      { id: 'w2', name: 'Polaris Wealth Management (Mock)', c: '#23918A', plan: 'Dedicated' },
+      { id: 'w3', name: 'Aura Asset Management (Mock)', c: '#5A67D8', plan: 'Dedicated' },
     ],
     me: 'm1',
     members,
@@ -677,7 +677,7 @@ export function seed() {
     recentSearches: ['1 kap. 100 §', 'DORA', 'Penningtvätt', 'SFS 2026:916'],
     sessions: [
       { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },
-      { id: 'se2', dev: 'Digia Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },
+      { id: 'se2', dev: 'Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },
     ],
     invoices: [
       { id: 'INV-REG-2026-001', date: dOff(-15), amt: '€12,500.00', st: 'Paid' },

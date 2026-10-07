@@ -218,12 +218,12 @@ export function popHtml(p) {
       inner = `<div class="mh">Workspaces</div>${D()
         .workspaces.map(
           w =>
-            `<button class="mi" data-a="switchWs" data-v="${w.id}">${wsLogo(w, 20)}<span class="grow">${esc(w.name)}</span><span class="faint" style="font-size:11px">${w.plan}</span>${w.name === D().ws.name ? `<span class="ck">${ic('check', 14)}</span>` : ''}</button>`,
+            `<button class="mi" data-a="switchWs" data-v="${w.id}">${wsLogo(w, 20)}<span class="grow trunc" style="min-width:0">${esc(w.name)}</span><span class="faint" style="font-size:11px;margin-left:8px;flex-shrink:0">${w.plan}</span>${w.name === D().ws.name ? `<span class="ck">${ic('check', 14)}</span>` : ''}</button>`,
         )
         .join(
           '',
         )}<div class="msep"></div><button class="mi" data-a="newWorkspace">${ic('plus', 15)}Create workspace</button><button class="mi" data-a="go" data-r="settings" data-sec="workspace">${ic('settings', 15)}Workspace settings</button><button class="mi" data-a="invite">${ic('user-plus', 15)}Invite members</button><div class="msep"></div><button class="mi" data-a="signOut">${ic('log-out', 15)}Sign out</button>`;
-      style = 'width:260px';
+      style = 'width:280px';
       break;
     case 'user':
       inner = `<div class="row" style="padding:8px 8px 10px;gap:10px">${av(D().me, 'lg', false)}<div style="min-width:0"><div style="font-weight:600">${esc(S.prefs.name)}</div><div class="faint trunc" style="font-size:12px">${esc(me().email)}</div></div></div><div class="msep"></div>

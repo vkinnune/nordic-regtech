@@ -1,4 +1,4 @@
-# Digia RegTech Studio
+# Nordic RegTech Studio
 
 A structured compliance and project management workspace with statutory diffs,
 task tracking, board / list / table / calendar / timeline views, team permissions,
