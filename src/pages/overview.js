@@ -21,16 +21,16 @@ export function pageOverview() {
     .sort((a, b) => b.ts.length - a.ts.length);
   const maxL = Math.max(...load.map(l => l.ts.length), 1);
   return `<div class="page">
-    <div class="ph"><div><h1>Compliance health overview</h1><p>Supervisory status and audit readiness across ${esc(D().ws.name)}.</p></div><div class="acts"><button class="btn btn-secondary" data-a="go" data-r="timeline">${ic('chart-gantt', 14)}Roadmap</button><button class="btn btn-primary" data-a="newProject">${ic('plus', 14)}New rulebook</button></div></div>
+    <div class="ph"><div><h1>Overview</h1><p>Status and progress across ${esc(D().ws.name)}.</p></div><div class="acts"><button class="btn btn-secondary" data-a="go" data-r="timeline">${ic('chart-gantt', 14)}Timeline</button><button class="btn btn-primary" data-a="newProject">${ic('plus', 14)}New project</button></div></div>
     <div class="stats" style="margin-bottom:16px">
-      <div class="stat"><span class="k">Rulebooks</span><span class="v">${ps.length}</span><span class="d">${ps.filter(p => p.status === 'complete').length} fully transposed</span></div>
-      <div class="stat"><span class="k">Obligations</span><span class="v">${all.length}</span><span class="d">${all.length - done} open</span></div>
-      <div class="stat"><span class="k">Audit readiness</span><span class="v">${Math.round((done / Math.max(all.length, 1)) * 100)}%</span><span class="d">across active rulebooks</span></div>
-      <div class="stat"><span class="k">Officers & 2LoD</span><span class="v">${D().members.length}</span><span class="d">${D().members.filter(m => m.status === 'invited').length} pending invite</span></div>
+      <div class="stat"><span class="k">Projects</span><span class="v">${ps.length}</span><span class="d">${ps.filter(p => p.status === 'complete').length} completed</span></div>
+      <div class="stat"><span class="k">Tasks</span><span class="v">${all.length}</span><span class="d">${all.length - done} open</span></div>
+      <div class="stat"><span class="k">Completed</span><span class="v">${Math.round((done / Math.max(all.length, 1)) * 100)}%</span><span class="d">across all projects</span></div>
+      <div class="stat"><span class="k">Team</span><span class="v">${D().members.length}</span><span class="d">${D().members.filter(m => m.status === 'invited').length} pending invite</span></div>
     </div>
     <div class="grid2">
-      <section class="panel"><div class="panel-h"><h2>Rulebooks & Directives</h2></div>
-        <div style="overflow-x:auto"><table class="perm-t" style="min-width:600px"><thead><tr><th style="padding-left:14px">Rulebook / Directive</th><th style="text-align:left">Lead Officer</th><th style="text-align:left">Status</th><th style="text-align:left;width:22%">Progress</th><th>Open</th><th>Overdue</th><th style="text-align:left">Due</th></tr></thead><tbody>
+      <section class="panel"><div class="panel-h"><h2>Projects</h2></div>
+        <div style="overflow-x:auto"><table class="perm-t" style="min-width:600px"><thead><tr><th style="padding-left:14px">Project</th><th style="text-align:left">Lead</th><th style="text-align:left">Status</th><th style="text-align:left;width:22%">Progress</th><th>Open</th><th>Overdue</th><th style="text-align:left">Due</th></tr></thead><tbody>
         ${ps
           .map(p => {
             const ts = tasksOf(p.id);
@@ -42,11 +42,11 @@ export function pageOverview() {
         </tbody></table></div>
       </section>
       <div class="stack">
-        <section class="panel"><div class="panel-h"><h2>Obligations by lifecycle stage</h2></div><div class="panel-b">
+        <section class="panel"><div class="panel-h"><h2>Tasks by status</h2></div><div class="panel-b">
           <div class="stackbar" style="height:10px;margin-bottom:12px">${counts.map(c => `<i style="width:${(c.n / Math.max(all.length, 1)) * 100}%;background:var(--st-${c.s.id})" title="${c.s.name}: ${c.n}"></i>`).join('')}</div>
           ${counts.map(c => `<div class="row" style="height:28px;font-size:13px">${stIcon(c.s.id)}<span class="grow">${c.s.name}</span><span class="num muted">${c.n}</span><span class="num faint" style="width:36px;text-align:right">${Math.round((c.n / Math.max(all.length, 1)) * 100)}%</span></div>`).join('')}
         </div></section>
-        <section class="panel"><div class="panel-h"><h2>Officer workload</h2><div class="acts"><span class="faint" style="font-size:11.5px">Open obligations per officer</span></div></div><div class="panel-b">
+        <section class="panel"><div class="panel-h"><h2>Team workload</h2><div class="acts"><span class="faint" style="font-size:11.5px">Open tasks per person</span></div></div><div class="panel-b">
           ${load
             .map(
               l =>

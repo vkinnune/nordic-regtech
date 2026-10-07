@@ -1,12 +1,11 @@
-# Digia RegTech Studio · Nordic Compliance & Horizon Scanning
+# Digia RegTech Studio
 
-A calm, structured regulatory change monitoring and compliance obligations workspace:
-executive compliance cockpit, regulatory horizon feed, obligations inventory, rulebooks with
-board / list / table / calendar / timeline / files views, governance officers, lines of defense,
-statutory redline diff viewers, and audit trail.
+A structured compliance and project management workspace with statutory diffs,
+task tracking, board / list / table / calendar / timeline views, team permissions,
+and audit activity.
 
 Built with plain JavaScript ES modules and CSS, bundled by [Vite](https://vite.dev). Zero
-runtime UI framework dependencies. Ready for plug-and-play REST / PostgreSQL integration.
+runtime UI framework dependencies. Ready for REST and PostgreSQL integration.
 
 
 ## Getting started

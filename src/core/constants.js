@@ -1,37 +1,37 @@
 /* ---------- vocab: Digia RegTech & Nordic Financial Compliance ---------- */
 export const STATUSES = [
-  { id: 'backlog', name: 'Horizon Alert' },
-  { id: 'todo', name: 'Triage & RIA' },
-  { id: 'progress', name: 'Policy & Redline' },
-  { id: 'review', name: 'Legal & 2nd LoD' },
-  { id: 'done', name: 'Audit Ready' },
+  { id: 'backlog', name: 'Backlog' },
+  { id: 'todo', name: 'To do' },
+  { id: 'progress', name: 'In progress' },
+  { id: 'review', name: 'In review' },
+  { id: 'done', name: 'Done' },
 ];
 export const ST = Object.fromEntries(STATUSES.map(s => [s.id, s]));
 export const PRIOS = [
-  { id: 'urgent', name: 'Tier 1 · Critical Sanction', w: 4 },
-  { id: 'high', name: 'Tier 2 · High Risk / Capital', w: 3 },
-  { id: 'medium', name: 'Tier 3 · Reporting & Ops', w: 2 },
-  { id: 'low', name: 'Tier 4 · Informational', w: 1 },
-  { id: 'none', name: 'Unrated', w: 0 },
+  { id: 'urgent', name: 'Urgent', w: 4 },
+  { id: 'high', name: 'High', w: 3 },
+  { id: 'medium', name: 'Medium', w: 2 },
+  { id: 'low', name: 'Low', w: 1 },
+  { id: 'none', name: 'None', w: 0 },
 ];
 export const PR = Object.fromEntries(PRIOS.map(p => [p.id, p]));
 export const LABELS = [
-  { id: 'dora', name: 'DORA · ICT Risk', c: 'var(--blue)' },
-  { id: 'aml', name: 'AML / CFT & Sanctions', c: 'var(--red)' },
-  { id: 'funds', name: 'Fund Ops & AIFM', c: 'var(--violet)' },
+  { id: 'dora', name: 'DORA', c: 'var(--blue)' },
+  { id: 'aml', name: 'AML / Sanctions', c: 'var(--red)' },
+  { id: 'funds', name: 'Funds & UCITS', c: 'var(--violet)' },
   { id: 'risk', name: 'Risk & Liquidity', c: 'var(--amber)' },
-  { id: 'mifid', name: 'MiFID II & Conduct', c: 'var(--teal)' },
-  { id: 'esg', name: 'SFDR & Green Taxonomy', c: 'var(--green)' },
-  { id: 'fi', name: 'Finansinspektionen (FI)', c: 'var(--orange)' },
-  { id: 'fiva', name: 'FIN-FSA (Fiva)', c: 'var(--rose)' },
+  { id: 'mifid', name: 'MiFID II', c: 'var(--teal)' },
+  { id: 'esg', name: 'ESG & SFDR', c: 'var(--green)' },
+  { id: 'fi', name: 'Finansinspektionen', c: 'var(--orange)' },
+  { id: 'fiva', name: 'FIN-FSA', c: 'var(--rose)' },
 ];
 export const LB = Object.fromEntries(LABELS.map(l => [l.id, l]));
 export const PSTAT = {
-  planning: { name: 'Consultation / Draft', c: 'var(--gray)' },
-  active: { name: 'In Force / Monitoring', c: 'var(--blue)' },
-  risk: { name: 'Audit Scrutiny', c: 'var(--red)' },
-  hold: { name: 'Legislative Delay', c: 'var(--amber)' },
-  complete: { name: 'Transposed & Audited', c: 'var(--green)' },
+  planning: { name: 'Planning', c: 'var(--gray)' },
+  active: { name: 'Active', c: 'var(--blue)' },
+  risk: { name: 'At risk', c: 'var(--red)' },
+  hold: { name: 'On hold', c: 'var(--amber)' },
+  complete: { name: 'Complete', c: 'var(--green)' },
 };
 export const PCOLORS = {
   indigo: '#5A67D8',
@@ -65,37 +65,37 @@ export const ROLES = ['Owner', 'Admin', 'Member', 'Guest'];
 export const TEAMS_SEED = [
   {
     id: 'compliance',
-    name: 'Regulatory Affairs & 2nd LoD',
+    name: 'Compliance',
     icon: 'shield-check',
     c: '#8662C9',
-    desc: 'Regulatory horizon scanning, supervisory filings (FI/Fiva), and 2nd LoD oversight',
+    desc: 'Compliance and regulatory oversight',
   },
   {
     id: 'risk',
-    name: 'Operational Risk & Capital',
+    name: 'Risk',
     icon: 'triangle-alert',
     c: '#C48A1E',
-    desc: 'Risk matrices, scenario testing, liquidity stress tests, and capital adequacy',
+    desc: 'Risk management and internal controls',
   },
   {
     id: 'legal',
-    name: 'Legal Counsel & Transposition',
+    name: 'Legal',
     icon: 'scale',
     c: '#3B82C4',
-    desc: 'Statutory interpretation, fund documentation, and supervisory liaison',
+    desc: 'Legal counsel and contracts',
   },
   {
     id: 'it_security',
-    name: 'ICT Resilience & DORA Ops',
+    name: 'Security & IT',
     icon: 'server',
     c: '#23918A',
-    desc: 'Digital operational resilience, major incident reporting, and third-party risk',
+    desc: 'IT security and operational resilience',
   },
   {
     id: 'funds',
-    name: 'Fund Operations & Trading',
+    name: 'Fund Operations',
     icon: 'briefcase',
     c: '#C54B78',
-    desc: 'Portfolio management, best execution, NAV calculations, and depositary oversight',
+    desc: 'Fund administration and trading',
   },
 ];

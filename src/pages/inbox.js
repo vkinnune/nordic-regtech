@@ -8,11 +8,11 @@ import { commentHtml } from '../overlays/drawer.js';
 
 export function pageInbox() {
   const cats = [
-    ['all', 'All Alerts'],
+    ['all', 'All'],
     ['mention', 'Mentions'],
-    ['assign', 'Obligations'],
-    ['comment', 'Discussions'],
-    ['update', 'Supervisory Notices'],
+    ['assign', 'Assigned'],
+    ['comment', 'Comments'],
+    ['update', 'Updates'],
   ];
   const cat = S.ui.inboxCat;
   let ns = D()
@@ -26,7 +26,7 @@ export function pageInbox() {
     <div style="display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);flex:1;min-height:0" class="inbox-grid">
       <style>@media(max-width:900px){.inbox-grid{grid-template-columns:minmax(0,1fr)!important}.inbox-prev{display:${sel ? 'flex' : 'none'}!important;position:fixed;inset:0;z-index:48;background:var(--surface)}}</style>
       <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0">
-        <div style="padding:18px var(--gutter) 0" class="row"><h1 style="font-size:var(--fs-xl);margin:0;font-weight:600;letter-spacing:-.015em">Regulatory Feed</h1><span class="sp"></span>
+        <div style="padding:18px var(--gutter) 0" class="row"><h1 style="font-size:var(--fs-xl);margin:0;font-weight:600;letter-spacing:-.015em">Inbox</h1><span class="sp"></span>
           <label class="row" style="font-size:12px;color:var(--text-2);gap:6px;cursor:pointer"><input type="checkbox" class="toggle" data-a="toggleUnreadOnly" ${S.ui.inboxUnread ? 'checked' : ''}>Unread</label>
           <button class="ibtn ibtn-sm" data-a="markAllRead" data-tip="Mark all as read" aria-label="Mark all as read">${ic('check-check', 15)}</button></div>
         <div class="tabs inbox-tabs" role="tablist">${cats.map(([k, n]) => `<button role="tab" class="tab ${cat === k ? 'on' : ''}" data-a="set" data-k="inboxCat" data-v="${k}">${n}${count(k) ? `<span class="cnt">${count(k)}</span>` : ''}</button>`).join('')}</div>

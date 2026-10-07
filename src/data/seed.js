@@ -557,10 +557,10 @@ export function seed() {
 
   const A = (by, verb, task, project, m, extra = '') => ({ id: uid('a'), by, verb, task, project, at: minsAgo(m), extra });
   const activity = [
-    A('m6', 'moved', 't1', 'p1', 35, 'to Legal & 2nd LoD Review'),
+    A('m6', 'moved', 't1', 'p1', 35, 'to In review'),
     A('m1', 'commented on', 't1', 'p1', 40),
     A('m4', 'updated', 't6', 'p2', 65, 'RTS Gap Analysis completed'),
-    A('m5', 'moved', 't11', 'p3', 120, 'to Policy & Redline'),
+    A('m5', 'moved', 't11', 'p3', 120, 'to In progress'),
     A('m3', 'completed', 't10', 'p2', 210),
     A('m8', 'added attachment to', 't7', 'p2', 320),
     A('m2', 'created task', 't18', 'p5', 540),
@@ -616,8 +616,8 @@ export function seed() {
       type: 'update',
       by: 'm6',
       task: 't1',
-      text: 'moved to Legal & 2nd LoD Review',
-      snippet: 'Policy & Redline → Legal & 2nd LoD',
+      text: 'moved to In review',
+      snippet: 'In progress → In review',
       at: minsAgo(35),
       read: true,
     },
@@ -673,7 +673,7 @@ export function seed() {
     files,
     events,
     projOrder: projects.map(p => p.id),
-    savedViews: [{ id: 'v1', project: 'p1', name: 'Critical Obligations', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
+    savedViews: [{ id: 'v1', project: 'p1', name: 'High Priority', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
     recentSearches: ['1 kap. 100 §', 'DORA', 'Penningtvätt', 'SFS 2026:916'],
     sessions: [
       { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },

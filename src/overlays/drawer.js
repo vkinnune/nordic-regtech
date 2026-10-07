@@ -69,11 +69,11 @@ export function drawerHtml(t) {
         ${prop('user', 'Assignee', cellAssignee(t))}
         ${prop('calendar', 'Due date', cellDue(t))}
         ${prop('calendar-arrow-up', 'Start date', `<button class="pillbtn ${t.start ? '' : 'empty'}" data-a="pop" data-pop="date" data-field="start" data-id="${t.id}">${ic('calendar', 13)}${t.start ? fmtDate(t.start) : 'Set date'}</button>`)}
-        ${prop('folder', 'Rulebook', cellProject(t))}
+        ${prop('folder', 'Project', cellProject(t))}
         ${prop('tag', 'Labels', `<button class="pillbtn ${t.labels.length ? '' : 'empty'}" data-a="pop" data-pop="labels" data-id="${t.id}" style="flex-wrap:wrap;height:auto;min-height:26px;padding:3px 7px">${t.labels.length ? t.labels.map(lbl).join('') : ic('tag', 13) + 'Add labels'}</button>`)}
         ${prop('repeat', 'Repeat', `<button class="pillbtn ${t.recur ? '' : 'empty'}" data-a="pop" data-pop="recur" data-id="${t.id}">${ic('repeat', 13)}${t.recur || 'Does not repeat'}</button>`)}
-        ${prop('shield-alert', 'Supervisory Impact', `<button class="pillbtn ${t.estimate ? '' : 'empty'}" data-a="pop" data-pop="estimate" data-id="${t.id}">${ic('shield-alert', 13)}${t.estimate ? esc(t.estimate) : 'Set impact tier'}</button>`)}
-        ${prop('git-branch', 'Legal Predecessor', `<button class="pillbtn ${t.deps.length ? '' : 'empty'}" data-a="pop" data-pop="deps" data-id="${t.id}" style="height:auto;min-height:26px;flex-wrap:wrap">${t.deps.length ? t.deps.map(d => (task(d) ? `<span class="depchip mono" style="font-size:11px;padding:1px 5px;border-radius:4px;background:var(--surface-3)">${task(d).key}</span><span class="trunc" style="max-width:160px">${esc(task(d).title)}</span>` : '')).join('') : ic('git-branch', 13) + 'None'}</button>`)}
+        ${prop('clock', 'Estimate', `<button class="pillbtn ${t.estimate ? '' : 'empty'}" data-a="pop" data-pop="estimate" data-id="${t.id}">${ic('clock', 13)}${t.estimate ? esc(t.estimate) : 'Set estimate'}</button>`)}
+        ${prop('git-branch', 'Dependencies', `<button class="pillbtn ${t.deps.length ? '' : 'empty'}" data-a="pop" data-pop="deps" data-id="${t.id}" style="height:auto;min-height:26px;flex-wrap:wrap">${t.deps.length ? t.deps.map(d => (task(d) ? `<span class="depchip mono" style="font-size:11px;padding:1px 5px;border-radius:4px;background:var(--surface-3)">${task(d).key}</span><span class="trunc" style="max-width:160px">${esc(task(d).title)}</span>` : '')).join('') : ic('git-branch', 13) + 'None'}</button>`)}
       </dl>
 
       ${t.diff ? diffViewerHtml(t.diff) : ''}
@@ -150,7 +150,7 @@ export function diffViewerHtml(diff) {
   if (!diff) return '';
   return `<div class="dsec diff-sec">
     <div class="dsec-h">
-      <h3 style="display:flex;align-items:center;gap:6px">${ic('git-compare', 14)}Statutory Redline (Författningsdiff)</h3>
+      <h3 style="display:flex;align-items:center;gap:6px">${ic('git-compare', 14)}Statutory diff</h3>
       ${diffBadge(diff)}
       <span class="sp"></span>
       <span class="diff-counts">
