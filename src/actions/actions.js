@@ -1196,6 +1196,48 @@ IN.tlGroup = el => {
 A.selectReg = el => {
   S.ui.regSel = el.dataset.id;
   delete S.ui.regSec;
+  S.ui.regPickerOpen = false;
+  render();
+};
+A.openRegInReader = el => {
+  S.ui.regSel = el.dataset.id;
+  delete S.ui.regSec;
+  S.ui.regView = 'reader';
+  S.ui.regPickerOpen = false;
+  render();
+};
+A.setRegView = el => {
+  S.ui.regView = el.dataset.view;
+  render();
+};
+A.setRegLibLayout = el => {
+  S.ui.regLibLayout = el.dataset.layout;
+  render();
+};
+A.setRegLibJuris = el => {
+  S.ui.regLibJuris = el.dataset.juris;
+  render();
+};
+A.setRegLibTag = el => {
+  S.ui.regLibTag = S.ui.regLibTag === el.dataset.tag ? '' : el.dataset.tag;
+  render();
+};
+A.clearRegLibQ = () => {
+  S.ui.regLibQ = '';
+  render();
+};
+A.clearRegLibFilters = () => {
+  S.ui.regLibQ = '';
+  S.ui.regLibJuris = 'all';
+  S.ui.regLibTag = '';
+  render();
+};
+A.toggleRegPicker = () => {
+  S.ui.regPickerOpen = !S.ui.regPickerOpen;
+  render();
+};
+A.clearRegPickerQ = () => {
+  S.ui.regPickerQ = '';
   render();
 };
 A.selectSec = el => {
@@ -1225,6 +1267,14 @@ IN.regActSelect = el => {
 };
 IN.regQ = el => {
   S.ui.regQ = el.value;
+  render();
+};
+IN.regPickerQ = el => {
+  S.ui.regPickerQ = el.value;
+  render();
+};
+IN.regLibQ = el => {
+  S.ui.regLibQ = el.value;
   render();
 };
 /* projects */

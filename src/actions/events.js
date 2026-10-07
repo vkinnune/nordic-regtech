@@ -30,6 +30,13 @@ document.addEventListener(
       S.ui.mention = null;
       if (!el) render();
     }
+    if (S.ui.regPickerOpen && !e.target.closest('.finlex-picker-box')) {
+      S.ui.regPickerOpen = false;
+      if (!el) {
+        render();
+        return;
+      }
+    }
     if (!el) return;
     if (el.tagName === 'BUTTON' || (el.tagName === 'INPUT' && el.type === 'checkbox' && el.dataset.a)) e.preventDefault();
     const fn = A[el.dataset.a];
