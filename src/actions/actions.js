@@ -1192,6 +1192,11 @@ IN.tlGroup = el => {
   render();
 };
 
+/* regulations */
+IN.regQ = el => {
+  S.ui.regQ = el.value;
+  render();
+};
 /* projects */
 IN.projQ = el => {
   S.ui.projQ = el.value;

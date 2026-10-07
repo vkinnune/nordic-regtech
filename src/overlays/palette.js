@@ -28,6 +28,7 @@ export function commands() {
     { id: 'c-home', name: 'Go to Home', icon: 'house', kbd: 'G H', run: () => go('home') },
     { id: 'c-inbox', name: 'Go to Inbox', icon: 'inbox', kbd: 'G I', run: () => go('inbox') },
     { id: 'c-my', name: 'Go to My Tasks', icon: 'circle-check', kbd: 'G T', run: () => go('mytasks') },
+    { id: 'c-reg', name: 'Go to Regulations', icon: 'scale', kbd: 'G R', run: () => go('regulations') },
     { id: 'c-projs', name: 'Go to Projects', icon: 'folder-kanban', kbd: 'G P', run: () => go('projects') },
     { id: 'c-cal', name: 'Go to Calendar', icon: 'calendar', kbd: 'G C', run: () => go('calendar') },
     { id: 'c-tl', name: 'Go to Timeline', icon: 'chart-gantt', run: () => go('timeline') },

@@ -24,6 +24,7 @@ import { pageWsTimeline } from '../views/timeline.js';
 import { pageSettings } from '../pages/settings.js';
 import { pageStates, pageSystem } from '../pages/design-system.js';
 import { pageArchive } from '../features/archive.js';
+import { pageRegulations } from '../pages/regulations.js';
 
 export function renderShell() {
   const u = S.ui;
@@ -49,6 +50,7 @@ export function renderPage() {
       notifications: pageNotifications,
       search: pageSearch,
       overview: pageOverview,
+      regulations: pageRegulations,
       projects: pageProjects,
       project: pageProject,
       tasks: pageTasks,
@@ -104,6 +106,7 @@ export function renderSidebar() {
       <div class="sgroup">
         <div class="sgroup-h">Workspace</div>
         ${sItem('overview', 'Overview', 'layout-dashboard')}
+        ${sItem('regulations', 'Regulations', 'scale')}
         ${sItem('projects', 'Projects', 'folder-kanban')}
         ${sItem('tasks', 'Tasks', 'list-checks')}
         ${sItem('calendar', 'Calendar', 'calendar')}
