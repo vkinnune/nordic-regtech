@@ -81,32 +81,6 @@
   margin: 0;
 }
 
-.finlex-toc-tools {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.finlex-btn-link {
-  background: var(--surface-3);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 2px 7px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-2);
-  cursor: pointer;
-  transition:
-    background var(--dur),
-    color var(--dur);
-}
-
-.finlex-btn-link:hover {
-  background: var(--surface-2);
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-
 .finlex-toc-search {
   margin-top: 2px;
 }

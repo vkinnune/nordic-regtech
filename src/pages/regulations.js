@@ -119,25 +119,25 @@ function renderRegulationsGrid(acts) {
         <p class="finlex-lib-card-desc">${esc(r.summary)}</p>
 
         <div class="finlex-lib-card-meta">
-          <span>${ic('landmark', 12)} ${esc(r.authority)}</span>
+          <span>${esc(r.authority)}</span>
           <span>·</span>
-          <span>${ic('calendar', 12)} ${esc(r.inForce || 'Voimassa')}</span>
+          <span>${esc(r.inForce || 'Voimassa')}</span>
           <span>·</span>
-          <span>${ic('file-text', 12)} ${secs.length} pykälää</span>
+          <span>${secs.length} pykälää</span>
         </div>
 
-        <div class="finlex-lib-card-foot">
+        ${
+          r.tags && r.tags.length
+            ? `<div class="finlex-lib-card-foot">
           <div class="row" style="gap:4px;flex-wrap:wrap">
-            ${(r.tags || [])
+            ${r.tags
               .slice(0, 3)
               .map(t => `<span class="pill" style="font-size:10.5px;padding:1px 6px">${esc(t)}</span>`)
               .join('')}
           </div>
-          <span class="finlex-btn-link" style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
-            <span>Avaa pykälät</span>
-            ${ic('arrow-right', 12)}
-          </span>
-        </div>
+        </div>`
+            : ''
+        }
       </article>`;
       })
       .join('')}
@@ -149,12 +149,11 @@ function renderRegulationsList(acts) {
     <table class="finlex-lib-table">
       <thead>
         <tr>
-          <th style="width:280px">Säädöskoodi ja nimi</th>
+          <th style="width:300px">Säädös</th>
           <th>Lainkäyttöalue</th>
           <th>Valvova viranomainen</th>
           <th>Voimaantulo</th>
           <th>Laajuus</th>
-          <th style="text-align:right">Toiminto</th>
         </tr>
       </thead>
       <tbody>
@@ -167,17 +166,11 @@ function renderRegulationsList(acts) {
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(r.code)}</span>
                 <span>${esc(r.shortTitle || r.title)}</span>
               </div>
-              <div class="muted trunc" style="font-size:11.5px;max-width:320px;margin-top:2px">${esc(r.title)}</div>
             </td>
             <td><span class="faint" style="font-size:12px">${esc(r.jurisdiction)}</span></td>
             <td><span style="font-size:12px;font-weight:500">${esc(r.authority)}</span></td>
             <td><span class="mono faint" style="font-size:11.5px">${esc(r.inForce || 'Voimassa')}</span></td>
             <td><span style="font-size:12px">${secs.length} pykälää</span></td>
-            <td style="text-align:right">
-              <span class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:11.5px">
-                ${ic('book-open', 12)} Avaa ➔
-              </span>
-            </td>
           </tr>`;
           })
           .join('')}
@@ -218,16 +211,12 @@ function renderRegulationsReader(u) {
             <span class="trunc" style="font-weight:700;font-size:13px;color:var(--text)">${esc(curAct.shortTitle || curAct.title)}</span>
           </div>
 
-          <!-- Sisällysluettelo Header & Actions -->
+          <!-- Sisällysluettelo Title -->
           <div class="finlex-toc-hdr-row">
             <h2 class="finlex-toc-title">
               ${ic('book-open', 13)}
               <span>Sisällysluettelo</span>
             </h2>
-            <div class="finlex-toc-tools">
-              <button class="finlex-btn-link" data-a="set" data-k="regTocCollapse" data-v="1" title="Supista kaikki">Supista</button>
-              <button class="finlex-btn-link" data-a="set" data-k="regTocCollapse" data-v="0" title="Laajenna kaikki">Laajenna</button>
-            </div>
           </div>
 
           <!-- Section Search -->
@@ -239,7 +228,7 @@ function renderRegulationsReader(u) {
 
         <!-- TOC Hierarchical Tree -->
         <div class="finlex-toc-tree" data-keep="finlex-tree">
-          ${renderFinlexTree(curAct, chapters, activeSecId, q, u.regTocCollapse === '1')}
+          ${renderFinlexTree(curAct, chapters, activeSecId, q)}
         </div>
       </aside>
 
@@ -247,25 +236,15 @@ function renderRegulationsReader(u) {
       <main class="finlex-reader" id="finlex-doc-content" tabindex="-1">
         <div class="finlex-reader-inner">
 
-          <!-- Top Back Link -->
-          <div style="margin-bottom:16px">
-            <button class="btn btn-sm btn-ghost" data-a="setRegView" data-view="grid" style="padding-left:4px">
-              ${ic('arrow-left', 14)}
-              <span>Kaikki säädökset</span>
-            </button>
-          </div>
-
           <!-- Act Document Header -->
           <header class="finlex-doc-head">
             <div class="finlex-doc-act-no">${esc(curAct.jurisdiction)} · ${esc(curAct.code)}</div>
-            <h1 class="finlex-doc-title">${esc(curAct.title)}</h1>
+            <h1 class="finlex-doc-title">${esc(curAct.shortTitle || curAct.title)}</h1>
             <div class="finlex-doc-meta">
               <span>Voimaantulo: <b>${esc(curAct.inForce || 'Voimassa')}</b></span>
               <span>·</span>
               <span>Valvoja: <b>${esc(curAct.authority)}</b></span>
               ${curAct.amendedBy ? `<span>·</span><span>Muutossäädös: <b>${esc(curAct.amendedBy)}</b></span>` : ''}
-              <span>·</span>
-              <span>Säädöskokoelma (SDK)</span>
             </div>
           </header>
 
@@ -277,7 +256,7 @@ function renderRegulationsReader(u) {
             </button>
             <button class="btn btn-sm btn-ghost" data-a="toggleRegLang" title="Vaihda kieltä">
               ${ic('languages', 13)}
-              <span>${lang === 'en' ? 'English (Käännös)' : 'Alkuperäinen'}</span>
+              <span>${lang === 'en' ? 'English' : 'Alkuperäinen'}</span>
             </button>
             <span class="sp"></span>
             ${
@@ -300,7 +279,7 @@ function renderRegulationsReader(u) {
   </div>`;
 }
 
-function renderFinlexTree(act, chapters, activeSecId, q, isCollapsed) {
+function renderFinlexTree(act, chapters, activeSecId, q) {
   let lastPart = null;
 
   return chapters
@@ -326,22 +305,19 @@ function renderFinlexTree(act, chapters, activeSecId, q, isCollapsed) {
 
       if (q && !matchingSecs.length) return '';
 
-      const secItems =
-        isCollapsed && !q
-          ? ''
-          : matchingSecs
-              .map(s => {
-                const isActive = s.id === activeSecId;
-                return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)} ${esc(s.heading)}">
-                ${esc(s.number)} - ${esc(s.heading)}
-              </button>`;
-              })
-              .join('');
+      const secItems = matchingSecs
+        .map(s => {
+          const isActive = s.id === activeSecId;
+          return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)} ${esc(s.heading)}">
+          ${esc(s.number)} - ${esc(s.heading)}
+        </button>`;
+        })
+        .join('');
 
       return `
         ${partHtml}
         <div class="finlex-tree-chap">
-          ${ic(isCollapsed && !q ? 'chevron-right' : 'chevron-down', 11)}
+          ${ic('chevron-down', 11)}
           <span>${esc(ch.number)} - ${esc(ch.title)}</span>
         </div>
         ${secItems}
@@ -397,7 +373,7 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
     ${
       showPlain && s.plainEnglish
         ? `<div class="finlex-plain-box">
-            <div class="finlex-plain-tag">${ic('sparkles', 11)} Mitä tämä tarkoittaa selkokielellä / In plain English:</div>
+            <div class="finlex-plain-tag">${ic('sparkles', 11)} Selkokielellä:</div>
             <p class="finlex-plain-summary">${esc(s.plainEnglish.summary)}</p>
             ${
               s.plainEnglish.points && s.plainEnglish.points.length
