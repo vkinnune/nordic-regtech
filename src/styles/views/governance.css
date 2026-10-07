@@ -1,0 +1,301 @@
+/* ============================================================
+   STATUTORY GOVERNANCE & CONTROLS MATRIX (Policies, Controls, Risks)
+   Calm, Scandinavian design system with high contrast.
+   ============================================================ */
+
+.gov-page-wrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.gov-page-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--gutter) var(--gutter) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.gov-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.gov-title-box h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.gov-title-box p {
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 4px 0 0;
+}
+
+.gov-alert-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gov-ok-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+/* Controls */
+.gov-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gov-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gov-filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gov-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Table */
+.gov-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.gov-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.gov-table th {
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.gov-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--divider);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.gov-table tr:last-child td {
+  border-bottom: none;
+}
+
+.gov-table tr:hover td {
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+/* Status Badges */
+.gov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gov-status-alert {
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+
+.gov-status-ok {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.gov-status-draft {
+  background: transparent;
+  color: var(--text-3);
+  border: 1px dashed var(--border);
+}
+
+.gov-status-critical {
+  background: var(--text);
+  color: var(--text-inv);
+  border: 1px solid var(--text);
+}
+
+.gov-status-high {
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  font-weight: 700;
+}
+
+.gov-status-med {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.gov-amendment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ============================================================
+   CONTEXTUAL FINLEX READER INLINE GOVERNANCE STRIP
+   ============================================================ */
+
+.finlex-gov-strip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finlex-gov-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.finlex-gov-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.finlex-gov-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.finlex-gov-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11.5px;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color var(--dur),
+    background var(--dur);
+}
+
+.finlex-gov-chip:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+
+.finlex-gov-chip.alert {
+  border-color: var(--border-strong);
+  font-weight: 600;
+  background: var(--surface-3);
+}
+
+/* Law change impact banner inside reader section */
+.finlex-impact-banner {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.finlex-impact-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.finlex-impact-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}

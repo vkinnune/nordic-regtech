@@ -1,7 +1,18 @@
 /* ---------- REGULATIONS EXPLORER (Starting Screen: Grid Library -> 2nd Screen: Reader) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, task, REGULATIONS, allChaptersOf, allRegulations, allSectionsOf, regulation } from '../core/store.js';
+import {
+  S,
+  task,
+  REGULATIONS,
+  allChaptersOf,
+  allRegulations,
+  allSectionsOf,
+  regulation,
+  policiesForSection,
+  controlsForSection,
+  risksForSection,
+} from '../core/store.js';
 import { stIcon } from '../ui/helpers.js';
 
 export function pageRegulations() {
@@ -391,6 +402,9 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
       ${formatFinlexBody(textToShow, s.status)}
     </div>
 
+    <!-- GOVERNANCE & CONTROLS STRIP (Policies, Controls, Risks & Impact Alerts) -->
+    ${renderSectionGovernanceStrip(s)}
+
     <!-- METADATA & LINKED TASKS -->
     <footer class="finlex-sec-foot">
       ${
@@ -417,6 +431,79 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
       }
     </footer>
   </article>`;
+}
+
+function renderSectionGovernanceStrip(s) {
+  const pols = policiesForSection(s.id);
+  const ctls = controlsForSection(s.id);
+  const rsks = risksForSection(s.id);
+  const impacted = ctls.filter(c => c.impactedByAmendment || c.status === 'DEFICIENT');
+
+  if (!pols.length && !ctls.length && !rsks.length) return '';
+
+  return `<div class="finlex-gov-strip">
+    <div class="finlex-gov-row">
+      <span class="finlex-gov-label">${ic('shield', 12)} Hallinto & Kontrollit:</span>
+      <div class="finlex-gov-chips">
+        ${pols
+          .map(
+            p => `
+          <button class="finlex-gov-chip" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Avaa käytäntö ${esc(p.code)}">
+            ${ic('file-text', 11)}
+            <span class="mono">${esc(p.code)}</span>
+          </button>
+        `,
+          )
+          .join('')}
+        ${ctls
+          .map(
+            c => `
+          <button class="finlex-gov-chip ${c.status === 'DEFICIENT' ? 'alert' : ''}" data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Avaa kontrolli ${esc(c.code)}: ${esc(c.title)}">
+            ${c.status === 'DEFICIENT' ? ic('alert-triangle', 11) : ic('check', 11)}
+            <span class="mono">${esc(c.code)}</span>
+          </button>
+        `,
+          )
+          .join('')}
+        ${rsks
+          .map(
+            r => `
+          <button class="finlex-gov-chip" data-a="openGovDrawer" data-type="risk" data-id="${r.id}" title="Säädösriski: ${esc(r.title)}">
+            ${ic('alert-octagon', 11)}
+            <span class="mono">${esc(r.code)}</span>
+          </button>
+        `,
+          )
+          .join('')}
+      </div>
+    </div>
+
+    <!-- Law Change Impact Assessment Alert -->
+    ${
+      impacted.length
+        ? `<div class="finlex-impact-banner">
+            <div class="finlex-impact-head">
+              <span style="display:flex;align-items:center;gap:6px">
+                ${ic('alert-circle', 13)}
+                <span>Säädösmuutos vaikuttaa ${impacted.length} kontrolliin</span>
+              </span>
+              <span class="mono faint" style="font-size:11px">${esc(s.amendingAct || '')}</span>
+            </div>
+            <div class="muted" style="font-size:11.5px;line-height:1.4">
+              ${esc(impacted[0].amendmentAlert || 'Kontrollien toimivuus ja raja-arvot on todennettava vastaamaan lakimuutosta.')}
+            </div>
+            <div class="finlex-impact-actions">
+              <button class="btn btn-sm btn-primary" data-a="createMitigationTask" data-sec="${s.id}" data-ctl="${impacted[0].id}" style="padding:2px 8px;font-size:11px">
+                ${ic('plus', 11)} Luo päivitystehtävä
+              </button>
+              <button class="btn btn-sm btn-ghost" data-a="resolveGap" data-id="${impacted[0].id}" style="padding:2px 8px;font-size:11px">
+                ${ic('check-circle', 11)} Kuittaa huomioiduksi
+              </button>
+            </div>
+          </div>`
+        : ''
+    }
+  </div>`;
 }
 
 function formatFinlexBody(rawText, status) {

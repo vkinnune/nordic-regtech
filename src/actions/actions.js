@@ -4,7 +4,24 @@
 import { $, $$, TODAY, addD, dOff, esc, fmtDate, iso, parse, uid } from '../core/utils.js';
 import { PR, PSTAT, ST } from '../core/constants.js';
 import { seed } from '../data/seed.js';
-import { D, DEFAULT_PREFS, S, allTasks, canSee, commentsOf, logAct, me, mem, proj, save, task, tasksOf, visibleProjects } from '../core/store.js';
+import {
+  D,
+  DEFAULT_PREFS,
+  S,
+  allTasks,
+  canSee,
+  commentsOf,
+  logAct,
+  me,
+  mem,
+  proj,
+  save,
+  task,
+  tasksOf,
+  visibleProjects,
+  control,
+  policy,
+} from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
 import { effectiveDark } from '../core/theme.js';
 import { mutate, toast } from '../ui/toast.js';
@@ -1244,6 +1261,75 @@ IN.regQ = el => {
 
 IN.regLibQ = el => {
   S.ui.regLibQ = el.value;
+  render();
+};
+
+/* ---------- statutory governance (policies, controls, risks) ---------- */
+A.openGovDrawer = el => {
+  S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
+  S.ui.drawerFull = false;
+  fxSet('drawer');
+  render();
+};
+
+A.closeGovDrawer = () => {
+  delete S.ui.govDrawer;
+  render();
+};
+
+A.resolveGap = el => {
+  const c = control(el.dataset.id);
+  if (c) {
+    c.status = 'EFFECTIVE';
+    c.signedOffAt = Date.now();
+    c.signedOffBy = D().me;
+    delete c.impactedByAmendment;
+    logAct('resolved', null, `Signed off compliance gap on ${c.code}`);
+    toast(`Kontrolli ${c.code} kuitattu toimivaksi.`);
+    render();
+  }
+};
+
+A.createMitigationTask = el => {
+  const c = el.dataset.ctl ? control(el.dataset.ctl) : null;
+  const secId = el.dataset.sec;
+  const newId = uid('t');
+  const pId = c?.policyId ? policy(c.policyId)?.projectId || 'p5' : 'p5';
+  const newTask = {
+    id: newId,
+    key: c ? `CTL-${c.code.split('-')[1]}` : `REG-${secId ? secId.split('-')[1] : '1'}`,
+    title: c ? `Päivitä kontrolli ${c.code} vastaamaan lakimuutosta` : `Lakimuutoksen toimeenpanotehtävä`,
+    desc: c ? `Säädösmuutosvaatimus kontrollille: ${c.amendmentAlert || c.specification}` : `Vaatimusten arviointi pykälälle ${secId}`,
+    project: pId,
+    status: 'todo',
+    priority: 'high',
+    assignee: D().me,
+    created: Date.now(),
+    updated: Date.now(),
+    subtasks: [],
+    labels: ['Compliance', 'Lakimuutos'],
+  };
+  D().tasks.unshift(newTask);
+  if (c) c.taskId = newId;
+  logAct('created', newTask, `Created mitigation task for ${c ? c.code : secId}`);
+  toast(`Päivitystehtävä ${newTask.key} luotu.`);
+  S.ui.drawer = newId;
+  delete S.ui.govDrawer;
+  render();
+};
+
+IN.polQ = el => {
+  S.ui.polQ = el.value;
+  render();
+};
+
+IN.ctlQ = el => {
+  S.ui.ctlQ = el.value;
+  render();
+};
+
+IN.rskQ = el => {
+  S.ui.rskQ = el.value;
   render();
 };
 /* projects */

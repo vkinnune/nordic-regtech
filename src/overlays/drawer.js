@@ -3,7 +3,7 @@
    ===================================================================== */
 import { MOD, TODAY, ago, diffD, esc, fmtDate, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { D, S, commentsOf, isOver, mem, pColor, proj, task } from '../core/store.js';
+import { D, S, commentsOf, isOver, mem, pColor, proj, task, policy, control, risk } from '../core/store.js';
 import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar } from '../ui/helpers.js';
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
@@ -17,6 +17,8 @@ export function renderLayer() {
   let h = '';
   if (u.drawer && task(u.drawer))
     h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeDrawer"></div>` : '') + drawerHtml(task(u.drawer));
+  if (u.govDrawer)
+    h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeGovDrawer"></div>` : '') + govDrawerHtml(u.govDrawer);
   u.modals.forEach((m, i) => {
     const en = u.fx.modal === i + 1;
     h += `<div class="scrim${en ? ' enter' : ''}" data-a="closeModal" style="z-index:${60 + i * 2}"></div><div class="modal-wrap" data-a="closeModalBg" style="z-index:${61 + i * 2}">${en ? modalHtml(m).replace('class="modal ', 'class="modal enter ') : modalHtml(m)}</div>`;
@@ -233,4 +235,132 @@ export function diffViewerHtml(diff) {
           </div>`
     }
   </div>`;
+}
+
+/* ---------------- GOVERNANCE DRAWER (Policies, Controls, Risks) ---------------- */
+export function govDrawerHtml(gov) {
+  const { type, id } = gov;
+  const u = S.ui;
+  let item = null;
+  if (type === 'policy') item = policy(id);
+  else if (type === 'control') item = control(id);
+  else if (type === 'risk') item = risk(id);
+
+  if (!item) return '';
+
+  const typeName = type === 'policy' ? 'Käytäntö' : type === 'control' ? 'Kontrolli' : 'Säädösriski';
+  const typeIcon = type === 'policy' ? 'file-text' : type === 'control' ? 'shield-check' : 'alert-triangle';
+
+  return `<aside class="drawer ${u.drawerFull ? 'full' : ''} ${u.fx.drawer ? 'enter' : ''}" role="dialog" aria-modal="${u.drawerFull}" aria-labelledby="gov-d-h" tabindex="-1">
+    <div class="drawer-h">
+      <span class="pill mono" style="font-size:11.5px;padding:2px 6px">${ic(typeIcon, 12)} ${esc(typeName)}: ${esc(item.code)}</span>
+      <span class="sp"></span>
+      <button class="ibtn ibtn-sm hide-m" data-a="toggleDrawerFull" data-tip="${u.drawerFull ? 'Side panel' : 'Full page'}" aria-label="Toggle full page">${ic(u.drawerFull ? 'minimize-2' : 'maximize-2', 15)}</button>
+      <button class="ibtn ibtn-sm" data-a="closeGovDrawer" data-tip="Sulje  Esc" aria-label="Sulje">${ic('x', 16)}</button>
+    </div>
+
+    <div class="drawer-b">
+      <h2 id="gov-d-h" style="font-size:18px;font-weight:700;color:var(--text);margin:0 0 12px;line-height:1.35">${esc(item.title)}</h2>
+
+      ${
+        type === 'control' && item.impactedByAmendment
+          ? `<div class="alert danger" style="margin-bottom:16px">
+              ${ic('alert-triangle', 15)}
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:12.5px">Lakimuutosvaikutus: ${esc(item.impactedByAmendment)}</div>
+                <div style="font-size:12px;margin-top:2px">${esc(item.amendmentAlert || '')}</div>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  ${
+                    item.status === 'DEFICIENT'
+                      ? `<button class="btn btn-sm btn-primary" data-a="resolveGap" data-id="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('check-circle', 12)} Merkitse toimivaksi</button>`
+                      : `<span class="pill mono" style="font-size:11px">${ic('check', 11)} Kuitattu toimivaksi</span>`
+                  }
+                  <button class="btn btn-sm btn-ghost" data-a="createMitigationTask" data-ctl="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('plus', 12)} Luo päivitystehtävä</button>
+                </div>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <div class="dsec">
+        <div class="dsec-h"><h3>Kuvaus ja määrittely</h3></div>
+        <p style="font-size:13px;line-height:1.55;color:var(--text);margin:0">${esc(item.summary || item.specification || item.consequence || '')}</p>
+      </div>
+
+      <dl class="kv" style="margin-top:16px">
+        ${item.owner ? `<dt>${ic('user', 14)}Vastuu</dt><dd>${esc(item.owner)} ${item.ownerRole ? `<span class="muted" style="font-size:11px">(${esc(item.ownerRole)})</span>` : ''}</dd>` : ''}
+        ${item.status ? `<dt>${ic('shield', 14)}Tila</dt><dd><span class="mono" style="font-size:12px;font-weight:600">${esc(item.status)}</span></dd>` : ''}
+        ${item.severity ? `<dt>${ic('alert-octagon', 14)}Vakavuus</dt><dd><span class="mono" style="font-size:12px;font-weight:600">${esc(item.severity)} (Altistus: ${item.exposureScore}/100)</span></dd>` : ''}
+        ${item.authority ? `<dt>${ic('landmark', 14)}Valvoja</dt><dd>${esc(item.authority)}</dd>` : ''}
+        ${item.frequency ? `<dt>${ic('clock', 14)}Tiheys</dt><dd>${esc(item.frequency)}</dd>` : ''}
+        ${item.version ? `<dt>${ic('file-text', 14)}Versio</dt><dd>v${esc(item.version)} (Tarkistettu: ${esc(item.lastReviewDate)})</dd>` : ''}
+      </dl>
+
+      <!-- Linked Statutory Sections -->
+      ${
+        item.statuteSections && item.statuteSections.length
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Liitetyt säädökset ja pykälät</h3></div>
+              <div class="col" style="gap:6px">
+                ${item.statuteSections
+                  .map(secId => {
+                    const label = formatGovSecBadge(secId);
+                    const regId = secId.startsWith('finlex-')
+                      ? 'reg-finlex-747-2012'
+                      : secId.startsWith('sfs-')
+                        ? 'reg-sfs-2004-46'
+                        : secId.startsWith('dora-')
+                          ? 'reg-dora'
+                          : 'reg-aml';
+                    return `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                      <span class="mono" style="font-size:12.5px;font-weight:600">${esc(label)}</span>
+                      <button class="btn btn-sm btn-ghost" data-a="openRegInReader" data-id="${regId}" data-sec="${secId}" style="padding:2px 7px;font-size:11.5px">
+                        ${ic('book-open', 12)} Avaa Finlex-lukijassa ➔
+                      </button>
+                    </div>`;
+                  })
+                  .join('')}
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Linked Tasks -->
+      ${
+        item.taskId && task(item.taskId)
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Liitetty compliance-tehtävä</h3></div>
+              <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                <div>
+                  <div style="font-weight:700;font-size:12.5px">${task(item.taskId).key}: ${esc(task(item.taskId).title)}</div>
+                  <div class="muted" style="font-size:11px">Tila: ${esc(task(item.taskId).status)} · Määräaika: ${esc(task(item.taskId).due || 'Ei asetettu')}</div>
+                </div>
+                <button class="btn btn-sm btn-primary" data-a="openTask" data-id="${item.taskId}" style="padding:2px 7px;font-size:11.5px">
+                  ${ic('arrow-right', 12)} Avaa tehtävä
+                </button>
+              </div>
+            </div>`
+          : ''
+      }
+    </div>
+  </aside>`;
+}
+
+function formatGovSecBadge(secId) {
+  if (secId.startsWith('finlex-')) {
+    const parts = secId.replace('finlex-', '').split('-');
+    return `747/2012 ${parts[0]}:${parts[1]} §`;
+  }
+  if (secId.startsWith('sfs-')) {
+    const parts = secId.replace('sfs-', '').split('-');
+    return `SFS ${parts[0]}:${parts[1]} §`;
+  }
+  if (secId.startsWith('dora-')) {
+    return `DORA Art. ${secId.replace('dora-', '')}`;
+  }
+  if (secId.startsWith('aml-')) {
+    const parts = secId.replace('aml-', '').split('-');
+    return `AML 444/2017 ${parts[0]}:${parts[1]} §`;
+  }
+  return secId;
 }

@@ -25,6 +25,9 @@ import { pageSettings } from '../pages/settings.js';
 import { pageStates, pageSystem } from '../pages/design-system.js';
 import { pageArchive } from '../features/archive.js';
 import { pageRegulations } from '../pages/regulations.js';
+import { pagePolicies } from '../pages/policies.js';
+import { pageControls } from '../pages/controls.js';
+import { pageRisks } from '../pages/risks.js';
 
 export function renderShell() {
   const u = S.ui;
@@ -51,6 +54,9 @@ export function renderPage() {
       search: pageSearch,
       overview: pageOverview,
       regulations: pageRegulations,
+      policies: pagePolicies,
+      controls: pageControls,
+      risks: pageRisks,
       projects: pageProjects,
       project: pageProject,
       tasks: pageTasks,
@@ -104,9 +110,15 @@ export function renderSidebar() {
       ${sItem('favorites', 'Favorites', 'star')}
       ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">
+        <div class="sgroup-h">Säädökset & Hallinto</div>
+        ${sItem('regulations', 'Säädökset', 'scale')}
+        ${sItem('policies', 'Käytännöt', 'file-text')}
+        ${sItem('controls', 'Kontrollit', 'shield-check')}
+        ${sItem('risks', 'Riskit', 'alert-triangle')}
+      </div>
+      <div class="sgroup">
         <div class="sgroup-h">Workspace</div>
         ${sItem('overview', 'Overview', 'layout-dashboard')}
-        ${sItem('regulations', 'Regulations', 'scale')}
         ${sItem('projects', 'Projects', 'folder-kanban')}
         ${sItem('tasks', 'Tasks', 'list-checks')}
         ${sItem('calendar', 'Calendar', 'calendar')}

@@ -43,3 +43,23 @@ _Avoid_: Ticket, issue, obligation inventory item
 **Supervisory Authority**:
 A national or European regulatory body with legal oversight and enforcement jurisdiction over the entity (e.g., Finansinspektionen, FIN-FSA, ESMA, EBA).
 _Avoid_: Regulator agency, supervisory body
+
+**Policy**:
+An authoritative internal governance document or standard adopted by executive management or the board defining mandatory corporate rules and compliance baselines.
+_Avoid_: Guideline, handbook note, company SOP
+
+**Control**:
+A concrete operational safeguard, technical parameter, automated rule, or procedural verification enforcing a statutory requirement or internal policy.
+_Avoid_: Check, test case, safety measure
+
+**Risk**:
+The regulatory, financial, operational, or legal exposure resulting from statutory non-compliance or control deficiencies.
+_Avoid_: Threat, danger, hazard
+
+**Compliance Gap**:
+An identified divergence where a statutory amendment or section requirement is not fully covered by an approved policy or effective operational control.
+_Avoid_: Defect, missing rule, bug
+
+**Impact Assessment**:
+The structured evaluation workflow wherein an officer reviews an amending statutory diff, identifies affected policies and controls, and records formal sign-off or mitigation actions.
+_Avoid_: Triage review, diff audit, change log analysis
