@@ -44,6 +44,10 @@ function lucideSubset() {
       }
       return `export const ICONS = ${JSON.stringify(out)};`;
     },
+    handleHotUpdate({ server }) {
+      const mod = server.moduleGraph.getModuleById(resolved);
+      if (mod) server.moduleGraph.invalidateModule(mod);
+    },
   };
 }
 

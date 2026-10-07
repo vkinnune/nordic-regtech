@@ -77,19 +77,23 @@
 }
 
 .finlex-btn-link {
-  background: #2563eb;
-  border: none;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
   border-radius: 3px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   font-size: 11px;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--text-2);
   cursor: pointer;
-  transition: opacity var(--dur);
+  transition:
+    background var(--dur),
+    color var(--dur);
 }
 
 .finlex-btn-link:hover {
-  opacity: 0.88;
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .finlex-toc-search {
@@ -159,19 +163,12 @@
   color: var(--text);
 }
 
-/* Finlex classic light-blue active section highlight */
+/* Finlex active section highlight: neutral, high contrast */
 .finlex-tree-sec.active {
-  background: #b9d9eb;
-  border-left-color: #2f65a6;
-  color: #112847;
+  background: var(--surface-3);
+  border-left-color: var(--text);
+  color: var(--text);
   font-weight: 600;
-}
-
-/* Dark theme active section fallback */
-[data-theme='dark'] .finlex-tree-sec.active {
-  background: rgba(47, 101, 166, 0.28);
-  border-left-color: #5c8ed6;
-  color: #dbe8fa;
 }
 
 /* ---------- RIGHT MAIN CONTENT: Finlex Document Reader ---------- */
