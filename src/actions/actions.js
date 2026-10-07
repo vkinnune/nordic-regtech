@@ -1193,21 +1193,14 @@ IN.tlGroup = el => {
 };
 
 /* regulations */
-A.selectReg = el => {
-  S.ui.regSel = el.dataset.id;
-  delete S.ui.regSec;
-  S.ui.regPickerOpen = false;
-  render();
-};
 A.openRegInReader = el => {
   S.ui.regSel = el.dataset.id;
   delete S.ui.regSec;
   S.ui.regView = 'reader';
-  S.ui.regPickerOpen = false;
   render();
 };
 A.setRegView = el => {
-  S.ui.regView = el.dataset.view;
+  S.ui.regView = el.dataset.view || 'library';
   render();
 };
 A.setRegLibLayout = el => {
@@ -1218,10 +1211,6 @@ A.setRegLibJuris = el => {
   S.ui.regLibJuris = el.dataset.juris;
   render();
 };
-A.setRegLibTag = el => {
-  S.ui.regLibTag = S.ui.regLibTag === el.dataset.tag ? '' : el.dataset.tag;
-  render();
-};
 A.clearRegLibQ = () => {
   S.ui.regLibQ = '';
   render();
@@ -1229,7 +1218,6 @@ A.clearRegLibQ = () => {
 A.clearRegLibFilters = () => {
   S.ui.regLibQ = '';
   S.ui.regLibJuris = 'all';
-  S.ui.regLibTag = '';
   render();
 };
 

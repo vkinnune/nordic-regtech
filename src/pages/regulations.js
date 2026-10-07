@@ -200,7 +200,7 @@ function renderRegulationsReader(u) {
       <aside class="finlex-toc" aria-label="Sisällysluettelo">
         <div class="finlex-toc-top">
           <!-- Back to Library Button -->
-          <button class="finlex-toc-back-btn" data-a="setRegView" data-view="grid" title="Takaisin säädösluetteloon">
+          <button class="finlex-toc-back-btn" data-a="setRegView" data-view="library" title="Takaisin säädösluetteloon">
             ${ic('arrow-left', 13)}
             <span>Takaisin säädöksiin</span>
           </button>
@@ -359,7 +359,7 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
   const t = s.taskId ? task(s.taskId) : null;
   const textToShow = lang === 'en' && s.textEn ? s.textEn : s.text;
 
-  return `<article class="finlex-sec ${isActive ? 'active' : 'inactive'}" id="sec-${s.id}">
+  return `<article class="finlex-sec ${isActive ? 'active' : ''}" id="sec-${s.id}">
     <!-- Section Citation & Heading -->
     <header class="finlex-sec-head">
       <div class="finlex-sec-cite">
