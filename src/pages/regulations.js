@@ -239,7 +239,7 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
       }
       ${
         t
-          ? `<button class="finlex-task-btn" data-a="openTask" data-id="${t.id}" title="Avaa tehtävä ja lakimuutoksen diff">
+          ? `<button class="finlex-task-btn" data-a="openTask" data-id="${t.id}" title="Avaa tehtävä ja lakimuutoksen vaatimukset">
               ${stIcon(t.status, 12)}
               <span>Tehtävä: <b>${esc(t.key)}</b> (${esc(t.title)})</span>
               ${ic('arrow-right', 12)}

@@ -114,7 +114,8 @@ export function filePrev(f) {
 export function diffBadge(diff) {
   if (!diff) return '';
   const st = (diff.status || 'modified').toLowerCase();
-  return `<span class="diff-badge diff-${st}">${esc(diff.status)}</span>`;
+  const label = st === 'added' ? 'New rule' : st === 'deleted' ? 'Repealed' : 'Amended';
+  return `<span class="diff-badge diff-${st}">${label}</span>`;
 }
 
 export function diffTokenHtml(tk) {

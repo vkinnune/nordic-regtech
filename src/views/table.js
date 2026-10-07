@@ -24,7 +24,7 @@ export function tcell(t, c) {
     case 'title':
       return ed
         ? `<td class="sticky editing"><input id="edit-cell" data-blur="commitCell" data-key-enter="commitCell" data-id="${t.id}" data-f="title" value="${esc(t.title)}" aria-label="Title"></td>`
-        : `<td class="sticky cellbtn" data-a="openTask" data-id="${t.id}" data-dbl="editCell" data-f="title" title="Double-click to rename"><span class="row" style="gap:8px">${stIcon(t.status, 13)}<span class="trunc" style="font-weight:450">${esc(t.title)}</span>${t.diff ? `<span class="diff-badge diff-${t.diff.status.toLowerCase()}" style="font-size:10px;padding:1px 5px;margin-left:4px">${t.diff.status}</span>` : ''}<span class="mono faint" style="font-size:11px;margin-left:auto">${t.key}</span></span></td>`;
+        : `<td class="sticky cellbtn" data-a="openTask" data-id="${t.id}" data-dbl="editCell" data-f="title" title="Double-click to rename"><span class="row" style="gap:8px">${stIcon(t.status, 13)}<span class="trunc" style="font-weight:450">${esc(t.title)}</span>${t.diff ? `<span class="diff-badge diff-${t.diff.status.toLowerCase()}" style="font-size:10px;padding:1px 5px;margin-left:4px">${t.diff.status === 'ADDED' ? 'New law' : t.diff.status === 'DELETED' ? 'Repealed' : 'Amended'}</span>` : ''}<span class="mono faint" style="font-size:11px;margin-left:auto">${t.key}</span></span></td>`;
     case 'status':
       return `<td class="cellbtn" data-a="pop" data-pop="status" data-id="${t.id}"><span class="row" style="gap:6px">${stPill(t.status)}</span></td>`;
     case 'priority':

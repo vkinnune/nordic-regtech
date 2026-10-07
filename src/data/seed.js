@@ -288,6 +288,11 @@ export function seed() {
           'Audit reconstruction: Every trade recommendation and allocation decision must be stored so regulators can reconstruct it in hindsight.',
         ],
         whyItMatters: 'Mandatory statutory requirement under SFS 2026:916. Violations risk Tier 1 regulatory fines and trading suspension.',
+        beforeAfter: {
+          before: 'No explicit statutory rule for AI or automated trading algorithms in Swedish fund law.',
+          after:
+            'Mandatory continuous human oversight, real-time risk surveillance, and complete audit trail to reconstruct every decision for Finansinspektionen.',
+        },
         translation:
           '100 § A fund management company that uses artificial intelligence or fully automated trading algorithms in managing an investment fund shall ensure that systems are subject to continuous human oversight, that the fund risk profile is monitored in real time, and that all management and asset allocation decisions can be reconstructed in hindsight upon request by Finansinspektionen.',
       },
@@ -336,6 +341,10 @@ export function seed() {
           'Harmonized terminology: Definitions aligned with EU directives and European Supervisory Authority (ESA) rules.',
         ],
         whyItMatters: 'Removes legal ambiguity regarding Swedish fund compliance with EU-wide IT resilience mandates.',
+        beforeAfter: {
+          before: 'Referred to EU UCITS directives without explicit DORA operational resilience requirements.',
+          after: 'Direct statutory clause incorporating EU DORA rules into Swedish fund company definitions.',
+        },
         translation:
           '1 § In this Act, alternative investment fund, competent authority, derivative instrument, EEA, own funds, and management company have the meanings stated in Directive 2009/65/EC (taking into account DORA requirements)...',
       },
@@ -376,6 +385,10 @@ export function seed() {
           'Legacy management routines must be upgraded to current statutory baselines.',
         ],
         whyItMatters: 'Closes historic loopholes; older funds cannot cite legacy carve-outs during regulatory reviews.',
+        beforeAfter: {
+          before: 'Older fund companies authorized before 2012 enjoyed grandfathering exemptions.',
+          after: 'Transitional exemptions repealed. All fund companies must meet uniform modern standards.',
+        },
         translation:
           '99 § The provisions of this chapter shall not apply to fund companies that obtained authorization before January 1, 2012 with regard to older management routines. [REPEALED]',
       },

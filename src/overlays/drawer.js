@@ -179,6 +179,28 @@ export function diffViewerHtml(diff) {
                 : ''
             }
             ${
+              diff.plainEnglish?.beforeAfter
+                ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;font-size:12px">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 10px">
+                      <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:3px">
+                        Before (Previous law):
+                      </div>
+                      <div style="color:var(--text-2);line-height:1.45">
+                        ${esc(diff.plainEnglish.beforeAfter.before)}
+                      </div>
+                    </div>
+                    <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--text);border-radius:4px;padding:8px 10px">
+                      <div style="font-size:10px;font-weight:700;color:var(--text);text-transform:uppercase;margin-bottom:3px">
+                        After (${esc(diff.amendingAct || 'New law')}):
+                      </div>
+                      <div style="color:var(--text);font-weight:500;line-height:1.45">
+                        ${esc(diff.plainEnglish.beforeAfter.after)}
+                      </div>
+                    </div>
+                  </div>`
+                : ''
+            }
+            ${
               diff.plainEnglish?.translation
                 ? `<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:6px">
                      <div style="font-size:11px;font-weight:600;color:var(--text-3);margin-bottom:4px">English translation of statutory text:</div>

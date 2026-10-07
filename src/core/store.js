@@ -3,7 +3,7 @@ import { TODAY, diffD, iso, parse, uid } from './utils.js';
 import { PCOLORS, TEAMS_SEED } from './constants.js';
 import { seed } from '../data/seed.js';
 
-export const STORE_KEY = 'regtech.studio.v4';
+export const STORE_KEY = 'regtech.studio.v5';
 export const DEFAULT_PREFS = {
   theme: 'system',
   accent: 'indigo',
