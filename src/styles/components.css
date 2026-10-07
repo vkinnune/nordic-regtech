@@ -766,27 +766,27 @@
   font-weight: 500;
 }
 .diff-badge {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
 }
 .diff-badge.diff-added {
-  background: rgba(46, 132, 86, 0.15);
-  color: var(--green);
-  border: 1px solid rgba(46, 132, 86, 0.3);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 .diff-badge.diff-modified {
-  background: rgba(200, 138, 20, 0.15);
-  color: var(--amber);
-  border: 1px solid rgba(200, 138, 20, 0.3);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 .diff-badge.diff-deleted {
-  background: rgba(217, 70, 70, 0.15);
-  color: var(--red);
-  border: 1px solid rgba(217, 70, 70, 0.3);
+  color: var(--text-3);
+  text-decoration: line-through;
+  border-color: var(--border);
 }
 .diff-counts {
   display: inline-flex;
@@ -794,44 +794,41 @@
   font-family: var(--font-mono, monospace);
   font-size: 11px;
   font-weight: 500;
+  color: var(--text-3);
 }
 .diff-add-cnt {
-  color: var(--green);
+  color: var(--text-2);
 }
 .diff-del-cnt {
-  color: var(--red);
+  color: var(--text-3);
 }
 .diff-body {
-  padding: 12px;
-  font-family: var(--font-mono, monospace);
-  font-size: 12.5px;
-  line-height: 1.65;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 280px;
+  max-height: 320px;
   overflow-y: auto;
   background: var(--surface);
-  color: var(--text-2);
+  color: var(--text);
 }
 .diff-token-ins {
-  background: rgba(46, 132, 86, 0.22);
+  background: transparent;
   color: var(--text);
-  border-radius: 3px;
-  padding: 1px 3px;
   text-decoration: underline;
-  text-decoration-color: var(--green);
-  text-decoration-thickness: 1.5px;
-  font-weight: 500;
+  text-underline-offset: 3px;
+  font-weight: 600;
 }
 .diff-token-del {
-  background: rgba(217, 70, 70, 0.22);
-  color: var(--red);
-  border-radius: 3px;
-  padding: 1px 3px;
+  background: transparent;
+  color: var(--text-3);
   text-decoration: line-through;
+  opacity: 0.65;
 }
 .diff-token-eq {
-  color: var(--text-2);
+  color: var(--text);
 }
 .diff-foot {
   display: flex;

@@ -1193,6 +1193,36 @@ IN.tlGroup = el => {
 };
 
 /* regulations */
+A.selectReg = el => {
+  S.ui.regSel = el.dataset.id;
+  delete S.ui.regSec;
+  render();
+};
+A.selectSec = el => {
+  S.ui.regSec = el.dataset.id;
+  render();
+  setTimeout(() => {
+    const target = document.getElementById('sec-' + el.dataset.id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 20);
+};
+A.toggleRegPlain = () => {
+  S.ui.regPlain = S.ui.regPlain === false ? true : false;
+  render();
+};
+A.toggleDiffPlain = () => {
+  S.ui.diffPlain = S.ui.diffPlain === false ? true : false;
+  render();
+};
+A.toggleRegLang = () => {
+  S.ui.regLang = S.ui.regLang === 'en' ? 'fi' : 'en';
+  render();
+};
+IN.regActSelect = el => {
+  S.ui.regSel = el.value;
+  delete S.ui.regSec;
+  render();
+};
 IN.regQ = el => {
   S.ui.regQ = el.value;
   render();

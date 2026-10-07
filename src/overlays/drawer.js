@@ -148,30 +148,67 @@ export function commentHtml(c) {
 
 export function diffViewerHtml(diff) {
   if (!diff) return '';
+  const isPlain = S.ui.diffPlain !== false;
+
   return `<div class="dsec diff-sec">
-    <div class="dsec-h">
-      <h3 style="display:flex;align-items:center;gap:6px">${ic('git-compare', 14)}Statutory diff</h3>
+    <div class="dsec-h" style="align-items:center;gap:8px">
+      <h3 style="display:flex;align-items:center;gap:6px">${ic('scale', 14)}Law change</h3>
       ${diffBadge(diff)}
       <span class="sp"></span>
-      <span class="diff-counts">
-        ${diff.additions_count ? `<span class="diff-add-cnt">+${diff.additions_count} adds</span>` : ''}
-        ${diff.deletions_count ? `<span class="diff-del-cnt">-${diff.deletions_count} dels</span>` : ''}
-      </span>
-    </div>
-    <div class="diff-box">
-      <div class="diff-head">
-        <span class="diff-ident mono">${esc(diff.identifier)}</span>
-        <span class="faint">·</span>
-        <span class="diff-title trunc">${esc(diff.heading)}</span>
-        <span class="sp"></span>
-        <span class="mono faint" style="font-size:11px">${esc(diff.amendingAct || '')}</span>
-      </div>
-      <div class="diff-body">${(diff.tokens || []).map(diffTokenHtml).join('')}</div>
-      <div class="diff-foot">
-        <span class="row" style="gap:4px">${ic('calendar', 12)}<span>In force: <b>${esc(diff.inForce || 'Pending')}</b></span></span>
-        <span class="sp"></span>
-        <span class="row" style="gap:4px">${ic('landmark', 12)}<span>Authority: <b>${esc(diff.authority || 'Finansinspektionen')}</b></span></span>
+      <div class="seg" role="tablist" style="font-size:11px">
+        <button class="${isPlain ? 'on' : ''}" data-a="toggleDiffPlain">${ic('sparkles', 11)}In plain English</button>
+        <button class="${!isPlain ? 'on' : ''}" data-a="toggleDiffPlain">Original text</button>
       </div>
     </div>
+
+    ${
+      isPlain
+        ? `<div class="diff-box" style="padding:14px;background:var(--surface-2)">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px">
+              What this law means in simple words:
+            </div>
+            <div style="font-size:13.5px;line-height:1.55;font-weight:600;color:var(--text);margin-bottom:8px">
+              ${esc(diff.plainEnglish?.summary || diff.heading)}
+            </div>
+            ${
+              diff.plainEnglish?.points && diff.plainEnglish.points.length
+                ? `<div style="font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:4px">Key requirements:</div>
+                   <ul style="margin:0 0 10px;padding-left:18px;font-size:12.5px;line-height:1.55;color:var(--text-2)">
+                     ${diff.plainEnglish.points.map(pt => `<li>${esc(pt)}</li>`).join('')}
+                   </ul>`
+                : ''
+            }
+            ${
+              diff.plainEnglish?.translation
+                ? `<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:6px">
+                     <div style="font-size:11px;font-weight:600;color:var(--text-3);margin-bottom:4px">English translation of statutory text:</div>
+                     <div style="font-size:12.5px;line-height:1.6;color:var(--text);background:var(--surface);padding:8px 10px;border-radius:4px;border:1px solid var(--border)">
+                       ${esc(diff.plainEnglish.translation)}
+                     </div>
+                   </div>`
+                : ''
+            }
+            <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:11.5px;color:var(--text-3)">
+              <span>In force: <b>${esc(diff.inForce || 'Pending')}</b></span>
+              <span>·</span>
+              <span>Authority: <b>${esc(diff.authority || 'Finansinspektionen')}</b></span>
+            </div>
+          </div>`
+        : `<div class="diff-box">
+            <div class="diff-head">
+              <span class="diff-ident mono" style="font-weight:700">${esc(diff.identifier)}</span>
+              <span class="faint">·</span>
+              <span class="diff-title trunc">${esc(diff.heading)}</span>
+              <span class="sp"></span>
+              <span class="mono faint" style="font-size:11px">${esc(diff.amendingAct || '')}</span>
+            </div>
+            <div class="diff-body">${(diff.tokens || []).map(diffTokenHtml).join('')}</div>
+            <div class="diff-foot">
+              <span class="row" style="gap:4px">${ic('calendar', 12)}<span>In force: <b>${esc(diff.inForce || 'Pending')}</b></span></span>
+              <span class="sp"></span>
+              <span class="row" style="gap:4px">${ic('landmark', 12)}<span>Authority: <b>${esc(diff.authority || 'Finansinspektionen')}</b></span></span>
+            </div>
+          </div>`
+    }
   </div>`;
 }

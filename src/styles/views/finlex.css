@@ -1,0 +1,421 @@
+/* ============================================================
+   FINLEX LEGISLATION VIEWER (Authentic & Plain English)
+   Strictly simple: no rainbow badges, no fancy colors.
+   ============================================================ */
+
+.finlex-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ---------- LEFT SIDEBAR: Sisällysluettelo (TOC) ---------- */
+.finlex-toc {
+  width: 340px;
+  min-width: 300px;
+  max-width: 380px;
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  user-select: none;
+}
+
+.finlex-toc-top {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+}
+
+.finlex-act-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.finlex-act-select {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.finlex-toc-hdr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.finlex-toc-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.finlex-toc-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finlex-btn-link {
+  background: #2563eb;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: opacity var(--dur);
+}
+
+.finlex-btn-link:hover {
+  opacity: 0.88;
+}
+
+.finlex-toc-search {
+  margin-top: 2px;
+}
+
+.finlex-toc-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.finlex-tree-part {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  padding: 8px 8px 4px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--divider);
+}
+.finlex-tree-part:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+.finlex-tree-chap {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 6px 8px 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.finlex-tree-sec {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  padding: 5px 8px 5px 22px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: 2px;
+  transition:
+    background var(--dur),
+    color var(--dur);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.finlex-tree-sec:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* Finlex classic light-blue active section highlight */
+.finlex-tree-sec.active {
+  background: #b9d9eb;
+  border-left-color: #2f65a6;
+  color: #112847;
+  font-weight: 600;
+}
+
+/* Dark theme active section fallback */
+[data-theme='dark'] .finlex-tree-sec.active {
+  background: rgba(47, 101, 166, 0.28);
+  border-left-color: #5c8ed6;
+  color: #dbe8fa;
+}
+
+/* ---------- RIGHT MAIN CONTENT: Finlex Document Reader ---------- */
+.finlex-reader {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--surface);
+  scroll-behavior: smooth;
+}
+
+.finlex-reader-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 32px 80px;
+}
+
+.finlex-doc-head {
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.finlex-doc-act-no {
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.03em;
+}
+
+.finlex-doc-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 4px 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.finlex-doc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.finlex-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.finlex-chap-divider {
+  margin: 36px 0 20px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.finlex-chap-no {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.finlex-chap-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 2px 0 0;
+}
+
+/* ---------- SECTION BLOCK ---------- */
+.finlex-sec {
+  position: relative;
+  margin-bottom: 30px;
+  padding-left: 14px;
+  border-left: 3px solid #2f65a6;
+  scroll-margin-top: 30px;
+}
+
+.finlex-sec.inactive {
+  border-left-color: var(--border-strong);
+}
+
+.finlex-sec-head {
+  margin-bottom: 8px;
+}
+
+.finlex-sec-cite {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.finlex-sec-num {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.finlex-sec-amendment {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+}
+[data-theme='dark'] .finlex-sec-amendment {
+  color: #70a1ff;
+}
+
+.finlex-sec-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 2px 0 0;
+}
+
+/* PLAIN ENGLISH BOX: Strictly neutral, simple, zero gaudy colors */
+.finlex-plain-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin: 10px 0 12px;
+}
+
+.finlex-plain-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.finlex-plain-summary {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.finlex-plain-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+/* BODY TEXT */
+.finlex-body {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-line;
+  font-family: var(--font-sans);
+}
+
+/* Subtle redline annotations without rainbow colors */
+.finlex-ins {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(46, 132, 86, 0.08);
+  padding: 0 2px;
+}
+
+.finlex-del {
+  text-decoration: line-through;
+  opacity: 0.65;
+  color: var(--text-3);
+  padding: 0 2px;
+}
+
+/* FOOTER META / ACTIONS */
+.finlex-sec-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+  font-size: 12px;
+}
+
+.finlex-ref-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 7px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.finlex-ref-chip:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.finlex-task-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.finlex-task-btn:hover {
+  background: var(--surface-3);
+}
+
+@media (max-width: 840px) {
+  .finlex-container {
+    flex-direction: column;
+  }
+  .finlex-toc {
+    width: 100%;
+    max-width: none;
+    max-height: 220px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .finlex-reader-inner {
+    padding: 16px;
+  }
+}

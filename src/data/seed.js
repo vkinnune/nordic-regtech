@@ -258,7 +258,7 @@ export function seed() {
   t('p1', 'SFS 2026:916 § 1 kap. 100 § · AI & Algorithmic Trading Supervision', 'review', 'm6', 'urgent', 2, ['fi', 'funds', 'risk'], {
     key: 'SFS 1:100',
     fav: true,
-    est: 'Tier 1 Sanction',
+    est: '2 weeks',
     len: 7,
     age: 18,
     upd: 3,
@@ -279,6 +279,18 @@ export function seed() {
       ],
       authority: 'Finansinspektionen & Riksdagen',
       inForce: '2026-11-01',
+      plainEnglish: {
+        summary:
+          'Fund management companies using AI or automated trading algorithms must ensure continuous human supervision, real-time risk surveillance, and complete audit trails to reconstruct every decision for Finansinspektionen.',
+        points: [
+          'Human-in-the-loop oversight: A qualified person must always oversee algorithms and have the authority to intervene or pause trading.',
+          'Real-time risk monitoring: Live surveillance of fund risk parameters while algorithms execute in production.',
+          'Audit reconstruction: Every trade recommendation and allocation decision must be stored so regulators can reconstruct it in hindsight.',
+        ],
+        whyItMatters: 'Mandatory statutory requirement under SFS 2026:916. Violations risk Tier 1 regulatory fines and trading suspension.',
+        translation:
+          '100 § A fund management company that uses artificial intelligence or fully automated trading algorithms in managing an investment fund shall ensure that systems are subject to continuous human oversight, that the fund risk profile is monitored in real time, and that all management and asset allocation decisions can be reconstructed in hindsight upon request by Finansinspektionen.',
+      },
     },
     subtasks: [
       { id: 's1', title: 'Draft algorithmic governance policy matching FI supervisory expectations', done: true },
@@ -294,7 +306,7 @@ export function seed() {
 
   t('p1', 'SFS 2026:916 § 1 kap. 1 § · DORA Scope Harmonization in Swedish Fund Law', 'progress', 'm1', 'high', 5, ['fi', 'dora', 'funds'], {
     key: 'SFS 1:1',
-    est: 'Scope Alignment',
+    est: '1 week',
     len: 5,
     age: 15,
     upd: 12,
@@ -317,6 +329,16 @@ export function seed() {
       ],
       authority: 'Finansdepartementet / Finansinspektionen',
       inForce: '2026-11-01',
+      plainEnglish: {
+        summary: 'Formally incorporates EU DORA cybersecurity and operational resilience definitions directly into the Swedish Investment Funds Act.',
+        points: [
+          'Scope alignment: Binds Swedish UCITS fund managers directly to EU DORA resilience standards.',
+          'Harmonized terminology: Definitions aligned with EU directives and European Supervisory Authority (ESA) rules.',
+        ],
+        whyItMatters: 'Removes legal ambiguity regarding Swedish fund compliance with EU-wide IT resilience mandates.',
+        translation:
+          '1 § In this Act, alternative investment fund, competent authority, derivative instrument, EEA, own funds, and management company have the meanings stated in Directive 2009/65/EC (taking into account DORA requirements)...',
+      },
     },
     subtasks: [
       { id: 's5', title: 'Cross-reference statutory definitions against internal fund taxonomy', done: true },
@@ -326,7 +348,7 @@ export function seed() {
 
   t('p1', 'SFS 2026:916 § 1 kap. 99 § · Repeal of Grandfathering Clauses for Older UCITS', 'done', 'm6', 'medium', -4, ['fi', 'legal'], {
     key: 'SFS 1:99',
-    est: 'Repealed Rule',
+    est: '3 days',
     age: 24,
     desc: '<p>Statutory deletion of transitional provisions from 2012. All funds must now operate strictly under uniform supervisory standards without historic legacy carve-outs.</p>',
     diff: {
@@ -345,12 +367,24 @@ export function seed() {
       ],
       authority: 'Riksdagen',
       inForce: '2026-11-01',
+      plainEnglish: {
+        summary:
+          'Repeals historic transitional exemptions dating back to 2012, requiring all fund companies to operate under the same modern regulatory standards.',
+        points: [
+          'Repeals legacy exemptions dating back to 2012.',
+          'All fund managers now follow identical supervisory and operational rules.',
+          'Legacy management routines must be upgraded to current statutory baselines.',
+        ],
+        whyItMatters: 'Closes historic loopholes; older funds cannot cite legacy carve-outs during regulatory reviews.',
+        translation:
+          '99 § The provisions of this chapter shall not apply to fund companies that obtained authorization before January 1, 2012 with regard to older management routines. [REPEALED]',
+      },
     },
   });
 
   t('p1', 'ESMA34-45-1823 · UCITS Liquidity Stress Testing (LST) Calibration', 'todo', 'm4', 'high', 8, ['funds', 'risk'], {
     key: 'ESMA §34',
-    est: 'Stress Scenario',
+    est: '1 week',
     len: 6,
     subtasks: [
       { id: 's7', title: 'Calibrate reverse stress scenarios for illiquid fixed-income buckets', done: true },
@@ -360,20 +394,20 @@ export function seed() {
 
   t('p1', 'Annual Prospectus & Key Information Document (KID) Regulatory Sweep', 'progress', 'm7', 'medium', 12, ['funds'], {
     key: 'PRIIP §7',
-    est: 'Periodic Sweep',
+    est: '2 weeks',
     len: 8,
   });
 
   t('p1', 'Finansinspektionen FFFS 2020:20 · Remiss on Liquidity Management Tools (LMT)', 'backlog', 'm2', 'low', 30, ['fi', 'funds'], {
     key: 'FI-REMISS',
-    est: 'Consultation',
+    est: '3 weeks',
   });
 
   /* ---- DORA Regulation (EU) 2022/2554 ---- */
   t('p2', 'DORA Art. 5-16 · ICT Risk Management Framework Gap Analysis & Policy Overhaul', 'review', 'm4', 'urgent', 1, ['dora', 'risk'], {
     key: 'DORA §5',
     fav: true,
-    est: 'Tier 1 Framework',
+    est: '4 weeks',
     len: 12,
     age: 30,
     upd: 5,
@@ -391,7 +425,7 @@ export function seed() {
 
   t('p2', 'DORA Art. 28 · Register of Information for Critical Third-Party ICT Providers (CTPPs)', 'progress', 'm8', 'urgent', 4, ['dora', 'it_security'], {
     key: 'DORA §28',
-    est: 'Mandatory Register',
+    est: '3 weeks',
     len: 9,
     age: 20,
     subtasks: [
@@ -404,7 +438,7 @@ export function seed() {
 
   t('p2', 'DORA Art. 17-23 · Major ICT-related Incident Reporting Procedure & Runbook', 'todo', 'm8', 'high', 9, ['dora', 'it_security'], {
     key: 'DORA §17',
-    est: '4h Incident SLA',
+    est: '2 weeks',
     len: 6,
     subtasks: [
       { id: 's17', title: 'Define 4-hour initial notification trigger threshold for Finansinspektionen / Fiva', done: true },
@@ -415,20 +449,20 @@ export function seed() {
 
   t('p2', 'TIBER-SE / DORA Art. 26 · Threat-Led Penetration Testing (TLPT) Scope Validation', 'todo', 'm4', 'medium', 19, ['dora', 'risk'], {
     key: 'TIBER §26',
-    est: 'Red Team Scope',
+    est: '2 weeks',
     len: 5,
   });
 
   t('p2', 'Board of Directors ICT Governance & Cybersecurity Training Curriculum', 'done', 'm3', 'medium', -7, ['dora', 'compliance'], {
     key: 'DORA §4',
-    est: 'Board Attestation',
+    est: '1 week',
   });
 
   /* ---- AML & SFS 2017:630 ---- */
   t('p3', 'FFFS 2017:11 Kap 4 · General Risk Assessment (Allmän riskbedömning 2026)', 'progress', 'm5', 'urgent', 3, ['aml', 'fi', 'compliance'], {
     key: 'AML §4',
     fav: true,
-    est: 'Annual GRA Audit',
+    est: '3 weeks',
     len: 8,
     age: 22,
     upd: 2,
@@ -443,7 +477,7 @@ export function seed() {
 
   t('p3', 'AMLR (EU) 2024/1624 · Transition Roadmap for the Unified EU AML Rulebook & AMLA', 'todo', 'm5', 'high', 15, ['aml', 'legal'], {
     key: 'AMLR §1',
-    est: 'AMLA Transition',
+    est: '4 weeks',
     len: 10,
     subtasks: [
       { id: 's23', title: 'Gap analysis of current CDD measures against new direct-acting EU regulation', done: false },
@@ -453,7 +487,7 @@ export function seed() {
 
   t('p3', 'Real-time Sanctions Screening & Asset Freeze Automation (EU, UN, OFAC)', 'review', 'm1', 'urgent', 0, ['aml', 'risk'], {
     key: 'AML §3',
-    est: 'Zero Tolerance Freeze',
+    est: '1 week',
     len: 4,
     subtasks: [
       { id: 's25', title: 'Fuzzy-name matching benchmark on Nordic and Cyrillic transliterations', done: true },
@@ -463,13 +497,13 @@ export function seed() {
 
   t('p3', 'Independent 3rd-Party Internal Audit of Swedish AML Controls', 'done', 'm3', 'high', -14, ['aml', 'fi'], {
     key: 'AML-AUDIT',
-    est: 'Audit Passed',
+    est: '2 weeks',
   });
 
   /* ---- AIFM FFFS 2013:9 ---- */
   t('p4', 'FFFS 2013:9 Kap 13 · Independent Valuation Governance for Private Equity Assets', 'progress', 'm7', 'high', 7, ['funds', 'risk'], {
     key: 'AIFM §13',
-    est: 'Tier 2 Governance',
+    est: '2 weeks',
     len: 7,
     subtasks: [
       { id: 's27', title: 'Review external valuation agent independence and conflict-of-interest disclosures', done: true },
@@ -479,30 +513,30 @@ export function seed() {
 
   t('p4', 'Prop. 2023/24:122 · Review of Administrative Fines & Sanctions Escalation for AIFMs', 'todo', 'm6', 'medium', 16, ['legal', 'fi'], {
     key: 'PROP §122',
-    est: 'Sanction Escalation',
+    est: '1 week',
     len: 4,
   });
 
   t('p4', 'Annex IV Supervisory Filing Q3 Automated XML Validation', 'done', 'm7', 'urgent', -2, ['funds'], {
     key: 'ANNEX-IV',
-    est: 'Regulatory XML',
+    est: '3 days',
   });
 
   /* ---- MiFID II & SFDR ---- */
   t('p5', 'MiFID II Delegated Reg 2017/565 · Best Execution Surveillance & Annual RTS 28 Publication', 'todo', 'm3', 'high', 21, ['mifid', 'funds'], {
     key: 'RTS §28',
-    est: 'Best Execution',
+    est: '2 weeks',
     len: 8,
   });
 
   t('p5', 'Product Governance (POG) Target Market Verification for Complex Structured Notes', 'backlog', 'm2', 'medium', 35, ['mifid', 'compliance'], {
     key: 'POG §9',
-    est: 'Investor Protection',
+    est: '3 weeks',
   });
 
   t('p6', 'SFDR RTS Art. 14 · Principal Adverse Impact (PAI) Statement for Article 8/9 Funds', 'progress', 'm6', 'high', 11, ['esg', 'legal'], {
     key: 'SFDR §14',
-    est: 'PAI Disclosure',
+    est: '4 weeks',
     len: 10,
     subtasks: [
       { id: 's30', title: 'Collect scope 1, 2, and 3 GHG emissions data across underlying portfolio companies', done: true },
@@ -514,7 +548,7 @@ export function seed() {
 
   t('p6', 'EU Green Taxonomy Alignment Verification for Nordic Climate Infrastructure Fund', 'todo', 'm7', 'medium', 25, ['esg'], {
     key: 'TAXON §3',
-    est: 'Green Verification',
+    est: '2 weeks',
   });
 
   const tk = id => T.find(x => x.id === id);
