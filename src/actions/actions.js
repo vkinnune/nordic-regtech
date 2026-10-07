@@ -1232,14 +1232,7 @@ A.clearRegLibFilters = () => {
   S.ui.regLibTag = '';
   render();
 };
-A.toggleRegPicker = () => {
-  S.ui.regPickerOpen = !S.ui.regPickerOpen;
-  render();
-};
-A.clearRegPickerQ = () => {
-  S.ui.regPickerQ = '';
-  render();
-};
+
 A.selectSec = el => {
   S.ui.regSec = el.dataset.id;
   render();
@@ -1260,10 +1253,7 @@ IN.regQ = el => {
   S.ui.regQ = el.value;
   render();
 };
-IN.regPickerQ = el => {
-  S.ui.regPickerQ = el.value;
-  render();
-};
+
 IN.regLibQ = el => {
   S.ui.regLibQ = el.value;
   render();

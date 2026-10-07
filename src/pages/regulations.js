@@ -1,4 +1,4 @@
-/* ---------- FINLEX LEGISLATION EXPLORER & REGULATIONS LIBRARY ---------- */
+/* ---------- REGULATIONS EXPLORER (Starting Screen: Grid Library -> 2nd Screen: Reader) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, task, REGULATIONS, allChaptersOf, allRegulations, allSectionsOf, regulation } from '../core/store.js';
@@ -6,19 +6,19 @@ import { stIcon } from '../ui/helpers.js';
 
 export function pageRegulations() {
   const u = S.ui;
-  if (u.regView === 'library') {
-    return renderRegulationsLibrary(u);
+  // Starting screen is the clean Grid Library view; Reader view is opened on card selection
+  if (u.regView === 'reader') {
+    return renderRegulationsReader(u);
   }
-  return renderRegulationsReader(u);
+  return renderRegulationsLibrary(u);
 }
 
 /* ============================================================
-   REGULATIONS LIBRARY VIEW (Catalogue, Grid & List Layouts)
+   1. STARTING SCREEN: REGULATIONS LIBRARY (GRID & LIST)
    ============================================================ */
 function renderRegulationsLibrary(u) {
   const libQ = (u.regLibQ || '').toLowerCase().trim();
   const juris = u.regLibJuris || 'all'; // 'all', 'fi', 'se', 'eu'
-  const tagFilter = u.regLibTag || '';
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
   const allActs = allRegulations();
@@ -27,9 +27,6 @@ function renderRegulationsLibrary(u) {
     if (juris === 'fi' && !r.jurisdiction.includes('Finland')) return false;
     if (juris === 'se' && !r.jurisdiction.includes('Sweden')) return false;
     if (juris === 'eu' && !r.jurisdiction.includes('European Union')) return false;
-
-    // Tag filter
-    if (tagFilter && !(r.tags || []).includes(tagFilter)) return false;
 
     // Search query
     if (libQ) {
@@ -47,62 +44,41 @@ function renderRegulationsLibrary(u) {
     return true;
   });
 
-  const popularTags = ['Funds', 'AI', 'AlgorithmicTrading', 'Risk', 'DORA', 'AML', 'MiFID', 'ESG', 'Conduct'];
-
   return `<div class="page flush">
     <div class="finlex-lib-wrap">
       <div class="finlex-lib-inner">
 
-        <!-- Top Header -->
+        <!-- Top Header: Super simple & uncluttered -->
         <header class="finlex-lib-head">
           <div class="finlex-lib-title-box">
             <h1 style="display:flex;align-items:center;gap:8px">
-              ${ic('scale', 22)}
-              <span>Lakikirjasto · Regulations Library</span>
+              ${ic('scale', 20)}
+              <span>Säädökset</span>
             </h1>
-            <p>Pohjoismainen finanssialan säädöskokoelma, EU-direktiivit ja valvontamääräykset · ${allActs.length} säädöstä arkistossa</p>
+            <p>Pohjoismainen finanssialan säädöskokoelma ja EU-direktiivit (${allActs.length})</p>
           </div>
-          <div class="row" style="gap:8px">
-            <div class="seg" role="tablist">
-              <button class="${layout !== 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="grid" title="Korttinäkymä (Grid)">${ic('layout-grid', 14)} Kortit</button>
-              <button class="${layout === 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="list" title="Taulukkonäkymä (List)">${ic('list', 14)} Luettelo</button>
-            </div>
-            <button class="btn btn-sm btn-primary" data-a="setRegView" data-view="reader" title="Avaa Finlex-lukija">
-              ${ic('book-open', 14)}
-              <span>Finlex-lukija</span>
-            </button>
+          <div class="seg" role="tablist">
+            <button class="${layout !== 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="grid" title="Korttinäkymä">${ic('layout-grid', 14)} Kortit</button>
+            <button class="${layout === 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="list" title="Luettelonäkymä">${ic('list', 14)} Luettelo</button>
           </div>
         </header>
 
-        <!-- Search & Filter Controls -->
+        <!-- Search & Jurisdiction Controls -->
         <div class="finlex-lib-controls">
           <div class="finlex-lib-search-bar">
             <div class="inwrap" style="flex:1">
               ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="regLibQ" placeholder="Hae lakia, pykälää, säädöskoodia, valvojaa tai asiasanaa (esim. 747/2012, SFS 2004:46, DORA, AI)..." value="${esc(u.regLibQ || '')}">
+              <input class="input" style="height:36px;font-size:13.5px" data-in="regLibQ" placeholder="Etsi säädöstä nimellä, koodilla tai aiheella (esim. 747/2012, SFS 2004:46, DORA, AI)..." value="${esc(u.regLibQ || '')}">
               ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Tyhjennä</button>` : ''}
             </div>
           </div>
 
           <div class="finlex-lib-filters-row">
             <div class="finlex-lib-filter-pills">
-              <span class="faint" style="font-size:12px;font-weight:600;margin-right:4px">Lainkäyttö:</span>
               <button class="finlex-filter-pill ${juris === 'all' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="all">Kaikki (${allActs.length})</button>
-              <button class="finlex-filter-pill ${juris === 'fi' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="fi">Suomi · Finlex</button>
-              <button class="finlex-filter-pill ${juris === 'se' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="se">Ruotsi · SFS</button>
-              <button class="finlex-filter-pill ${juris === 'eu' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="eu">Euroopan unioni · EU</button>
-            </div>
-
-            <div class="finlex-lib-filter-pills">
-              <span class="faint" style="font-size:12px;font-weight:600;margin-right:4px">Aihealueet:</span>
-              ${popularTags
-                .map(
-                  t => `
-                <button class="finlex-filter-pill ${tagFilter === t ? 'on' : ''}" data-a="setRegLibTag" data-tag="${t}">${esc(t)}</button>
-              `,
-                )
-                .join('')}
-              ${tagFilter ? `<button class="pillbtn" data-a="setRegLibTag" data-tag="" style="font-size:11.5px">${ic('x', 11)}Nollaa aihe</button>` : ''}
+              <button class="finlex-filter-pill ${juris === 'fi' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="fi">Suomi</button>
+              <button class="finlex-filter-pill ${juris === 'se' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="se">Ruotsi</button>
+              <button class="finlex-filter-pill ${juris === 'eu' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="eu">Euroopan unioni</button>
             </div>
           </div>
         </div>
@@ -114,7 +90,7 @@ function renderRegulationsLibrary(u) {
           <div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
             ${ic('search-x', 32)}
             <h3 style="margin:12px 0 4px;font-size:16px">Ei hakua vastaavia säädöksiä</h3>
-            <p class="muted" style="margin:0 0 16px;font-size:13px">Hakusanalla "${esc(libQ || tagFilter)}" ei löytynyt säädöksiä tai määräyksiä.</p>
+            <p class="muted" style="margin:0 0 16px;font-size:13px">Hakusanalla "${esc(libQ)}" ei löytynyt säädöksiä.</p>
             <button class="btn btn-sm btn-ghost" data-a="clearRegLibFilters">${ic('refresh-cw', 13)} Nollaa suodattimet</button>
           </div>
         `
@@ -133,7 +109,7 @@ function renderRegulationsGrid(acts) {
     ${acts
       .map(r => {
         const secs = allSectionsOf(r);
-        return `<article class="finlex-lib-card" data-a="openRegInReader" data-id="${r.id}" title="Avaa säädös Finlex-lukijassa">
+        return `<article class="finlex-lib-card" data-a="openRegInReader" data-id="${r.id}" title="Avaa säädös lukijassa">
         <div class="finlex-lib-card-top">
           <span class="finlex-jurisdiction-tag">${esc(r.jurisdiction)}</span>
           <span class="finlex-code-badge">${esc(r.code)}</span>
@@ -145,7 +121,7 @@ function renderRegulationsGrid(acts) {
         <div class="finlex-lib-card-meta">
           <span>${ic('landmark', 12)} ${esc(r.authority)}</span>
           <span>·</span>
-          <span>${ic('calendar', 12)} Voimaantulo: <b>${esc(r.inForce || 'Voimassa')}</b></span>
+          <span>${ic('calendar', 12)} ${esc(r.inForce || 'Voimassa')}</span>
           <span>·</span>
           <span>${ic('file-text', 12)} ${secs.length} pykälää</span>
         </div>
@@ -157,10 +133,10 @@ function renderRegulationsGrid(acts) {
               .map(t => `<span class="pill" style="font-size:10.5px;padding:1px 6px">${esc(t)}</span>`)
               .join('')}
           </div>
-          <button class="finlex-btn-link" style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
-            <span>Lue pykälät</span>
+          <span class="finlex-btn-link" style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
+            <span>Avaa pykälät</span>
             ${ic('arrow-right', 12)}
-          </button>
+          </span>
         </div>
       </article>`;
       })
@@ -185,7 +161,7 @@ function renderRegulationsList(acts) {
         ${acts
           .map(r => {
             const secs = allSectionsOf(r);
-            return `<tr data-a="openRegInReader" data-id="${r.id}" title="Avaa ${esc(r.code)} Finlex-lukijassa">
+            return `<tr data-a="openRegInReader" data-id="${r.id}" title="Avaa ${esc(r.code)}">
             <td>
               <div style="font-weight:700;display:flex;align-items:center;gap:6px">
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(r.code)}</span>
@@ -198,9 +174,9 @@ function renderRegulationsList(acts) {
             <td><span class="mono faint" style="font-size:11.5px">${esc(r.inForce || 'Voimassa')}</span></td>
             <td><span style="font-size:12px">${secs.length} pykälää</span></td>
             <td style="text-align:right">
-              <button class="btn btn-sm btn-ghost" data-a="openRegInReader" data-id="${r.id}" style="padding:3px 8px;font-size:11.5px">
+              <span class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:11.5px">
                 ${ic('book-open', 12)} Avaa ➔
-              </button>
+              </span>
             </td>
           </tr>`;
           })
@@ -211,7 +187,7 @@ function renderRegulationsList(acts) {
 }
 
 /* ============================================================
-   FINLEX DOCUMENT READER VIEW
+   2. SECOND SCREEN: FINLEX DOCUMENT READER VIEW
    ============================================================ */
 function renderRegulationsReader(u) {
   const selActId = u.regSel || 'reg-finlex-747-2012';
@@ -230,13 +206,22 @@ function renderRegulationsReader(u) {
       <!-- LEFT SIDEBAR: Finlex Sisällysluettelo (TOC) -->
       <aside class="finlex-toc" aria-label="Sisällysluettelo">
         <div class="finlex-toc-top">
-          <!-- Act Switcher Combobox / Picker -->
-          ${renderLawPicker(curAct, u)}
+          <!-- Back to Library Button -->
+          <button class="finlex-toc-back-btn" data-a="setRegView" data-view="grid" title="Takaisin säädösluetteloon">
+            ${ic('arrow-left', 13)}
+            <span>Takaisin säädöksiin</span>
+          </button>
+
+          <!-- Current Act Title in Sidebar -->
+          <div class="finlex-toc-act-label">
+            <span class="mono" style="font-size:11px;color:var(--text-3)">${esc(curAct.code)}</span>
+            <span class="trunc" style="font-weight:700;font-size:13px;color:var(--text)">${esc(curAct.shortTitle || curAct.title)}</span>
+          </div>
 
           <!-- Sisällysluettelo Header & Actions -->
           <div class="finlex-toc-hdr-row">
             <h2 class="finlex-toc-title">
-              ${ic('book-open', 14)}
+              ${ic('book-open', 13)}
               <span>Sisällysluettelo</span>
             </h2>
             <div class="finlex-toc-tools">
@@ -248,7 +233,7 @@ function renderRegulationsReader(u) {
           <!-- Section Search -->
           <div class="inwrap finlex-toc-search">
             ${ic('search', 13)}
-            <input class="input search-sm" id="reg-toc-q" data-in="regQ" placeholder="Etsi pykälää tai tekstiä…" value="${esc(u.regQ || '')}" aria-label="Etsi pykälää">
+            <input class="input search-sm" id="reg-toc-q" data-in="regQ" placeholder="Etsi pykälää..." value="${esc(u.regQ || '')}" aria-label="Etsi pykälää">
           </div>
         </div>
 
@@ -261,6 +246,14 @@ function renderRegulationsReader(u) {
       <!-- RIGHT MAIN CONTENT: Finlex Document Reader -->
       <main class="finlex-reader" id="finlex-doc-content" tabindex="-1">
         <div class="finlex-reader-inner">
+
+          <!-- Top Back Link -->
+          <div style="margin-bottom:16px">
+            <button class="btn btn-sm btn-ghost" data-a="setRegView" data-view="grid" style="padding-left:4px">
+              ${ic('arrow-left', 14)}
+              <span>Kaikki säädökset</span>
+            </button>
+          </div>
 
           <!-- Act Document Header -->
           <header class="finlex-doc-head">
@@ -276,19 +269,15 @@ function renderRegulationsReader(u) {
             </div>
           </header>
 
-          <!-- Top Toolbar: Plain English, Language & Library Jump -->
+          <!-- Simple Toolbar: Plain English and Language Toggles Only -->
           <div class="finlex-toolbar">
-            <button class="btn btn-sm btn-ghost" data-a="setRegView" data-view="library" title="Siirry lakikirjastoon">
-              ${ic('layout-grid', 13)}
-              <span>Lakikirjasto (Library)</span>
-            </button>
             <button class="btn btn-sm ${showPlain ? 'btn-primary' : 'btn-ghost'}" data-a="toggleRegPlain" title="Näytä selkokielinen tiivistelmä">
               ${ic('sparkles', 13)}
-              <span>Selkokielinen tiivistelmä (Plain English)</span>
+              <span>Selkokieli</span>
             </button>
             <button class="btn btn-sm btn-ghost" data-a="toggleRegLang" title="Vaihda kieltä">
               ${ic('languages', 13)}
-              <span>Kieli: <b>${lang === 'en' ? 'English (Käännös)' : 'Alkuperäisteksti (FI/SV)'}</b></span>
+              <span>${lang === 'en' ? 'English (Käännös)' : 'Alkuperäinen'}</span>
             </button>
             <span class="sp"></span>
             ${
@@ -308,73 +297,6 @@ function renderRegulationsReader(u) {
       </main>
 
     </div>
-  </div>`;
-}
-
-function renderLawPicker(curAct, u) {
-  const pickerQ = (u.regPickerQ || '').toLowerCase().trim();
-  const isOpen = !!u.regPickerOpen;
-  const allActs = allRegulations();
-  const filteredActs = allActs.filter(r => {
-    if (!pickerQ) return true;
-    return (
-      (r.code && r.code.toLowerCase().includes(pickerQ)) ||
-      (r.title && r.title.toLowerCase().includes(pickerQ)) ||
-      (r.shortTitle && r.shortTitle.toLowerCase().includes(pickerQ)) ||
-      (r.authority && r.authority.toLowerCase().includes(pickerQ)) ||
-      (r.jurisdiction && r.jurisdiction.toLowerCase().includes(pickerQ)) ||
-      (r.tags && r.tags.some(t => t.toLowerCase().includes(pickerQ)))
-    );
-  });
-
-  return `<div class="finlex-picker-box">
-    <button class="finlex-picker-trigger" data-a="toggleRegPicker" title="Vaihda säädöstä">
-      <span style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis">
-        ${ic('book-open', 14)}
-        <span class="trunc"><b>${esc(curAct.shortTitle || curAct.code)}</b> <span class="mono faint">(${esc(curAct.code)})</span></span>
-      </span>
-      ${ic(isOpen ? 'chevron-up' : 'chevron-down', 13)}
-    </button>
-
-    ${
-      isOpen
-        ? `
-      <div class="finlex-picker-menu">
-        <div class="inwrap" style="width:100%">
-          ${ic('search', 13)}
-          <input class="input search-sm" id="finlex-picker-search" data-in="regPickerQ" placeholder="Etsi säädöstä (koodi, nimi, aihe)..." value="${esc(u.regPickerQ || '')}" autofocus>
-          ${u.regPickerQ ? `<button class="pillbtn" data-a="clearRegPickerQ" style="padding:1px 4px">${ic('x', 11)}</button>` : ''}
-        </div>
-        <div class="finlex-picker-list">
-          ${
-            filteredActs.length
-              ? filteredActs
-                  .map(
-                    r => `
-            <button class="finlex-picker-item ${r.id === curAct.id ? 'on' : ''}" data-a="selectReg" data-id="${r.id}">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
-                <span style="font-weight:600;font-size:12.5px">${esc(r.shortTitle || r.title)}</span>
-                <span class="mono faint" style="font-size:11px">${esc(r.code)}</span>
-              </div>
-              <div style="font-size:11px;color:var(--text-3);display:flex;gap:6px;align-items:center">
-                <span>${esc(r.jurisdiction)}</span>
-                <span>·</span>
-                <span>${esc(r.authority)}</span>
-              </div>
-            </button>
-          `,
-                  )
-                  .join('')
-              : `<div style="padding:12px;text-align:center;color:var(--text-3);font-size:12px">Ei hakutuloksia</div>`
-          }
-        </div>
-        <button class="btn btn-sm btn-ghost" data-a="setRegView" data-view="library" style="width:100%;justify-content:center;margin-top:4px;border-top:1px solid var(--border);border-radius:0 0 4px 4px;padding-top:6px">
-          ${ic('layout-grid', 13)} <span>Avaa lakikirjasto</span>
-        </button>
-      </div>
-    `
-        : ''
-    }
   </div>`;
 }
 
@@ -500,7 +422,7 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
           ? s.crossRefs
               .map(
                 cr => `
-            <button class="finlex-ref-chip" data-a="selectReg" data-id="${cr.regId}" title="Siirry säädökseen">
+            <button class="finlex-ref-chip" data-a="openRegInReader" data-id="${cr.regId}" title="Siirry säädökseen">
               ${ic('link-2', 11)}Viite: ${esc(cr.label)}
             </button>
           `,
