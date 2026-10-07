@@ -96,23 +96,23 @@ export function renderSidebar() {
     </div>
     <div class="side-scroll" data-keep="side">
       ${u.collapsed ? `<button class="sitem" data-a="toggleSide" data-tip="Expand sidebar" data-tip-pos="right" aria-label="Expand sidebar">${ic('panel-left', 16)}</button>` : ''}
-      ${sItem('home', 'Home', 'house')}
-      ${sItem('inbox', 'Inbox', 'inbox', { ct: unreadInbox || '', dot: true })}
-      ${sItem('mytasks', 'My Tasks', 'circle-check', { ct: myOpen || '' })}
-      ${sItem('favorites', 'Favorites', 'star')}
-      ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
+      ${sItem('home', 'Cockpit', 'house')}
+      ${sItem('inbox', 'Regulatory Feed', 'inbox', { ct: unreadInbox || '', dot: true })}
+      ${sItem('mytasks', 'My Obligations', 'circle-check', { ct: myOpen || '' })}
+      ${sItem('favorites', 'Pinned Items', 'star')}
+      ${sItem('notifications', 'Supervisory Alerts', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">
-        <div class="sgroup-h">Workspace</div>
-        ${sItem('overview', 'Overview', 'layout-dashboard')}
-        ${sItem('projects', 'Projects', 'folder-kanban')}
-        ${sItem('tasks', 'Tasks', 'list-checks')}
-        ${sItem('calendar', 'Calendar', 'calendar')}
-        ${sItem('timeline', 'Timeline', 'chart-gantt')}
-        ${sItem('members', 'Members', 'users')}
-        ${sItem('activity', 'Activity', 'activity')}
+        <div class="sgroup-h">Compliance Operations</div>
+        ${sItem('overview', 'Compliance Health', 'layout-dashboard')}
+        ${sItem('projects', 'Rulebooks & Directives', 'folder-kanban')}
+        ${sItem('tasks', 'Obligations Inventory', 'list-checks')}
+        ${sItem('calendar', 'Supervisory Calendar', 'calendar')}
+        ${sItem('timeline', 'Legislative Roadmap', 'chart-gantt')}
+        ${sItem('members', 'Governance & Officers', 'users')}
+        ${sItem('activity', 'Supervisory Audit Trail', 'activity')}
       </div>
       <div class="sgroup" id="side-projects">
-        <div class="sgroup-h"><span>Projects</span><span class="sp"></span><button class="ibtn ibtn-xs" data-a="newProject" data-tip="New project  P" aria-label="New project">${ic('plus', 14)}</button></div>
+        <div class="sgroup-h"><span>Monitored Rulebooks</span><span class="sp"></span><button class="ibtn ibtn-xs" data-a="newProject" data-tip="New rulebook  P" aria-label="New rulebook">${ic('plus', 14)}</button></div>
         ${projs
           .map(p => {
             const open = !!u.expanded[p.id];
@@ -124,7 +124,7 @@ export function renderSidebar() {
               ${p.fav ? `<span class="fav">${ic('star', 11)}</span>` : ''}
               ${p.private ? `<span class="faint" style="margin-left:4px">${ic('lock', 11)}</span>` : ''}
               <span class="sdot" style="background:${PSTAT[p.status].c}" title="${PSTAT[p.status].name}"></span>
-              <span class="hov"><span class="ibtn ibtn-xs" data-a="ctxBtn" data-ctx="project" data-id="${p.id}" aria-label="Project options">${ic('ellipsis', 14)}</span><span class="ibtn ibtn-xs" data-a="toggleExpand" data-id="${p.id}" aria-label="Expand">${ic('chevron-right', 13, 'chev ' + (open ? 'open' : ''))}</span></span>
+              <span class="hov"><span class="ibtn ibtn-xs" data-a="ctxBtn" data-ctx="project" data-id="${p.id}" aria-label="Rulebook options">${ic('ellipsis', 14)}</span><span class="ibtn ibtn-xs" data-a="toggleExpand" data-id="${p.id}" aria-label="Expand">${ic('chevron-right', 13, 'chev ' + (open ? 'open' : ''))}</span></span>
             </div>
             <div class="sub ${open && !u.collapsed ? 'open' : ''}">
               ${[
@@ -142,17 +142,17 @@ export function renderSidebar() {
           </div>`;
           })
           .join('')}
-        ${sItem('archive', 'Archive', 'archive', { ct: D().tasks.filter(t => t.archived).length + D().projects.filter(p => p.archived).length || '' })}
+        ${sItem('archive', 'Regulatory Archive', 'archive', { ct: D().tasks.filter(t => t.archived).length + D().projects.filter(p => p.archived).length || '' })}
       </div>
       <div class="sgroup">
-        <div class="sgroup-h"><span>Teams</span><span class="sp"></span><button class="ibtn ibtn-xs" data-a="newTeam" data-tip="New team" aria-label="New team">${ic('plus', 14)}</button></div>
+        <div class="sgroup-h"><span>Lines of Defense</span><span class="sp"></span><button class="ibtn ibtn-xs" data-a="newTeam" data-tip="New defense line" aria-label="New defense line">${ic('plus', 14)}</button></div>
         ${teamsList()
           .map(t => sItem('team', t.name, t.icon, { id: t.id }))
           .join('')}
       </div>
     </div>
     <div class="side-bot">
-      <button class="sitem" data-a="pop" data-pop="help" ${u.collapsed ? 'data-tip="Help" data-tip-pos="right"' : ''}>${ic('circle-help', 16)}<span>Help & resources</span></button>
+      <button class="sitem" data-a="pop" data-pop="help" ${u.collapsed ? 'data-tip="Help" data-tip-pos="right"' : ''}>${ic('circle-help', 16)}<span>Regulatory Guidance</span></button>
       ${sItem('settings', 'Settings', 'settings')}
       <button class="sitem" data-a="pop" data-pop="user" style="height:36px" ${u.collapsed ? 'data-tip="Profile" data-tip-pos="right"' : ''}>${av(d.me, 'presence', false)}<span class="trunc" style="color:var(--text);font-weight:500">${esc(S.prefs.name)}</span><span class="ct">${ic('chevrons-up-down', 13)}</span></button>
     </div>
@@ -166,7 +166,7 @@ export function crumbs() {
   const c = (label, act = '', cur = false, icon = '') => `<button class="${cur ? 'cur' : ''}" ${act}>${icon}${esc(label)}</button>`;
   if (r === 'project') {
     const p = proj(u.params.id);
-    out.push(c('Projects', 'data-a="go" data-r="projects"'));
+    out.push(c('Rulebooks', 'data-a="go" data-r="projects"'));
     if (p)
       out.push(
         c(
@@ -177,11 +177,11 @@ export function crumbs() {
         ),
       );
   } else if (r === 'member') {
-    out.push(c('Members', 'data-a="go" data-r="members"'));
-    out.push(c(mem(u.params.id)?.name || 'Member', '', true));
+    out.push(c('Governance', 'data-a="go" data-r="members"'));
+    out.push(c(mem(u.params.id)?.name || 'Officer', '', true));
   } else if (r === 'team') {
-    out.push(c('Teams', 'data-a="go" data-r="teams"'));
-    out.push(c(team(u.params.id)?.name || 'Team', '', true));
+    out.push(c('Lines of Defense', 'data-a="go" data-r="teams"'));
+    out.push(c(team(u.params.id)?.name || 'Defense Line', '', true));
   } else if (r === 'settings') {
     out.push(c('Settings', '', true));
   } else out.push(c(ROUTE_NAMES[r] || 'Not found', '', true));

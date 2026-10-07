@@ -3,7 +3,7 @@ import { TODAY, diffD, iso, parse, uid } from './utils.js';
 import { PCOLORS, TEAMS_SEED } from './constants.js';
 import { seed } from '../data/seed.js';
 
-export const STORE_KEY = 'gr8r.v2';
+export const STORE_KEY = 'digia.regtech.v1';
 export const DEFAULT_PREFS = {
   theme: 'system',
   accent: 'indigo',
@@ -11,13 +11,13 @@ export const DEFAULT_PREFS = {
   density: 'comfortable',
   weekStart: 1,
   dateFmt: 'MMM d',
-  lang: 'English (US)',
-  tz: '(GMT-07:00) Pacific Time',
+  lang: 'English (Nordic / US)',
+  tz: 'Europe/Helsinki',
   motion: 'system',
   home: 'home',
   openTasks: 'drawer',
-  name: 'Tanjim Islam',
-  title: 'Head of Product',
+  name: 'Workspace Owner',
+  title: 'Lead Solutions Architect · RegTech',
 };
 export function load() {
   try {

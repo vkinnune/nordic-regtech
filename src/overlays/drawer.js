@@ -4,7 +4,7 @@
 import { MOD, TODAY, ago, diffD, esc, fmtDate, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { D, S, commentsOf, isOver, mem, pColor, proj, task } from '../core/store.js';
-import { FT, av, filePrev, fileType, fmtComment, lbl, progBar } from '../ui/helpers.js';
+import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar } from '../ui/helpers.js';
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
 import { modalHtml } from './modals.js';
@@ -69,12 +69,14 @@ export function drawerHtml(t) {
         ${prop('user', 'Assignee', cellAssignee(t))}
         ${prop('calendar', 'Due date', cellDue(t))}
         ${prop('calendar-arrow-up', 'Start date', `<button class="pillbtn ${t.start ? '' : 'empty'}" data-a="pop" data-pop="date" data-field="start" data-id="${t.id}">${ic('calendar', 13)}${t.start ? fmtDate(t.start) : 'Set date'}</button>`)}
-        ${prop('folder', 'Project', cellProject(t))}
+        ${prop('folder', 'Rulebook', cellProject(t))}
         ${prop('tag', 'Labels', `<button class="pillbtn ${t.labels.length ? '' : 'empty'}" data-a="pop" data-pop="labels" data-id="${t.id}" style="flex-wrap:wrap;height:auto;min-height:26px;padding:3px 7px">${t.labels.length ? t.labels.map(lbl).join('') : ic('tag', 13) + 'Add labels'}</button>`)}
         ${prop('repeat', 'Repeat', `<button class="pillbtn ${t.recur ? '' : 'empty'}" data-a="pop" data-pop="recur" data-id="${t.id}">${ic('repeat', 13)}${t.recur || 'Does not repeat'}</button>`)}
-        ${prop('timer', 'Estimate', `<button class="pillbtn ${t.estimate ? '' : 'empty'}" data-a="pop" data-pop="estimate" data-id="${t.id}">${ic('timer', 13)}${t.estimate ? esc(t.estimate) : 'Add estimate'}</button>`)}
-        ${prop('git-branch', 'Blocked by', `<button class="pillbtn ${t.deps.length ? '' : 'empty'}" data-a="pop" data-pop="deps" data-id="${t.id}" style="height:auto;min-height:26px;flex-wrap:wrap">${t.deps.length ? t.deps.map(d => (task(d) ? `<span class="depchip mono" style="font-size:11px;padding:1px 5px;border-radius:4px;background:var(--surface-3)">${task(d).key}</span><span class="trunc" style="max-width:160px">${esc(task(d).title)}</span>` : '')).join('') : ic('git-branch', 13) + 'None'}</button>`)}
+        ${prop('shield-alert', 'Supervisory Impact', `<button class="pillbtn ${t.estimate ? '' : 'empty'}" data-a="pop" data-pop="estimate" data-id="${t.id}">${ic('shield-alert', 13)}${t.estimate ? esc(t.estimate) : 'Set impact tier'}</button>`)}
+        ${prop('git-branch', 'Legal Predecessor', `<button class="pillbtn ${t.deps.length ? '' : 'empty'}" data-a="pop" data-pop="deps" data-id="${t.id}" style="height:auto;min-height:26px;flex-wrap:wrap">${t.deps.length ? t.deps.map(d => (task(d) ? `<span class="depchip mono" style="font-size:11px;padding:1px 5px;border-radius:4px;background:var(--surface-3)">${task(d).key}</span><span class="trunc" style="max-width:160px">${esc(task(d).title)}</span>` : '')).join('') : ic('git-branch', 13) + 'None'}</button>`)}
       </dl>
+
+      ${t.diff ? diffViewerHtml(t.diff) : ''}
 
       <div class="dsec"><div class="dsec-h"><h3 id="d-desc-l">Description</h3><div class="rte-tb" role="toolbar" aria-label="Formatting" aria-controls="d-desc">
           ${[
@@ -142,4 +144,34 @@ export function commentHtml(c) {
       .join(
         '',
       )}<button class="react" data-a="pop" data-pop="emoji" data-id="${c.id}" aria-label="Add reaction" style="color:var(--text-3)">${ic('smile-plus', 13)}</button></div></div></div>`;
+}
+
+export function diffViewerHtml(diff) {
+  if (!diff) return '';
+  return `<div class="dsec diff-sec">
+    <div class="dsec-h">
+      <h3 style="display:flex;align-items:center;gap:6px">${ic('git-compare', 14)}Statutory Redline (Författningsdiff)</h3>
+      ${diffBadge(diff)}
+      <span class="sp"></span>
+      <span class="diff-counts">
+        ${diff.additions_count ? `<span class="diff-add-cnt">+${diff.additions_count} adds</span>` : ''}
+        ${diff.deletions_count ? `<span class="diff-del-cnt">-${diff.deletions_count} dels</span>` : ''}
+      </span>
+    </div>
+    <div class="diff-box">
+      <div class="diff-head">
+        <span class="diff-ident mono">${esc(diff.identifier)}</span>
+        <span class="faint">·</span>
+        <span class="diff-title trunc">${esc(diff.heading)}</span>
+        <span class="sp"></span>
+        <span class="mono faint" style="font-size:11px">${esc(diff.amendingAct || '')}</span>
+      </div>
+      <div class="diff-body">${(diff.tokens || []).map(diffTokenHtml).join('')}</div>
+      <div class="diff-foot">
+        <span class="row" style="gap:4px">${ic('calendar', 12)}<span>In force: <b>${esc(diff.inForce || 'Pending')}</b></span></span>
+        <span class="sp"></span>
+        <span class="row" style="gap:4px">${ic('landmark', 12)}<span>Authority: <b>${esc(diff.authority || 'Finansinspektionen')}</b></span></span>
+      </div>
+    </div>
+  </div>`;
 }

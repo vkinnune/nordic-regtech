@@ -1,10 +1,12 @@
-# Gr8r Studio
+# Digia RegTech Studio · Nordic Compliance & Horizon Scanning
 
-A calm, structured project management workspace: home dashboard, inbox, my tasks, projects with
-board / list / table / calendar / timeline / files views, members, teams, activity and settings.
+A calm, structured regulatory change monitoring and compliance obligations workspace:
+executive compliance cockpit, regulatory horizon feed, obligations inventory, rulebooks with
+board / list / table / calendar / timeline / files views, governance officers, lines of defense,
+statutory redline diff viewers, and audit trail.
 
-Built with plain JavaScript ES modules and CSS, bundled by [Vite](https://vite.dev). There is no
-UI framework and no runtime dependency.
+Built with plain JavaScript ES modules and CSS, bundled by [Vite](https://vite.dev). Zero
+runtime UI framework dependencies. Ready for plug-and-play REST / PostgreSQL integration.
 
 
 ## Getting started

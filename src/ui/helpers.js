@@ -110,3 +110,15 @@ export function filePrev(f) {
   const ext = (f.name.split('.').pop() || '').slice(0, 4);
   return `<div class="fprev">${art}<span class="ext" style="--c:${t.c}">${esc(ext)}</span></div>`;
 }
+
+export function diffBadge(diff) {
+  if (!diff) return '';
+  const st = (diff.status || 'modified').toLowerCase();
+  return `<span class="diff-badge diff-${st}">${esc(diff.status)}</span>`;
+}
+
+export function diffTokenHtml(tk) {
+  if (tk.type === 'insert') return `<mark class="diff-token-ins">${esc(tk.text)}</mark>`;
+  if (tk.type === 'delete') return `<del class="diff-token-del">${esc(tk.text)}</del>`;
+  return `<span class="diff-token-eq">${esc(tk.text)}</span>`;
+}

@@ -1,37 +1,37 @@
-/* ---------- vocab ---------- */
+/* ---------- vocab: Digia RegTech & Nordic Financial Compliance ---------- */
 export const STATUSES = [
-  { id: 'backlog', name: 'Backlog' },
-  { id: 'todo', name: 'To Do' },
-  { id: 'progress', name: 'In Progress' },
-  { id: 'review', name: 'Review' },
-  { id: 'done', name: 'Done' },
+  { id: 'backlog', name: 'Horizon Alert' },
+  { id: 'todo', name: 'Triage & RIA' },
+  { id: 'progress', name: 'Policy & Redline' },
+  { id: 'review', name: 'Legal & 2nd LoD' },
+  { id: 'done', name: 'Audit Ready' },
 ];
 export const ST = Object.fromEntries(STATUSES.map(s => [s.id, s]));
 export const PRIOS = [
-  { id: 'urgent', name: 'Urgent', w: 4 },
-  { id: 'high', name: 'High', w: 3 },
-  { id: 'medium', name: 'Medium', w: 2 },
-  { id: 'low', name: 'Low', w: 1 },
-  { id: 'none', name: 'No priority', w: 0 },
+  { id: 'urgent', name: 'Tier 1 · Critical Sanction', w: 4 },
+  { id: 'high', name: 'Tier 2 · High Risk / Capital', w: 3 },
+  { id: 'medium', name: 'Tier 3 · Reporting & Ops', w: 2 },
+  { id: 'low', name: 'Tier 4 · Informational', w: 1 },
+  { id: 'none', name: 'Unrated', w: 0 },
 ];
 export const PR = Object.fromEntries(PRIOS.map(p => [p.id, p]));
 export const LABELS = [
-  { id: 'design', name: 'Design', c: 'var(--violet)' },
-  { id: 'frontend', name: 'Frontend', c: 'var(--blue)' },
-  { id: 'backend', name: 'Backend', c: 'var(--teal)' },
-  { id: 'research', name: 'Research', c: 'var(--amber)' },
-  { id: 'content', name: 'Content', c: 'var(--rose)' },
-  { id: 'bug', name: 'Bug', c: 'var(--red)' },
-  { id: 'qa', name: 'QA', c: 'var(--green)' },
-  { id: 'growth', name: 'Growth', c: 'var(--orange)' },
+  { id: 'dora', name: 'DORA · ICT Risk', c: 'var(--blue)' },
+  { id: 'aml', name: 'AML / CFT & Sanctions', c: 'var(--red)' },
+  { id: 'funds', name: 'Fund Ops & AIFM', c: 'var(--violet)' },
+  { id: 'risk', name: 'Risk & Liquidity', c: 'var(--amber)' },
+  { id: 'mifid', name: 'MiFID II & Conduct', c: 'var(--teal)' },
+  { id: 'esg', name: 'SFDR & Green Taxonomy', c: 'var(--green)' },
+  { id: 'fi', name: 'Finansinspektionen (FI)', c: 'var(--orange)' },
+  { id: 'fiva', name: 'FIN-FSA (Fiva)', c: 'var(--rose)' },
 ];
 export const LB = Object.fromEntries(LABELS.map(l => [l.id, l]));
 export const PSTAT = {
-  planning: { name: 'Planning', c: 'var(--gray)' },
-  active: { name: 'In Progress', c: 'var(--blue)' },
-  risk: { name: 'At Risk', c: 'var(--red)' },
-  hold: { name: 'On Hold', c: 'var(--amber)' },
-  complete: { name: 'Completed', c: 'var(--green)' },
+  planning: { name: 'Consultation / Draft', c: 'var(--gray)' },
+  active: { name: 'In Force / Monitoring', c: 'var(--blue)' },
+  risk: { name: 'Audit Scrutiny', c: 'var(--red)' },
+  hold: { name: 'Legislative Delay', c: 'var(--amber)' },
+  complete: { name: 'Transposed & Audited', c: 'var(--green)' },
 };
 export const PCOLORS = {
   indigo: '#5A67D8',
@@ -44,27 +44,58 @@ export const PCOLORS = {
   slate: '#6B7280',
 };
 export const PICONS = [
+  'scale',
+  'landmark',
+  'shield-check',
+  'book-open',
+  'server',
+  'briefcase',
+  'lock',
+  'leaf',
+  'file-text',
   'globe',
-  'smartphone',
-  'megaphone',
-  'rocket',
   'component',
   'building-2',
-  'layout-grid',
-  'palette',
-  'code',
-  'briefcase',
   'target',
   'layers',
-  'zap',
-  'heart',
   'folder',
   'sparkles',
 ];
 export const ROLES = ['Owner', 'Admin', 'Member', 'Guest'];
 export const TEAMS_SEED = [
-  { id: 'design', name: 'Design', icon: 'palette', c: '#8662C9', desc: 'Product design, brand, and research' },
-  { id: 'eng', name: 'Engineering', icon: 'code', c: '#3B82C4', desc: 'Web, mobile, and platform engineering' },
-  { id: 'mkt', name: 'Marketing', icon: 'megaphone', c: '#C54B78', desc: 'Campaigns, content, and growth' },
-  { id: 'product', name: 'Product', icon: 'target', c: '#C48A1E', desc: 'Roadmap, planning, and QA' },
+  {
+    id: 'compliance',
+    name: 'Regulatory Affairs & 2nd LoD',
+    icon: 'shield-check',
+    c: '#8662C9',
+    desc: 'Regulatory horizon scanning, supervisory filings (FI/Fiva), and 2nd LoD oversight',
+  },
+  {
+    id: 'risk',
+    name: 'Operational Risk & Capital',
+    icon: 'triangle-alert',
+    c: '#C48A1E',
+    desc: 'Risk matrices, scenario testing, liquidity stress tests, and capital adequacy',
+  },
+  {
+    id: 'legal',
+    name: 'Legal Counsel & Transposition',
+    icon: 'scale',
+    c: '#3B82C4',
+    desc: 'Statutory interpretation, fund documentation, and supervisory liaison',
+  },
+  {
+    id: 'it_security',
+    name: 'ICT Resilience & DORA Ops',
+    icon: 'server',
+    c: '#23918A',
+    desc: 'Digital operational resilience, major incident reporting, and third-party risk',
+  },
+  {
+    id: 'funds',
+    name: 'Fund Operations & Trading',
+    icon: 'briefcase',
+    c: '#C54B78',
+    desc: 'Portfolio management, best execution, NAV calculations, and depositary oversight',
+  },
 ];

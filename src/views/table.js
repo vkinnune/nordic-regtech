@@ -6,17 +6,17 @@ import { av, dueHtml, empty, lbl, prPill, stIcon, stPill } from '../ui/helpers.j
 import { groupTasks, viewOf } from '../shell/view-engine.js';
 
 export const TCOLS = [
-  ['title', 'Task', 314],
-  ['status', 'Status', 132],
-  ['priority', 'Priority', 112],
-  ['assignee', 'Assignee', 156],
-  ['due', 'Due date', 112],
-  ['start', 'Start date', 112],
-  ['labels', 'Labels', 180],
+  ['title', 'Obligation / Section', 320],
+  ['status', 'Stage', 132],
+  ['priority', 'Criticality', 112],
+  ['assignee', 'Officer / Owner', 156],
+  ['due', 'In-Force / Due', 112],
+  ['start', 'Effective Start', 112],
+  ['labels', 'Domains / Authority', 180],
   ['deps', 'Dependencies', 150],
-  ['estimate', 'Estimate', 92],
-  ['created', 'Created', 112],
-  ['project', 'Project', 156],
+  ['estimate', 'Effort', 92],
+  ['created', 'Detected', 112],
+  ['project', 'Rulebook', 156],
 ];
 export function tcell(t, c) {
   const ed = S.ui.editCell && S.ui.editCell.id === t.id && S.ui.editCell.f === c;
@@ -24,7 +24,7 @@ export function tcell(t, c) {
     case 'title':
       return ed
         ? `<td class="sticky editing"><input id="edit-cell" data-blur="commitCell" data-key-enter="commitCell" data-id="${t.id}" data-f="title" value="${esc(t.title)}" aria-label="Title"></td>`
-        : `<td class="sticky cellbtn" data-a="openTask" data-id="${t.id}" data-dbl="editCell" data-f="title" title="Double-click to rename"><span class="row" style="gap:8px">${stIcon(t.status, 13)}<span class="trunc" style="font-weight:450">${esc(t.title)}</span><span class="mono faint" style="font-size:11px;margin-left:auto">${t.key}</span></span></td>`;
+        : `<td class="sticky cellbtn" data-a="openTask" data-id="${t.id}" data-dbl="editCell" data-f="title" title="Double-click to rename"><span class="row" style="gap:8px">${stIcon(t.status, 13)}<span class="trunc" style="font-weight:450">${esc(t.title)}</span>${t.diff ? `<span class="diff-badge diff-${t.diff.status.toLowerCase()}" style="font-size:10px;padding:1px 5px;margin-left:4px">${t.diff.status}</span>` : ''}<span class="mono faint" style="font-size:11px;margin-left:auto">${t.key}</span></span></td>`;
     case 'status':
       return `<td class="cellbtn" data-a="pop" data-pop="status" data-id="${t.id}"><span class="row" style="gap:6px">${stPill(t.status)}</span></td>`;
     case 'priority':
@@ -41,7 +41,7 @@ export function tcell(t, c) {
       return `<td class="cellbtn" data-a="pop" data-pop="deps" data-id="${t.id}">${t.deps.map(d => (task(d) ? `<span class="depchip" title="${esc(task(d).title)}">${task(d).key}</span>` : '')).join('') || '<span class="faint">—</span>'}</td>`;
     case 'estimate':
       return ed
-        ? `<td class="editing"><input id="edit-cell" data-blur="commitCell" data-key-enter="commitCell" data-id="${t.id}" data-f="estimate" value="${esc(t.estimate || '')}" placeholder="e.g. 2d" aria-label="Estimate"></td>`
+        ? `<td class="editing"><input id="edit-cell" data-blur="commitCell" data-key-enter="commitCell" data-id="${t.id}" data-f="estimate" value="${esc(t.estimate || '')}" placeholder="e.g. Tier 1 / Sanction" aria-label="Supervisory Impact"></td>`
         : `<td class="cellbtn num" data-dbl="editCell" data-id="${t.id}" data-f="estimate" data-a="editCell" title="Click to edit">${t.estimate ? esc(t.estimate) : '<span class="faint">—</span>'}</td>`;
     case 'created':
       return `<td class="num muted">${fmtDate(iso(new Date(t.created)))}</td>`;

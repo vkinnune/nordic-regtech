@@ -13,26 +13,26 @@ import { placePop } from '../overlays/popovers.js';
 import { renderAuth } from '../pages/auth.js';
 
 export const ROUTE_NAMES = {
-  home: 'Home',
-  inbox: 'Inbox',
-  mytasks: 'My Tasks',
-  favorites: 'Favorites',
-  notifications: 'Notifications',
+  home: 'Cockpit',
+  inbox: 'Regulatory Feed',
+  mytasks: 'My Obligations',
+  favorites: 'Pinned Items',
+  notifications: 'Supervisory Alerts',
   search: 'Search',
-  overview: 'Overview',
-  projects: 'Projects',
-  tasks: 'Tasks',
-  calendar: 'Calendar',
-  timeline: 'Timeline',
-  members: 'Members',
-  member: 'Member',
-  teams: 'Teams',
-  team: 'Team',
-  activity: 'Activity',
+  overview: 'Compliance Health',
+  projects: 'Statutes & Rulebooks',
+  tasks: 'Obligations Inventory',
+  calendar: 'Supervisory Calendar',
+  timeline: 'Legislative Roadmap',
+  members: 'Governance & Officers',
+  member: 'Officer',
+  teams: 'Lines of Defense',
+  team: 'Defense Line',
+  activity: 'Supervisory Audit Trail',
   settings: 'Settings',
   system: 'Design system',
   states: 'System states',
-  archive: 'Archive',
+  archive: 'Regulatory Archive',
 };
 export const ROUTE_ICONS = {
   home: 'house',
@@ -107,7 +107,7 @@ export function tryFocus(key) {
 }
 export function pageTitle() {
   const u = S.ui;
-  if (u.auth) return 'Gr8r Studio';
+  if (u.auth) return 'Digia RegTech Studio';
   let t = ROUTE_NAMES[u.route] || 'Not found';
   if (u.route === 'project' && proj(u.params.id)) t = `${(PTABS.find(x => x[0] === u.params.tab) || [0, 'Saved view'])[1]} · ${proj(u.params.id).name}`;
   if (u.route === 'member' && mem(u.params.id)) t = mem(u.params.id).name;

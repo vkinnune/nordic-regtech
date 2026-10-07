@@ -1,240 +1,224 @@
-/* ---------- seed data ---------- */
+/* ---------- seed data: Digia RegTech & Nordic Financial Compliance ---------- */
 import { dOff, minsAgo, uid } from '../core/utils.js';
 
 export function seed() {
   const members = [
     {
       id: 'm1',
-      name: 'Tanjim Islam',
-      email: 'hello@gr8rstudio.com',
+      name: 'Workspace Owner',
+      email: 'valtteri@digia.com',
       role: 'Owner',
-      team: 'product',
-      title: 'Head of Product',
-      c: '#5A67D8',
+      team: 'compliance',
+      title: 'Lead Solutions Architect · RegTech',
+      c: '#0F52BA',
       status: 'active',
       last: 0,
-      tz: 'San Francisco',
+      tz: 'Helsinki',
     },
     {
       id: 'm2',
-      name: 'Sarah Chen',
-      email: 'sarah@gr8rstudio.com',
+      name: 'Petter',
+      email: 'petter@digia.com',
       role: 'Admin',
-      team: 'design',
-      title: 'Design Lead',
-      c: '#C54B78',
+      team: 'compliance',
+      title: 'Client Partner · Financial Services',
+      c: '#3B82C4',
       status: 'active',
-      last: 4,
-      tz: 'New York',
+      last: 5,
+      tz: 'Helsinki',
     },
     {
       id: 'm3',
-      name: 'John Carter',
-      email: 'john@gr8rstudio.com',
-      role: 'Member',
-      team: 'eng',
-      title: 'Frontend Engineer',
-      c: '#3B82C4',
+      name: 'Compliance Officer',
+      email: 'ann-sofie.lindqvist@evli.com',
+      role: 'Admin',
+      team: 'compliance',
+      title: 'Chief Compliance Officer (2nd LoD)',
+      c: '#8662C9',
       status: 'active',
-      last: 22,
-      tz: 'London',
+      last: 12,
+      tz: 'Stockholm',
     },
     {
       id: 'm4',
-      name: 'Emma Wilson',
-      email: 'emma@gr8rstudio.com',
+      name: 'Risk Manager',
+      email: 'henrik.borgstrom@unitedbankers.fi',
       role: 'Member',
-      team: 'design',
-      title: 'Product Designer',
-      c: '#23918A',
+      team: 'risk',
+      title: 'Head of Operational Risk & DORA Lead',
+      c: '#C48A1E',
       status: 'active',
-      last: 9,
-      tz: 'Berlin',
+      last: 28,
+      tz: 'Stockholm',
     },
     {
       id: 'm5',
-      name: 'Priya Patel',
-      email: 'priya@gr8rstudio.com',
+      name: 'AML Officer',
+      email: 'matti.korhonen@digia.com',
       role: 'Member',
-      team: 'mkt',
-      title: 'Content Strategist',
-      c: '#C48A1E',
+      team: 'compliance',
+      title: 'MLRO & Anti-Financial Crime Lead',
+      c: '#C54B78',
       status: 'active',
-      last: 95,
-      tz: 'Toronto',
+      last: 45,
+      tz: 'Helsinki',
     },
     {
       id: 'm6',
-      name: 'Marcus Lee',
-      email: 'marcus@gr8rstudio.com',
+      name: 'Legal Counsel',
+      email: 'sofia.nygard@digia.com',
       role: 'Member',
-      team: 'eng',
-      title: 'Backend Engineer',
-      c: '#8662C9',
+      team: 'legal',
+      title: 'Senior Regulatory Counsel',
+      c: '#23918A',
       status: 'active',
-      last: 240,
-      tz: 'Singapore',
+      last: 120,
+      tz: 'Stockholm',
     },
     {
       id: 'm7',
-      name: 'Lena Fischer',
-      email: 'lena@gr8rstudio.com',
-      role: 'Admin',
-      team: 'product',
-      title: 'QA Lead',
+      name: 'Fund Operations',
+      email: 'johan.eklund@evli.com',
+      role: 'Member',
+      team: 'funds',
+      title: 'Head of Fund Operations & Custody',
       c: '#3D8E5F',
       status: 'active',
-      last: 1500,
-      tz: 'Munich',
+      last: 320,
+      tz: 'Stockholm',
     },
     {
       id: 'm8',
-      name: 'Diego Alvarez',
-      email: 'diego@freelance.io',
-      role: 'Guest',
-      team: 'mkt',
-      title: 'Freelance Copywriter',
-      c: '#C0612B',
-      status: 'invited',
-      last: null,
-      tz: 'Madrid',
+      name: 'Security Engineer',
+      email: 'tuomas.lehtonen@digia.com',
+      role: 'Member',
+      team: 'it_security',
+      title: 'Lead ICT Resilience Engineer',
+      c: '#6B7280',
+      status: 'active',
+      last: 840,
+      tz: 'Helsinki',
     },
   ];
+
   const projects = [
     {
       id: 'p1',
-      key: 'WEB',
-      name: 'Website Redesign',
-      icon: 'globe',
+      key: 'SFS46',
+      name: 'SFS 2004:46 · Värdepappersfonder',
+      icon: 'book-open',
       color: 'indigo',
       status: 'active',
-      team: 'design',
-      lead: 'm2',
-      due: dOff(24),
-      start: dOff(-30),
+      team: 'legal',
+      lead: 'm6',
+      due: dOff(18),
+      start: dOff(-60),
       fav: true,
-      members: ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7'],
-      desc: 'Rebuild gr8rstudio.com with a clearer information architecture, a responsive component library, and a faster CMS-driven blog.',
+      members: ['m1', 'm2', 'm3', 'm4', 'm6', 'm7'],
+      desc: 'Swedish statutory framework for UCITS funds and fund management companies. Tracking legislative amendments via Riksdagen SFS 2026:916 and Finansinspektionen FFFS circulars.',
       milestones: [
-        { name: 'Wireframes signed off', date: dOff(2) },
-        { name: 'Dev handoff', date: dOff(14) },
-        { name: 'Public launch', date: dOff(24) },
+        { name: 'SFS 2026:916 In-force Date', date: dOff(14) },
+        { name: 'FI Quarterly Fund Return Filing', date: dOff(45) },
       ],
-      last: 12,
+      last: 8,
     },
     {
       id: 'p2',
-      key: 'MOB',
-      name: 'Mobile App',
-      icon: 'smartphone',
+      key: 'DORA',
+      name: 'Regulation (EU) 2022/2554 · DORA',
+      icon: 'shield-check',
       color: 'blue',
-      status: 'active',
-      team: 'eng',
-      lead: 'm3',
-      due: dOff(52),
-      start: dOff(-45),
+      status: 'risk',
+      team: 'it_security',
+      lead: 'm4',
+      due: dOff(35),
+      start: dOff(-90),
       fav: true,
-      members: ['m1', 'm3', 'm4', 'm6', 'm7'],
-      desc: 'Native iOS and Android client for field teams with offline sync, push notifications, and biometric sign-in.',
+      members: ['m1', 'm3', 'm4', 'm6', 'm8'],
+      desc: 'Digital Operational Resilience Act compliance program across Nordic entities. Covers ICT risk frameworks, major incident reporting, register of information for critical ICT third parties, and TIBER-SE digital resilience testing.',
       milestones: [
-        { name: 'Beta build', date: dOff(9) },
-        { name: 'App Store submission', date: dOff(45) },
+        { name: 'ICT Third-Party Register Freeze', date: dOff(5) },
+        { name: 'Board Resilience Attestation', date: dOff(20) },
+        { name: 'Supervisory Dry Run with FI/Fiva', date: dOff(48) },
       ],
-      last: 48,
+      last: 15,
     },
     {
       id: 'p3',
-      key: 'MKT',
-      name: 'Marketing Campaign',
-      icon: 'megaphone',
+      key: 'AML',
+      name: 'SFS 2017:630 · Penningtvättslagen',
+      icon: 'lock',
       color: 'rose',
-      status: 'planning',
-      team: 'mkt',
+      status: 'active',
+      team: 'compliance',
       lead: 'm5',
-      due: dOff(40),
-      start: dOff(-10),
-      fav: false,
-      members: ['m1', 'm4', 'm5', 'm7', 'm8'],
-      desc: 'Q4 awareness campaign across paid social, email, and a launch webinar targeting operations leads.',
+      due: dOff(28),
+      start: dOff(-40),
+      fav: true,
+      members: ['m1', 'm3', 'm5', 'm6', 'm7'],
+      desc: 'Swedish Act on Measures against Money Laundering and Terrorist Financing, aligned with FFFS 2017:11 and the new EU AMLR 2024/1624 package. KYC/CDD, transaction surveillance, and PEP screening.',
       milestones: [
-        { name: 'Creative lock', date: dOff(12) },
-        { name: 'Campaign live', date: dOff(21) },
+        { name: 'Annual General Risk Assessment (GRA)', date: dOff(8) },
+        { name: 'Sanctions Screening Architecture Audit', date: dOff(28) },
       ],
-      last: 130,
+      last: 42,
     },
     {
       id: 'p4',
-      key: 'LCH',
-      name: 'Product Launch',
-      icon: 'rocket',
+      key: 'AIFM',
+      name: 'FFFS 2013:9 · AIFM-Föreskrifter',
+      icon: 'briefcase',
       color: 'amber',
-      status: 'risk',
-      team: 'product',
-      lead: 'm1',
-      due: dOff(12),
-      start: dOff(-21),
+      status: 'active',
+      team: 'funds',
+      lead: 'm7',
+      due: dOff(45),
+      start: dOff(-30),
       fav: false,
-      members: ['m1', 'm2', 'm3', 'm5', 'm7'],
-      desc: 'Coordinate the Workflows 2.0 launch: pricing, docs, press, and sales enablement across teams.',
+      members: ['m1', 'm3', 'm6', 'm7'],
+      desc: 'Finansinspektionen regulations governing Alternative Investment Fund Managers (AIFMs), depositary liability, liquidity management tools (LMTs), and illiquid valuation functions.',
       milestones: [
-        { name: 'Go / no-go', date: dOff(11) },
-        { name: 'Launch day', date: dOff(12) },
+        { name: 'Annex IV Supervisory Filing Q3', date: dOff(10) },
+        { name: 'Depositary Cash Monitoring Audit', date: dOff(32) },
       ],
-      last: 35,
+      last: 90,
     },
     {
       id: 'p5',
-      key: 'DS',
-      name: 'Design System',
-      icon: 'component',
+      key: 'MIFID',
+      name: 'Sijoituspalvelulaki 747/2012 · MiFID II',
+      icon: 'landmark',
       color: 'violet',
-      status: 'active',
-      team: 'design',
-      lead: 'm2',
-      due: dOff(70),
-      start: dOff(-60),
+      status: 'planning',
+      team: 'compliance',
+      lead: 'm3',
+      due: dOff(60),
+      start: dOff(-15),
       fav: false,
-      members: ['m2', 'm3', 'm4'],
-      desc: 'Shared tokens, components, and documentation used by web and mobile teams.',
-      milestones: [{ name: 'v2 tokens', date: dOff(3) }],
-      last: 300,
+      members: ['m1', 'm2', 'm3', 'm6', 'm7'],
+      desc: 'Nordic securities markets and investment services conduct. Best execution, client classification, suitability assessments, and annual RTS 28 disclosure packages.',
+      milestones: [{ name: 'Annual Best Execution RTS 28 Publication', date: dOff(25) }],
+      last: 180,
     },
     {
       id: 'p6',
-      key: 'CP',
-      name: 'Customer Portal',
-      icon: 'building-2',
-      color: 'teal',
-      status: 'hold',
-      team: 'eng',
-      lead: 'm6',
-      due: dOff(90),
-      start: dOff(-5),
-      fav: false,
-      members: ['m6', 'm7'],
-      private: true,
-      desc: 'Self-serve billing and support portal for enterprise customers. Restricted during contract review.',
-      milestones: [],
-      last: 2880,
-    },
-    {
-      id: 'p7',
-      key: 'MW',
-      name: 'Marketing Website',
-      icon: 'layout-grid',
+      key: 'ESG',
+      name: 'SFDR 2019/2088 & Green Taxonomy',
+      icon: 'leaf',
       color: 'green',
-      status: 'complete',
-      team: 'mkt',
-      lead: 'm5',
-      due: dOff(-18),
-      start: dOff(-80),
+      status: 'active',
+      team: 'legal',
+      lead: 'm6',
+      due: dOff(75),
+      start: dOff(-50),
       fav: false,
-      members: ['m1', 'm3', 'm5'],
-      desc: 'Launch site for the spring release. Shipped and handed to the web team for maintenance.',
-      milestones: [],
-      last: 26000,
+      members: ['m1', 'm6', 'm7'],
+      desc: 'Sustainable Finance Disclosure Regulation and EU Taxonomy Regulation (2020/852). Pre-contractual information, website disclosures, and entity-level Principal Adverse Impacts (PAI) reporting.',
+      milestones: [{ name: 'Entity-level PAI Statement Validation', date: dOff(60) }],
+      last: 240,
     },
   ];
+
   let n = 0;
   const T = [];
   const t = (p, title, status, a, prio, due, labels = [], x = {}) => {
@@ -244,265 +228,440 @@ export function seed() {
       Object.assign(
         {
           id: 't' + ++n,
-          key: proj.key + '-' + (100 + count * 3),
+          key: x.key || proj.key + '-' + (100 + count * 5),
           project: p,
           title,
           status,
           assignee: a,
           priority: prio,
           due: due == null ? null : dOff(due),
-          start: due == null ? null : dOff(due - (x.len || 4)),
+          start: due == null ? null : dOff(due - (x.len || 5)),
           labels,
           subtasks: [],
           attachments: [],
           deps: [],
           desc: '',
           estimate: x.est || null,
-          created: minsAgo(60 * 24 * (x.age || 12)),
-          updated: minsAgo(60 * (x.upd || 30)),
+          created: minsAgo(60 * 24 * (x.age || 14)),
+          updated: minsAgo(60 * (x.upd || 25)),
           order: n,
           fav: false,
           recur: null,
+          diff: null,
         },
         x,
       ),
     );
   };
-  // Website Redesign
-  t('p1', 'Audit existing navigation', 'done', 'm2', 'high', -12, ['research'], { est: '2d', len: 5, age: 28 });
-  t('p1', 'Summarize stakeholder interviews', 'done', 'm1', 'medium', -9, ['research'], { est: '1d', age: 26 });
-  t('p1', 'Create homepage wireframes', 'review', 'm2', 'high', 1, ['design'], {
-    est: '3d',
-    len: 7,
+
+  /* ---- SFS 2004:46 Tasks & Statutory Diffs ---- */
+  t('p1', 'SFS 2026:916 § 1 kap. 100 § · AI & Algorithmic Trading Supervision', 'review', 'm6', 'urgent', 2, ['fi', 'funds', 'risk'], {
+    key: 'SFS 1:100',
     fav: true,
-    desc: '<p>Low-fidelity wireframes for the new homepage covering <b>desktop, tablet, and mobile</b> breakpoints.</p><ul><li>Hero with product value proposition</li><li>Customer logos and proof points</li><li>Feature overview linking to product pages</li></ul><p>Reference the navigation audit for IA decisions.</p>',
+    est: 'Tier 1 Sanction',
+    len: 7,
+    age: 18,
+    upd: 3,
+    desc: '<p><b>Riksdagen legislative amendment SFS 2026:916</b> introduces a statutory requirement for Swedish fund management companies utilizing artificial intelligence or automated execution algorithms.</p><p>Requires real-time risk profile surveillance, continuous human-in-the-loop controls, and complete algorithmic decision reconstruction during Finansinspektionen audits.</p>',
+    diff: {
+      identifier: '1 kap. 100 §',
+      regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
+      amendingAct: 'SFS 2026:916',
+      heading: 'Tillsyn över artificiell intelligens och algoritmer',
+      status: 'ADDED',
+      additions_count: 30,
+      deletions_count: 0,
+      tokens: [
+        {
+          type: 'insert',
+          text: '100 § Ett fondbolag som använder artificiell intelligens eller helautomatiserade handelsalgoritmer vid förvaltningen av en värdepappersfond ska säkerställa att systemen är underkastade kontinuerlig mänsklig tillsyn, att fondens riskprofil övervakas i realtid, samt att samtliga förvaltnings- och allokeringsbeslut kan rekonstrueras i efterhand på begäran av Finansinspektionen.',
+        },
+      ],
+      authority: 'Finansinspektionen & Riksdagen',
+      inForce: '2026-11-01',
+    },
     subtasks: [
-      { id: 's1', title: 'Desktop layout', done: true },
-      { id: 's2', title: 'Tablet layout', done: true },
-      { id: 's3', title: 'Mobile layout', done: true },
-      { id: 's4', title: 'Annotate interactions', done: false },
+      { id: 's1', title: 'Draft algorithmic governance policy matching FI supervisory expectations', done: true },
+      { id: 's2', title: 'Establish pre-trade kill switch architecture for high-frequency execution', done: true },
+      { id: 's3', title: 'Implement automated audit reconstruction ledger for AI trading decisions', done: false },
+      { id: 's4', title: 'Submit 2nd LoD compliance opinion to the Risk Committee', done: false },
     ],
     attachments: [
-      { id: 'a1', name: 'homepage-wireframes-v3.fig', type: 'fig', size: '4.2 MB', by: 'm2', at: minsAgo(300) },
-      { id: 'a2', name: 'nav-audit-findings.pdf', type: 'pdf', size: '860 KB', by: 'm2', at: minsAgo(8000) },
+      { id: 'a1', name: 'SFS_2026_916_Amending_Act_Riksdagen.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180) },
+      { id: 'a2', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400) },
     ],
   });
-  t('p1', 'Finalize navigation', 'progress', 'm3', 'high', 0, ['design', 'frontend'], {
-    est: '2d',
-    len: 4,
+
+  t('p1', 'SFS 2026:916 § 1 kap. 1 § · DORA Scope Harmonization in Swedish Fund Law', 'progress', 'm1', 'high', 5, ['fi', 'dora', 'funds'], {
+    key: 'SFS 1:1',
+    est: 'Scope Alignment',
+    len: 5,
+    age: 15,
+    upd: 12,
+    desc: '<p>Direct statutory amendment explicitly harmonizing definitions in 1 kap. 1 § with Regulation (EU) 2022/2554 (DORA). Mandates that operational risk rules apply to all authorized UCITS management entities under DORA standards.</p>',
+    diff: {
+      identifier: '1 kap. 1 §',
+      regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
+      amendingAct: 'SFS 2026:916',
+      heading: 'Definitioner (DORA-anpassning)',
+      status: 'MODIFIED',
+      additions_count: 4,
+      deletions_count: 0,
+      tokens: [
+        { type: 'equal', text: 'I denna lag betyder' },
+        { type: 'insert', text: ' (med beaktande av DORA-kraven)' },
+        {
+          type: 'equal',
+          text: '\n\n1. alternativ investeringsfond: detsamma som i 1 kap. 2 § lagen (2013:561) om förvaltare av alternativa investeringsfonder,\n\n2. behörig myndighet: utländsk myndighet som har behörighet att utöva tillsyn över fondföretag eller förvaltningsbolag,\n\n3. derivatinstrument: optioner, terminer och swappar samt andra likartade finansiella instrument,\n\n4. EES: Europeiska ekonomiska samarbetsområdet,\n\n5. egna medel: detsamma som i artikel 2.1 l i Europaparlamentets och rådets direktiv 2009/65/EG…',
+        },
+      ],
+      authority: 'Finansdepartementet / Finansinspektionen',
+      inForce: '2026-11-01',
+    },
     subtasks: [
-      { id: 's5', title: 'Primary nav structure', done: true },
-      { id: 's6', title: 'Mega-menu content', done: false },
-      { id: 's7', title: 'Mobile drawer behavior', done: false },
+      { id: 's5', title: 'Cross-reference statutory definitions against internal fund taxonomy', done: true },
+      { id: 's6', title: 'Update internal compliance manual section 2.1', done: false },
     ],
   });
-  t('p1', 'Design responsive navigation', 'progress', 'm4', 'medium', 3, ['design'], {
-    est: '3d',
+
+  t('p1', 'SFS 2026:916 § 1 kap. 99 § · Repeal of Grandfathering Clauses for Older UCITS', 'done', 'm6', 'medium', -4, ['fi', 'legal'], {
+    key: 'SFS 1:99',
+    est: 'Repealed Rule',
+    age: 24,
+    desc: '<p>Statutory deletion of transitional provisions from 2012. All funds must now operate strictly under uniform supervisory standards without historic legacy carve-outs.</p>',
+    diff: {
+      identifier: '1 kap. 99 §',
+      regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
+      amendingAct: 'SFS 2026:916',
+      heading: 'Övergångsbestämmelser för äldre fondbolag',
+      status: 'DELETED',
+      additions_count: 0,
+      deletions_count: 8,
+      tokens: [
+        {
+          type: 'delete',
+          text: '99 § Bestämmelserna i detta kapitel ska inte tillämpas på fondbolag som erhållit auktorisation före den 1 januari 2012 vad avser äldre förvaltningsrutiner.',
+        },
+      ],
+      authority: 'Riksdagen',
+      inForce: '2026-11-01',
+    },
+  });
+
+  t('p1', 'ESMA34-45-1823 · UCITS Liquidity Stress Testing (LST) Calibration', 'todo', 'm4', 'high', 8, ['funds', 'risk'], {
+    key: 'ESMA §34',
+    est: 'Stress Scenario',
     len: 6,
     subtasks: [
-      { id: 's8', title: 'Breakpoint rules', done: true },
-      { id: 's9', title: 'Sticky header states', done: false },
+      { id: 's7', title: 'Calibrate reverse stress scenarios for illiquid fixed-income buckets', done: true },
+      { id: 's8', title: 'Incorporate redemptions shock scenario (top 5 institutional unit-holders)', done: false },
     ],
   });
-  t('p1', 'Prepare design system tokens', 'todo', 'm1', 'medium', 6, ['design'], { est: '2d', len: 4 });
-  t('p1', 'Review responsive layouts', 'todo', 'm4', 'medium', 8, ['qa', 'design'], { est: '1d', len: 3 });
-  t('p1', 'Prepare developer handoff', 'todo', 'm2', 'high', 14, ['frontend'], { est: '2d', len: 4, deps: ['t3', 't5'] });
-  t('p1', 'Design mobile onboarding', 'progress', 'm4', 'urgent', -1, ['design'], {
-    est: '3d',
+
+  t('p1', 'Annual Prospectus & Key Information Document (KID) Regulatory Sweep', 'progress', 'm7', 'medium', 12, ['funds'], {
+    key: 'PRIIP §7',
+    est: 'Periodic Sweep',
+    len: 8,
+  });
+
+  t('p1', 'Finansinspektionen FFFS 2020:20 · Remiss on Liquidity Management Tools (LMT)', 'backlog', 'm2', 'low', 30, ['fi', 'funds'], {
+    key: 'FI-REMISS',
+    est: 'Consultation',
+  });
+
+  /* ---- DORA Regulation (EU) 2022/2554 ---- */
+  t('p2', 'DORA Art. 5-16 · ICT Risk Management Framework Gap Analysis & Policy Overhaul', 'review', 'm4', 'urgent', 1, ['dora', 'risk'], {
+    key: 'DORA §5',
+    fav: true,
+    est: 'Tier 1 Framework',
+    len: 12,
+    age: 30,
+    upd: 5,
+    desc: '<p>Comprehensive audit of the internal ICT risk management framework against the Regulatory Technical Standards (RTS) under Articles 5-16 of DORA.</p><p>Mandates formal business impact analyses (BIA), RTO/RPO metrics for critical trading and transfer agency services, and dual-center backup validation.</p>',
+    subtasks: [
+      { id: 's10', title: 'Audit current RTO/RPO targets for fund pricing and order routing engines', done: true },
+      { id: 's11', title: 'Review ICT risk tolerance levels with Chief Risk Officer', done: true },
+      { id: 's12', title: 'Complete board-approved ICT security policy documentation', done: false },
+    ],
+    attachments: [
+      { id: 'a3', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200) },
+      { id: 'a4', name: 'Digia_Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400) },
+    ],
+  });
+
+  t('p2', 'DORA Art. 28 · Register of Information for Critical Third-Party ICT Providers (CTPPs)', 'progress', 'm8', 'urgent', 4, ['dora', 'it_security'], {
+    key: 'DORA §28',
+    est: 'Mandatory Register',
+    len: 9,
+    age: 20,
+    subtasks: [
+      { id: 's13', title: 'Map all cloud, market data, and core banking vendors to EBA standard schema', done: true },
+      { id: 's14', title: 'Assess supply chain concentration risk (Azure / AWS / Bloomberg)', done: true },
+      { id: 's15', title: 'Execute mandatory audit right addendums with sub-processors', done: false },
+      { id: 's16', title: 'Validate register JSON against FI / ESMA submission portal schema', done: false },
+    ],
+  });
+
+  t('p2', 'DORA Art. 17-23 · Major ICT-related Incident Reporting Procedure & Runbook', 'todo', 'm8', 'high', 9, ['dora', 'it_security'], {
+    key: 'DORA §17',
+    est: '4h Incident SLA',
     len: 6,
     subtasks: [
-      { id: 's10', title: 'Welcome screens', done: true },
-      { id: 's11', title: 'Permission prompts', done: false },
-      { id: 's12', title: 'Empty states', done: false },
+      { id: 's17', title: 'Define 4-hour initial notification trigger threshold for Finansinspektionen / Fiva', done: true },
+      { id: 's18', title: 'Build automated incident classification calculator based on financial & user impact', done: false },
+      { id: 's19', title: 'Dry-run tabletop simulation with crisis management team', done: false },
     ],
   });
-  t('p1', 'Write homepage copy', 'backlog', 'm5', 'low', 18, ['content'], { est: '2d' });
-  t('p1', 'Set up analytics events', 'backlog', 'm6', 'medium', 20, ['backend', 'growth'], { est: '1d' });
-  t('p1', 'Accessibility audit of templates', 'backlog', 'm7', 'high', 22, ['qa'], { est: '2d' });
-  t('p1', 'Build hero component', 'todo', 'm3', 'medium', 10, ['frontend'], { est: '2d', len: 3, deps: ['t3'] });
-  t('p1', 'Image optimization pipeline', 'review', 'm6', 'low', 2, ['backend'], { est: '1d', len: 5 });
-  t('p1', 'Weekly design sync notes', 'todo', 'm1', 'low', 2, ['content'], { recur: 'Weekly', est: '30m', len: 0 });
-  t('p1', 'Migrate blog to new CMS', 'backlog', 'm3', 'medium', 28, ['backend'], { est: '5d', len: 8 });
-  t('p1', 'Footer and legal pages', 'done', 'm5', 'low', -5, ['frontend'], { est: '1d' });
-  t('p1', 'Fix broken anchor links on pricing', 'done', 'm3', 'medium', -3, ['bug'], { est: '2h', len: 1 });
-  // Mobile App
-  t('p2', 'Onboarding flow prototype', 'progress', 'm4', 'high', 4, ['design'], { est: '3d', len: 6 });
-  t('p2', 'Push notification service', 'progress', 'm6', 'high', 6, ['backend'], { est: '5d', len: 9 });
-  t('p2', 'Offline mode sync', 'todo', 'm3', 'urgent', 5, ['frontend', 'backend'], { est: '8d', len: 10, deps: ['t20'] });
-  t('p2', 'App Store screenshots', 'backlog', 'm5', 'low', 40, ['content'], { est: '1d' });
-  t('p2', 'Crash reporting setup', 'done', 'm6', 'medium', -8, ['backend'], { est: '1d' });
-  t('p2', 'Biometric sign-in', 'review', 'm3', 'high', 2, ['frontend'], { est: '3d', len: 6 });
-  t('p2', 'Settings screen redesign', 'todo', 'm4', 'medium', 9, ['design'], { est: '2d' });
-  t('p2', 'Triage beta tester feedback', 'todo', 'm1', 'medium', 0, ['research'], { est: '4h', len: 1, recur: 'Weekly' });
-  t('p2', 'Crash on Android 12 when rotating', 'todo', 'm3', 'urgent', 1, ['bug'], { est: '1d', len: 1 });
-  // Marketing Campaign
-  t('p3', 'Campaign brief', 'done', 'm5', 'medium', -6, ['content'], { est: '1d' });
-  t('p3', 'Landing page copy', 'progress', 'm5', 'medium', 4, ['content'], { est: '2d' });
-  t('p3', 'Paid social creatives', 'todo', 'm4', 'high', 7, ['design', 'growth'], { est: '3d', len: 5 });
-  t('p3', 'Email nurture sequence', 'todo', 'm8', 'medium', 9, ['content'], { est: '2d' });
-  t('p3', 'Influencer outreach list', 'backlog', 'm7', 'low', null, ['growth']);
-  t('p3', 'Launch webinar deck', 'todo', 'm1', 'medium', 15, ['content'], { est: '2d' });
-  t('p3', 'Budget approval', 'review', 'm1', 'urgent', -2, [], { est: '1h', len: 1 });
-  // Product Launch
-  t('p4', 'Launch readiness checklist', 'progress', 'm1', 'urgent', 3, ['qa'], {
-    est: '1d',
+
+  t('p2', 'TIBER-SE / DORA Art. 26 · Threat-Led Penetration Testing (TLPT) Scope Validation', 'todo', 'm4', 'medium', 19, ['dora', 'risk'], {
+    key: 'TIBER §26',
+    est: 'Red Team Scope',
+    len: 5,
+  });
+
+  t('p2', 'Board of Directors ICT Governance & Cybersecurity Training Curriculum', 'done', 'm3', 'medium', -7, ['dora', 'compliance'], {
+    key: 'DORA §4',
+    est: 'Board Attestation',
+  });
+
+  /* ---- AML & SFS 2017:630 ---- */
+  t('p3', 'FFFS 2017:11 Kap 4 · General Risk Assessment (Allmän riskbedömning 2026)', 'progress', 'm5', 'urgent', 3, ['aml', 'fi', 'compliance'], {
+    key: 'AML §4',
+    fav: true,
+    est: 'Annual GRA Audit',
+    len: 8,
+    age: 22,
+    upd: 2,
+    desc: '<p>Annual statutory update of the firm-wide AML/CFT General Risk Assessment required by Finansinspektionen.</p><p>Assesses money laundering vulnerabilities across private banking, institutional mandates, distribution partners, and cross-border subscriptions from non-EEA jurisdictions.</p>',
+    subtasks: [
+      { id: 's20', title: 'Update geographic risk scores including high-risk third countries list', done: true },
+      { id: 's21', title: 'Review transaction volume thresholds for enhanced due diligence (EDD)', done: true },
+      { id: 's22', title: 'Compile MLRO annual report for Executive Management and Board', done: false },
+    ],
+    attachments: [{ id: 'a5', name: 'AML_General_Risk_Assessment_Draft_2026.docx', type: 'doc', size: '2.1 MB', by: 'm5', at: minsAgo(600) }],
+  });
+
+  t('p3', 'AMLR (EU) 2024/1624 · Transition Roadmap for the Unified EU AML Rulebook & AMLA', 'todo', 'm5', 'high', 15, ['aml', 'legal'], {
+    key: 'AMLR §1',
+    est: 'AMLA Transition',
     len: 10,
     subtasks: [
-      { id: 's20', title: 'Docs published', done: true },
-      { id: 's21', title: 'Pricing live', done: false },
-      { id: 's22', title: 'Support trained', done: false },
-      { id: 's23', title: 'Status page updated', done: true },
+      { id: 's23', title: 'Gap analysis of current CDD measures against new direct-acting EU regulation', done: false },
+      { id: 's24', title: 'Evaluate AMLA direct supervision thresholds for cross-border wealth operations', done: false },
     ],
   });
-  t('p4', 'Pricing page update', 'todo', 'm2', 'high', 6, ['design', 'frontend'], { est: '2d' });
-  t('p4', 'Press release draft', 'review', 'm5', 'medium', 1, ['content'], { est: '1d' });
-  t('p4', 'Sales enablement docs', 'todo', 'm7', 'medium', 8, ['content'], { est: '2d' });
-  t('p4', 'Release notes', 'backlog', 'm3', 'low', 11, ['content'], { est: '4h' });
-  t('p4', 'Go / no-go meeting', 'todo', 'm1', 'high', 11, [], { est: '1h', len: 0 });
-  // Design System
-  t('p5', 'Color tokens v2', 'done', 'm2', 'high', -4, ['design'], { est: '3d' });
-  t('p5', 'Button component audit', 'progress', 'm2', 'medium', 5, ['design', 'frontend'], { est: '2d' });
-  t('p5', 'Form field states', 'todo', 'm4', 'medium', 12, ['design'], { est: '3d' });
-  t('p5', 'Icon library cleanup', 'backlog', 'm4', 'low', null, ['design']);
-  t('p5', 'Documentation site', 'todo', 'm3', 'medium', 20, ['frontend'], { est: '5d', len: 8 });
-  t('p5', 'Dark mode palette', 'review', 'm2', 'high', 2, ['design'], { est: '2d' });
-  // Marketing Website (complete)
-  t('p7', 'Launch site QA', 'done', 'm3', 'high', -20, ['qa']);
-  t('p7', 'Spring release hero video', 'done', 'm5', 'medium', -24, ['content']);
-  // Customer portal (restricted)
-  t('p6', 'Billing API contract', 'todo', 'm6', 'high', 30, ['backend']);
+
+  t('p3', 'Real-time Sanctions Screening & Asset Freeze Automation (EU, UN, OFAC)', 'review', 'm1', 'urgent', 0, ['aml', 'risk'], {
+    key: 'AML §3',
+    est: 'Zero Tolerance Freeze',
+    len: 4,
+    subtasks: [
+      { id: 's25', title: 'Fuzzy-name matching benchmark on Nordic and Cyrillic transliterations', done: true },
+      { id: 's26', title: 'Establish 15-minute SLA for PEP & Sanctions alert escalation', done: true },
+    ],
+  });
+
+  t('p3', 'Independent 3rd-Party Internal Audit of Swedish AML Controls', 'done', 'm3', 'high', -14, ['aml', 'fi'], {
+    key: 'AML-AUDIT',
+    est: 'Audit Passed',
+  });
+
+  /* ---- AIFM FFFS 2013:9 ---- */
+  t('p4', 'FFFS 2013:9 Kap 13 · Independent Valuation Governance for Private Equity Assets', 'progress', 'm7', 'high', 7, ['funds', 'risk'], {
+    key: 'AIFM §13',
+    est: 'Tier 2 Governance',
+    len: 7,
+    subtasks: [
+      { id: 's27', title: 'Review external valuation agent independence and conflict-of-interest disclosures', done: true },
+      { id: 's28', title: 'Formalize quarterly discount-rate stress methodology for illiquid debt', done: false },
+    ],
+  });
+
+  t('p4', 'Prop. 2023/24:122 · Review of Administrative Fines & Sanctions Escalation for AIFMs', 'todo', 'm6', 'medium', 16, ['legal', 'fi'], {
+    key: 'PROP §122',
+    est: 'Sanction Escalation',
+    len: 4,
+  });
+
+  t('p4', 'Annex IV Supervisory Filing Q3 Automated XML Validation', 'done', 'm7', 'urgent', -2, ['funds'], {
+    key: 'ANNEX-IV',
+    est: 'Regulatory XML',
+  });
+
+  /* ---- MiFID II & SFDR ---- */
+  t('p5', 'MiFID II Delegated Reg 2017/565 · Best Execution Surveillance & Annual RTS 28 Publication', 'todo', 'm3', 'high', 21, ['mifid', 'funds'], {
+    key: 'RTS §28',
+    est: 'Best Execution',
+    len: 8,
+  });
+
+  t('p5', 'Product Governance (POG) Target Market Verification for Complex Structured Notes', 'backlog', 'm2', 'medium', 35, ['mifid', 'compliance'], {
+    key: 'POG §9',
+    est: 'Investor Protection',
+  });
+
+  t('p6', 'SFDR RTS Art. 14 · Principal Adverse Impact (PAI) Statement for Article 8/9 Funds', 'progress', 'm6', 'high', 11, ['esg', 'legal'], {
+    key: 'SFDR §14',
+    est: 'PAI Disclosure',
+    len: 10,
+    subtasks: [
+      { id: 's30', title: 'Collect scope 1, 2, and 3 GHG emissions data across underlying portfolio companies', done: true },
+      { id: 's31', title: 'Review water emissions and hazardous waste metrics with ESG data vendor', done: false },
+      { id: 's32', title: 'Prepare website disclosure summary in Swedish and English', done: false },
+    ],
+    attachments: [{ id: 'a6', name: 'SFDR_PAI_Consolidated_Statement_2026.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200) }],
+  });
+
+  t('p6', 'EU Green Taxonomy Alignment Verification for Nordic Climate Infrastructure Fund', 'todo', 'm7', 'medium', 25, ['esg'], {
+    key: 'TAXON §3',
+    est: 'Green Verification',
+  });
 
   const tk = id => T.find(x => x.id === id);
-  // completed metadata
-  T.filter(x => x.status === 'done').forEach((x, i) => (x.completedAt = minsAgo(60 * (6 + i * 17))));
+  T.filter(x => x.status === 'done').forEach((x, i) => (x.completedAt = minsAgo(60 * (8 + i * 22))));
+
   const comments = [
     {
       id: 'c1',
-      task: 't3',
-      by: 'm4',
-      at: minsAgo(260),
-      text: 'Tablet layout feels crowded around the logo strip. Could we drop to four logos under 1024px?',
-      re: { '👍': ['m2', 'm3'] },
+      task: 't1',
+      by: 'm6',
+      at: minsAgo(85),
+      text: 'Riksdagen passed SFS 2026:916 with immediate effect on Section 100. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement to reconstruct execution steps on demand.',
+      re: { '👍': ['m1', 'm3'] },
     },
-    { id: 'c2', task: 't3', by: 'm2', at: minsAgo(210), text: 'Good call. Updated in v3 — @Tanjim Islam can you review before Thursday?', re: {} },
+    {
+      id: 'c2',
+      task: 't1',
+      by: 'm1',
+      at: minsAgo(40),
+      text: 'Verified. The Python parser and diff engine in the Nordic RegTech core already capture token-level changes for 1 kap. 100 §. Working with engineering to log audit decision states to PostgreSQL with pgvector.',
+      re: { '🚀': ['m6', 'm2'] },
+    },
     {
       id: 'c3',
-      task: 't3',
-      by: 'm3',
-      at: minsAgo(95),
-      text: 'Hero spacing maps cleanly to our 8pt scale. No blockers from engineering.',
-      re: { '🎉': ['m2'] },
+      task: 't7',
+      by: 'm4',
+      at: minsAgo(190),
+      text: 'CTPP vendor questionnaires sent to Microsoft and Bloomberg. We need legal sign-off on the standard EU contractual clauses for exit strategies before Friday.',
+      re: { '👀': ['m6'] },
     },
-    { id: 'c4', task: 't4', by: 'm3', at: minsAgo(400), text: "Mega-menu content still pending from marketing. I'll stub it for now.", re: {} },
-    { id: 'c5', task: 't4', by: 'm5', at: minsAgo(120), text: '@John Carter content is in the shared doc now — six columns max.', re: { '👍': ['m3'] } },
-    { id: 'c6', task: 't9', by: 'm1', at: minsAgo(55), text: 'This slipped past yesterday — @Emma Wilson anything blocking the permission prompts?', re: {} },
-    { id: 'c7', task: 't24', by: 'm7', at: minsAgo(700), text: 'Face ID fallback to passcode works on iOS 17; testing Android next.', re: {} },
-    { id: 'c8', task: 't34', by: 'm2', at: minsAgo(1500), text: 'Finance needs the channel split before approving.', re: {} },
-    { id: 'c9', task: 't35', by: 'm7', at: minsAgo(200), text: 'Support training moved to Monday. @Tanjim Islam please confirm the status page copy.', re: {} },
+    {
+      id: 'c4',
+      task: 't11',
+      by: 'm5',
+      at: minsAgo(240),
+      text: 'The updated General Risk Assessment draft has been shared with the compliance officer. Customer risk rating models reflect the new high-risk jurisdictions.',
+      re: { '👍': ['m3'] },
+    },
   ];
+
   const A = (by, verb, task, project, m, extra = '') => ({ id: uid('a'), by, verb, task, project, at: minsAgo(m), extra });
   const activity = [
-    A('m2', 'moved', 't3', 'p1', 38, 'to Review'),
-    A('m3', 'completed', 't18', 'p1', 90),
-    A('m4', 'commented on', 't19', 'p2', 140),
-    A('m1', 'changed priority of', 't9', 'p1', 180, 'to Urgent'),
-    A('m6', 'added a file to', 't14', 'p1', 260),
-    A('m5', 'created', 't30', 'p3', 330),
-    A('m2', 'assigned', 't8', 'p1', 420, 'to Sarah Chen'),
-    A('m7', 'completed', 't23', 'p2', 1300),
-    A('m3', 'moved', 't24', 'p2', 1500, 'to Review'),
-    A('m1', 'created project', null, 'p4', 30000),
-    A('m2', 'created project', null, 'p1', 43000),
-    A('m4', 'completed', 't41', 'p5', 5600),
-    A('m5', 'completed', 't17', 'p1', 7200),
+    A('m6', 'moved', 't1', 'p1', 35, 'to Legal & 2nd LoD Review'),
+    A('m1', 'commented on', 't1', 'p1', 40),
+    A('m4', 'updated', 't6', 'p2', 65, 'RTS Gap Analysis completed'),
+    A('m5', 'moved', 't11', 'p3', 120, 'to Policy & Redline'),
+    A('m3', 'completed', 't10', 'p2', 210),
+    A('m8', 'added attachment to', 't7', 'p2', 320),
+    A('m2', 'created task', 't18', 'p5', 540),
+    A('m7', 'completed', 't16', 'p4', 1200),
+    A('m6', 'created project', null, 'p1', 45000),
+    A('m4', 'created project', null, 'p2', 42000),
   ];
+
   const notifs = [
     {
       id: 'n1',
       type: 'mention',
-      by: 'm2',
-      task: 't3',
+      by: 'm6',
+      task: 't1',
       text: 'mentioned you in',
-      snippet: 'Updated in v3 — @Tanjim Islam can you review before Thursday?',
-      at: minsAgo(210),
+      snippet:
+        'Riksdagen passed SFS 2026:916 with immediate effect on Section 100. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement…',
+      at: minsAgo(85),
       read: false,
     },
-    { id: 'n2', type: 'assign', by: 'm3', task: 't28', text: 'assigned you', snippet: 'Due today · Medium priority', at: minsAgo(300), read: false },
+    {
+      id: 'n2',
+      type: 'update',
+      by: null,
+      project: 'p2',
+      text: 'DORA Compliance Package requires attention',
+      snippet: '3 critical ICT third-party provider assessments due in 5 days',
+      at: minsAgo(140),
+      read: false,
+    },
     {
       id: 'n3',
-      type: 'comment',
-      by: 'm4',
-      task: 't9',
-      text: 'commented on',
-      snippet: 'Permission prompts need legal review — drafting now.',
-      at: minsAgo(40),
+      type: 'assign',
+      by: 'm3',
+      task: 't2',
+      text: 'assigned you',
+      snippet: 'SFS 2026:916 § 1 kap. 1 § · DORA Scope Harmonization in Swedish Fund Law',
+      at: minsAgo(260),
       read: false,
     },
     {
       id: 'n4',
-      type: 'mention',
-      by: 'm7',
-      task: 't35',
-      text: 'mentioned you in',
-      snippet: 'Support training moved to Monday. @Tanjim Islam please confirm the status page copy.',
-      at: minsAgo(200),
-      read: false,
+      type: 'comment',
+      by: 'm4',
+      task: 't7',
+      text: 'commented on',
+      snippet: 'CTPP vendor questionnaires sent to Microsoft and Bloomberg.',
+      at: minsAgo(190),
+      read: true,
     },
-    { id: 'n5', type: 'update', by: 'm2', task: 't3', text: 'moved to Review', snippet: 'To Do → Review', at: minsAgo(38), read: true },
+    {
+      id: 'n5',
+      type: 'update',
+      by: 'm6',
+      task: 't1',
+      text: 'moved to Legal & 2nd LoD Review',
+      snippet: 'Policy & Redline → Legal & 2nd LoD',
+      at: minsAgo(35),
+      read: true,
+    },
     {
       id: 'n6',
       type: 'update',
       by: null,
-      project: 'p4',
-      text: 'Product Launch is at risk',
-      snippet: '3 tasks due this week are not started',
-      at: minsAgo(600),
+      task: 't13',
+      text: 'is due today',
+      snippet: 'Real-time Sanctions Screening & Asset Freeze Automation (EU, UN, OFAC)',
+      at: minsAgo(15),
       read: false,
     },
-    {
-      id: 'n7',
-      type: 'comment',
-      by: 'm2',
-      task: 't34',
-      text: 'commented on',
-      snippet: 'Finance needs the channel split before approving.',
-      at: minsAgo(1500),
-      read: true,
-    },
-    { id: 'n8', type: 'assign', by: 'm2', task: 't6', text: 'assigned you', snippet: 'Due in 6 days', at: minsAgo(2900), read: true },
-    { id: 'n9', type: 'update', by: 'm3', task: 't18', text: 'completed', snippet: 'Fix broken anchor links on pricing', at: minsAgo(90), read: true },
-    { id: 'n10', type: 'update', by: null, task: 't28', text: 'is due today', snippet: 'Triage beta tester feedback', at: minsAgo(20), read: false },
   ];
+
   const files = [
-    { id: 'f1', project: 'p1', name: 'homepage-wireframes-v3.fig', type: 'fig', size: '4.2 MB', by: 'm2', at: minsAgo(300), task: 't3' },
-    { id: 'f2', project: 'p1', name: 'nav-audit-findings.pdf', type: 'pdf', size: '860 KB', by: 'm2', at: minsAgo(8000), task: 't3' },
-    { id: 'f3', project: 'p1', name: 'brand-photography-set.zip', type: 'zip', size: '128 MB', by: 'm4', at: minsAgo(3000) },
-    { id: 'f4', project: 'p1', name: 'hero-exploration.png', type: 'img', size: '2.1 MB', by: 'm4', at: minsAgo(1400) },
-    { id: 'f5', project: 'p1', name: 'content-inventory.xlsx', type: 'sheet', size: '310 KB', by: 'm5', at: minsAgo(9000) },
-    { id: 'f6', project: 'p1', name: 'sitemap-v2.pdf', type: 'pdf', size: '540 KB', by: 'm1', at: minsAgo(12000) },
-    { id: 'f7', project: 'p1', name: 'interview-notes.docx', type: 'doc', size: '96 KB', by: 'm1', at: minsAgo(20000) },
-    { id: 'f8', project: 'p1', name: 'analytics-events.json', type: 'code', size: '12 KB', by: 'm6', at: minsAgo(700) },
-    { id: 'f9', project: 'p2', name: 'onboarding-flow.fig', type: 'fig', size: '6.8 MB', by: 'm4', at: minsAgo(500) },
-    { id: 'f10', project: 'p2', name: 'beta-feedback.xlsx', type: 'sheet', size: '220 KB', by: 'm1', at: minsAgo(900) },
-    { id: 'f11', project: 'p3', name: 'campaign-brief.pdf', type: 'pdf', size: '1.1 MB', by: 'm5', at: minsAgo(4000) },
-    { id: 'f12', project: 'p4', name: 'launch-plan.docx', type: 'doc', size: '180 KB', by: 'm1', at: minsAgo(6000) },
+    { id: 'f1', project: 'p1', name: 'SFS_2026_916_Amending_Act_Riksdagen.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180), task: 't1' },
+    { id: 'f2', project: 'p1', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400), task: 't1' },
+    { id: 'f3', project: 'p2', name: 'DORA_Regulation_EU_2022_2554_Official_Journal.pdf', type: 'pdf', size: '3.4 MB', by: 'm4', at: minsAgo(5000) },
+    { id: 'f4', project: 'p2', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200), task: 't6' },
+    { id: 'f5', project: 'p2', name: 'Digia_Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400), task: 't6' },
+    { id: 'f6', project: 'p3', name: 'Finansinspektionen_FFFS_2017_11_Penningtvatt.pdf', type: 'pdf', size: '890 KB', by: 'm5', at: minsAgo(8000) },
+    { id: 'f7', project: 'p3', name: 'AML_General_Risk_Assessment_Draft_2026.docx', type: 'doc', size: '2.1 MB', by: 'm5', at: minsAgo(600), task: 't11' },
+    { id: 'f8', project: 'p4', name: 'FFFS_2013_9_AIFM_Consolidated.pdf', type: 'pdf', size: '1.6 MB', by: 'm7', at: minsAgo(9500) },
+    { id: 'f9', project: 'p6', name: 'SFDR_PAI_Consolidated_Statement_2026.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200), task: 't19' },
   ];
+
   const events = [
-    { id: 'e1', title: 'Design review', date: dOff(1), time: '10:00', project: 'p1' },
-    { id: 'e2', title: 'Sprint planning', date: dOff(5), time: '09:30', project: 'p2' },
-    { id: 'e3', title: 'Launch sync', date: dOff(0), time: '15:00', project: 'p4' },
-    { id: 'e4', title: 'Stakeholder demo', date: dOff(9), time: '14:00', project: 'p1' },
-    { id: 'e5', title: 'Campaign kickoff', date: dOff(-3), time: '11:00', project: 'p3' },
-    { id: 'e6', title: 'Retro', date: dOff(12), time: '16:00', project: 'p2' },
+    { id: 'e1', title: 'Finansinspektionen Supervisory Dialogue · SFS 2026:916', date: dOff(2), time: '10:00', project: 'p1' },
+    { id: 'e2', title: 'DORA Steering Committee & CTPP Freeze', date: dOff(5), time: '13:30', project: 'p2' },
+    { id: 'e3', title: 'Executive Board Compliance & GRA Attestation', date: dOff(8), time: '15:00', project: 'p3' },
+    { id: 'e4', title: 'AIFM Annex IV Supervisory Filing Deadline', date: dOff(10), time: '17:00', project: 'p4' },
+    { id: 'e5', title: 'Quarterly Best Execution Review Committee', date: dOff(25), time: '11:00', project: 'p5' },
   ];
-  const tmp = tk('t3');
-  tmp.updated = minsAgo(38);
+
+  const tmp = tk('t1');
+  if (tmp) tmp.updated = minsAgo(35);
+
   return {
-    ws: { name: 'Gr8r Studio', url: 'gr8rstudio', c: '#1D1C1A', brand: true },
+    ws: { name: 'Digia RegTech Hub (Nordic Wealth)', url: 'digia-regtech', c: '#0F52BA', brand: true },
     workspaces: [
-      { id: 'w1', name: 'Gr8r Studio', c: '#1D1C1A', plan: 'Team', brand: true },
-      { id: 'w2', name: 'Personal', c: '#3D8E5F', plan: 'Free' },
-      { id: 'w3', name: 'Acme Labs', c: '#3B82C4', plan: 'Business' },
+      { id: 'w1', name: 'Digia RegTech Hub (Nordic Wealth)', c: '#0F52BA', plan: 'Enterprise', brand: true },
+      { id: 'w2', name: 'Evli Wealth Management (Sandbox)', c: '#23918A', plan: 'Dedicated' },
+      { id: 'w3', name: 'United Bankers Asset Mgmt', c: '#5A67D8', plan: 'Dedicated' },
     ],
     me: 'm1',
     members,
@@ -514,20 +673,17 @@ export function seed() {
     files,
     events,
     projOrder: projects.map(p => p.id),
-    savedViews: [{ id: 'v1', project: 'p1', name: 'High priority', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
-    recentSearches: ['homepage', 'Sarah', 'wireframes'],
+    savedViews: [{ id: 'v1', project: 'p1', name: 'Critical Obligations', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
+    recentSearches: ['1 kap. 100 §', 'DORA', 'Penningtvätt', 'SFS 2026:916'],
     sessions: [
-      { id: 'se1', dev: 'MacBook Pro · Chrome', loc: 'San Francisco, US', at: 'Active now', cur: true },
-      { id: 'se2', dev: 'iPhone 15 · Gr8r app', loc: 'San Francisco, US', at: '2 hours ago' },
-      { id: 'se3', dev: 'Windows · Edge', loc: 'Oakland, US', at: 'Sep 12' },
+      { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },
+      { id: 'se2', dev: 'Digia Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },
     ],
     invoices: [
-      { id: 'INV-2026-009', date: dOff(-23), amt: '$96.00', st: 'Paid' },
-      { id: 'INV-2026-008', date: dOff(-53), amt: '$96.00', st: 'Paid' },
-      { id: 'INV-2026-007', date: dOff(-84), amt: '$80.00', st: 'Paid' },
-      { id: 'INV-2026-006', date: dOff(-114), amt: '$80.00', st: 'Paid' },
+      { id: 'INV-REG-2026-001', date: dOff(-15), amt: '€12,500.00', st: 'Paid' },
+      { id: 'INV-REG-2026-002', date: dOff(-45), amt: '€12,500.00', st: 'Paid' },
     ],
-    tfa: false,
+    tfa: true,
     notifPrefs: {
       email_mention: true,
       email_assign: true,
