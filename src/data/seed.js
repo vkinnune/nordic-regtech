@@ -17,8 +17,8 @@ export function seed() {
     },
     {
       id: 'm2',
-      name: 'Petter',
-      email: 'petter@nordicregtech.io',
+      name: 'Workspace Admin',
+      email: 'admin@example.com',
       role: 'Admin',
       team: 'compliance',
       title: 'Client Partner · Financial Services',
