@@ -438,8 +438,9 @@ function renderSectionGovernanceStrip(s) {
   const ctls = controlsForSection(s.id);
   const rsks = risksForSection(s.id);
   const impacted = ctls.filter(c => c.impactedByAmendment || c.status === 'DEFICIENT');
+  const reviewPols = pols.filter(p => p.status === 'NEEDS_REVIEW');
 
-  if (!pols.length && !ctls.length && !rsks.length) return '';
+  if (!pols.length && !ctls.length && !rsks.length && s.status !== 'MODIFIED' && s.status !== 'ADDED') return '';
 
   return `<div class="finlex-gov-strip">
     <div class="finlex-gov-row">
@@ -448,7 +449,7 @@ function renderSectionGovernanceStrip(s) {
         ${pols
           .map(
             p => `
-          <button class="finlex-gov-chip" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Avaa käytäntö ${esc(p.code)}">
+          <button class="finlex-gov-chip ${p.status === 'NEEDS_REVIEW' ? 'alert' : ''}" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Avaa käytäntö ${esc(p.code)}: ${esc(p.title)}">
             ${ic('file-text', 11)}
             <span class="mono">${esc(p.code)}</span>
           </button>
@@ -475,32 +476,63 @@ function renderSectionGovernanceStrip(s) {
         `,
           )
           .join('')}
+        <button class="finlex-gov-chip faint" data-a="pop" data-pop="linkControl" data-sec="${s.id}" title="Linkitä kontrolli">
+          ${ic('plus', 11)}
+          <span>Linkitä</span>
+        </button>
       </div>
     </div>
 
-    <!-- Law Change Impact Assessment Alert -->
+    <!-- Policy Review Alert -->
+    ${
+      reviewPols.length
+        ? `<div class="finlex-impact-banner" style="border-left: 3px solid var(--text-3)">
+            <div class="finlex-impact-head">
+              <span style="display:flex;align-items:center;gap:6px">
+                ${ic('file-text', 13)}
+                <span>Käytännön katselmointitarve: ${reviewPols.map(p => esc(p.code)).join(', ')}</span>
+              </span>
+              <span class="mono faint" style="font-size:11px">Päivitys vaaditaan</span>
+            </div>
+            <div class="muted" style="font-size:11.5px;line-height:1.4">
+              Lakimuutos edellyttää sisäisen toimintaohjeen ja käytäntödokumentaation tarkastamista ja hyväksyntää.
+            </div>
+          </div>`
+        : ''
+    }
+
+    <!-- Law Change Impact Assessment Alerts for impacted controls -->
     ${
       impacted.length
-        ? `<div class="finlex-impact-banner">
+        ? impacted
+            .map(
+              c => `
+          <div class="finlex-impact-banner">
             <div class="finlex-impact-head">
               <span style="display:flex;align-items:center;gap:6px">
                 ${ic('alert-circle', 13)}
-                <span>Säädösmuutos vaikuttaa ${impacted.length} kontrolliin</span>
+                <span>Säädösmuutos vaikuttaa kontrolliin <b>${esc(c.code)}</b> (${esc(c.title)})</span>
               </span>
               <span class="mono faint" style="font-size:11px">${esc(s.amendingAct || '')}</span>
             </div>
             <div class="muted" style="font-size:11.5px;line-height:1.4">
-              ${esc(impacted[0].amendmentAlert || 'Kontrollien toimivuus ja raja-arvot on todennettava vastaamaan lakimuutosta.')}
+              ${esc(c.amendmentAlert || 'Kontrollin toimivuus ja raja-arvot on todennettava vastaamaan lakimuutosta.')}
             </div>
             <div class="finlex-impact-actions">
-              <button class="btn btn-sm btn-primary" data-a="createMitigationTask" data-sec="${s.id}" data-ctl="${impacted[0].id}" style="padding:2px 8px;font-size:11px">
+              <button class="btn btn-sm btn-primary" data-a="createMitigationTask" data-sec="${s.id}" data-ctl="${c.id}" style="padding:2px 8px;font-size:11px">
                 ${ic('plus', 11)} Luo päivitystehtävä
               </button>
-              <button class="btn btn-sm btn-ghost" data-a="resolveGap" data-id="${impacted[0].id}" style="padding:2px 8px;font-size:11px">
+              <button class="btn btn-sm btn-ghost" data-a="resolveGap" data-id="${c.id}" style="padding:2px 8px;font-size:11px">
                 ${ic('check-circle', 11)} Kuittaa huomioiduksi
               </button>
+              <button class="btn btn-sm btn-ghost" data-a="pop" data-pop="linkControl" data-sec="${s.id}" style="padding:2px 8px;font-size:11px">
+                ${ic('link-2', 11)} Linkitä kontrolli
+              </button>
             </div>
-          </div>`
+          </div>
+        `,
+            )
+            .join('')
         : ''
     }
   </div>`;

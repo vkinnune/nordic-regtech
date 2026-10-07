@@ -58,25 +58,6 @@ export const POLICIES = [
     riskIds: ['rsk-aml-01'],
     projectId: 'p4',
   },
-  {
-    id: 'pol-mifid-01',
-    code: 'POL-MIFID-01',
-    title: 'Sijoittajansuojan, tuotehallinnan ja soveltuvuusarvioinnin ohjeistus',
-    shortTitle: 'Sijoittajansuojapolitiikka (MiFID II)',
-    category: 'Investor Protection & Advisory',
-    owner: 'Lars Holmström',
-    ownerRole: 'Head of Wealth Advisory',
-    version: '3.2',
-    status: 'ACTIVE',
-    lastReviewDate: '2025-09-20',
-    nextReviewDue: '2026-09-20',
-    summary:
-      'Ohjeistaa strukturoitujen talletusten ja sijoitustuotteiden kuluselvitykset, asiakasluokittelut, kohdemarkkinamääritykset ja asianmukaisuus- ja soveltuvuusarviointimenettelyt ennen kaupan toteutusta.',
-    statuteSections: ['finlex-1-1', 'finlex-1-8'],
-    controlIds: ['ctl-mifid-01'],
-    riskIds: ['rsk-mifid-01'],
-    projectId: 'p5',
-  },
 ];
 
 export const CONTROLS = [
@@ -199,22 +180,6 @@ export const CONTROLS = [
     specification:
       'Sääntöpohjainen poikkeamamoottori havaitsee poikkeukselliset transaktiomäärät tai maantieteelliset riskikeskittymät ja luo välittömän tutkintatapauksen MLRO:lle.',
   },
-  {
-    id: 'ctl-mifid-01',
-    code: 'CTL-MIFID-01',
-    title: 'Strukturoitujen tuotteiden kuluilmoitus ja soveltuvuustarkastus',
-    category: 'Sijoittajansuoja',
-    type: 'AUTOMATED',
-    status: 'EFFECTIVE',
-    frequency: 'Transaktiokohtainen ennen vahvistusta',
-    owner: 'Lars Holmström',
-    policyId: 'pol-mifid-01',
-    statuteSections: ['finlex-1-1', 'finlex-1-8'],
-    riskId: 'rsk-mifid-01',
-    taskId: null,
-    specification:
-      'Verkkopalvelu ja toimeksiantojärjestelmä estävät monimutkaisten ja strukturoitujen talletusten toimeksiannot, mikäli asiakkaalle ei ole esitetty ex-ante kululaskelmaa ja suoritettu asianmukaisuustestiä.',
-  },
 ];
 
 export const RISKS = [
@@ -268,22 +233,5 @@ export const RISKS = [
     controlIds: ['ctl-aml-01', 'ctl-aml-02'],
     gapStatus: 'COVERED',
     gapSummary: 'Kaikki tunnistetut lakivelvoitteet katettu toimivilla automaatiokontrolleilla.',
-  },
-  {
-    id: 'rsk-mifid-01',
-    code: 'RSK-MIFID-01',
-    title: 'Asiakashyvitysvelvollisuus virheellisen strukturoidun sijoitustuotteen myynnistä',
-    category: 'Investor Redress & Conduct Risk',
-    severity: 'MEDIUM',
-    likelihood: 'LOW',
-    exposureScore: 45,
-    authority: 'Finanssivalvonta & Kuluttajariitalautakunta',
-    consequence:
-      'Mikäli asiakkaalle on tarjottu strukturoitua talletusta ilman vaadittavaa soveltuvuusarviointia tai kuluerittelyä, yritys on velvollinen korvaamaan pääomatappiot.',
-    statuteSections: ['finlex-1-1', 'finlex-1-8'],
-    policyIds: ['pol-mifid-01'],
-    controlIds: ['ctl-mifid-01'],
-    gapStatus: 'COVERED',
-    gapSummary: 'Pre-trade kuluselvitys ja soveltuvuuskysely integroitu toimeksiantojärjestelmään.',
   },
 ];

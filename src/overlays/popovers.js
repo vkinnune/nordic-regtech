@@ -2,7 +2,7 @@
 import { $, MOD, MONL, TODAY, WD, addD, dOff, diffD, esc, fmtDate, iso, parse } from '../core/utils.js';
 import { ic, wsLogo } from '../core/icons.js';
 import { LABELS, PRIOS, PSTAT, STATUSES } from '../core/constants.js';
-import { D, S, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects } from '../core/store.js';
+import { D, S, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects } from '../core/store.js';
 import { av, avStack, prIcon, stIcon } from '../ui/helpers.js';
 import { focusKey, render } from '../shell/render.js';
 import { FIELDS, viewOf } from '../shell/view-engine.js';
@@ -18,6 +18,7 @@ export function openPop(el, extra = {}) {
     type: d.pop,
     id: d.id,
     key: d.key,
+    sec: d.sec,
     i: d.i != null ? +d.i : undefined,
     field: d.field,
     date: d.date,
@@ -368,6 +369,23 @@ export function popHtml(p) {
         .map(m => `<button class="mi" data-a="bulkSet" data-f="assignee" data-v="${m.id}">${av(m.id || null, 'sm', false)}${esc(m.name)}</button>`)
         .join('');
       break;
+    case 'linkControl': {
+      const secId = p.sec || p.id;
+      const allCtls = allControls();
+      const unlinked = allCtls.filter(c => !(c.statuteSections || []).includes(secId));
+      inner = `<div class="mh">Linkitä kontrolli</div>
+        ${popList(
+          unlinked.map(c => ({
+            id: c.id,
+            name: `${c.code}: ${c.title}`,
+            act: 'linkControlPick',
+            html: `${ic('shield', 13)} `,
+          })),
+          { search: 'Etsi kontrollia...' },
+        )}`;
+      style = 'width:320px';
+      break;
+    }
   }
   if (!inner) return '';
   return `<div class="pop floating ${cls} ${S.ui.fx.pop ? 'enter' : ''}" role="menu" style="left:${p.x}px;top:${p.y}px;${style}" data-pop-root>${inner}</div>`;

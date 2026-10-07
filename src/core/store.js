@@ -141,31 +141,28 @@ export function team(id) {
 export const TM = new Proxy({}, { get: (_, k) => team(k) || NO_TEAM });
 
 /* ---------- statutory regulations lookups ---------- */
-export { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags } from '../data/regulations.js';
+import { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags } from '../data/regulations.js';
+export { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags };
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 export { POLICIES, CONTROLS, RISKS } from '../data/governance.js';
-import { POLICIES, CONTROLS, RISKS } from '../data/governance.js';
 
 export function allPolicies() {
-  if (!S.data.policies) S.data.policies = POLICIES.map(p => ({ ...p }));
-  return S.data.policies;
+  return D().policies || [];
 }
 export function policy(id) {
   return allPolicies().find(p => p.id === id || p.code === id) || null;
 }
 
 export function allControls() {
-  if (!S.data.controls) S.data.controls = CONTROLS.map(c => ({ ...c }));
-  return S.data.controls;
+  return D().controls || [];
 }
 export function control(id) {
   return allControls().find(c => c.id === id || c.code === id) || null;
 }
 
 export function allRisks() {
-  if (!S.data.risks) S.data.risks = RISKS.map(r => ({ ...r }));
-  return S.data.risks;
+  return D().risks || [];
 }
 export function risk(id) {
   return allRisks().find(r => r.id === id || r.code === id) || null;
@@ -185,4 +182,13 @@ export function risksForSection(secId) {
 
 export function impactedControlsForSection(secId) {
   return controlsForSection(secId).filter(c => c.impactedByAmendment || c.status === 'DEFICIENT');
+}
+
+export function regulationOfSection(secId) {
+  const regs = allRegulations();
+  for (const reg of regs) {
+    const secs = allSectionsOf(reg);
+    if (secs.some(s => s.id === secId)) return reg;
+  }
+  return null;
 }

@@ -404,6 +404,7 @@ A.openTask = el => {
   S.ui.modals = [];
   S.ui.mention = null;
   S.ui.subOpen = null;
+  delete S.ui.govDrawer;
   S.ui.drawerTab = S.ui.drawerTab || 'comments';
   render();
   const dr = $('.drawer');
@@ -1211,9 +1212,15 @@ IN.tlGroup = el => {
 
 /* regulations */
 A.openRegInReader = el => {
+  S.ui.route = 'regulations';
   S.ui.regSel = el.dataset.id;
-  delete S.ui.regSec;
+  if (el.dataset.sec) {
+    S.ui.regSec = el.dataset.sec;
+  } else {
+    delete S.ui.regSec;
+  }
   S.ui.regView = 'reader';
+  delete S.ui.govDrawer;
   render();
 };
 A.setRegView = el => {
@@ -1315,6 +1322,22 @@ A.createMitigationTask = el => {
   toast(`Päivitystehtävä ${newTask.key} luotu.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;
+  render();
+};
+
+A.linkControlPick = el => {
+  const ctlId = el.dataset.v;
+  const p = S.ui.pop;
+  const secId = p?.sec || p?.id;
+  const c = control(ctlId);
+  if (c && secId) {
+    if (!c.statuteSections) c.statuteSections = [];
+    if (!c.statuteSections.includes(secId)) {
+      c.statuteSections.push(secId);
+    }
+    toast(`Kontrolli ${c.code} linkitetty pykälään.`);
+  }
+  closePop();
   render();
 };
 

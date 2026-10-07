@@ -1,5 +1,6 @@
 /* ---------- seed data: Nordic Financial Compliance ---------- */
 import { dOff, minsAgo, uid } from '../core/utils.js';
+import { POLICIES, CONTROLS, RISKS } from './governance.js';
 
 export function seed() {
   const members = [
@@ -714,6 +715,9 @@ export function seed() {
     members,
     projects,
     tasks: T,
+    policies: POLICIES.map(p => ({ ...p })),
+    controls: CONTROLS.map(c => ({ ...c })),
+    risks: RISKS.map(r => ({ ...r })),
     comments,
     activity,
     notifs,

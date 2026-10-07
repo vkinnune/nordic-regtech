@@ -3,8 +3,8 @@
    ===================================================================== */
 import { MOD, TODAY, ago, diffD, esc, fmtDate, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { D, S, commentsOf, isOver, mem, pColor, proj, task, policy, control, risk } from '../core/store.js';
-import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar } from '../ui/helpers.js';
+import { D, S, commentsOf, isOver, mem, pColor, proj, task, policy, control, risk, regulationOfSection } from '../core/store.js';
+import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
 import { modalHtml } from './modals.js';
@@ -304,14 +304,9 @@ export function govDrawerHtml(gov) {
               <div class="col" style="gap:6px">
                 ${item.statuteSections
                   .map(secId => {
-                    const label = formatGovSecBadge(secId);
-                    const regId = secId.startsWith('finlex-')
-                      ? 'reg-finlex-747-2012'
-                      : secId.startsWith('sfs-')
-                        ? 'reg-sfs-2004-46'
-                        : secId.startsWith('dora-')
-                          ? 'reg-dora'
-                          : 'reg-aml';
+                    const label = formatSecBadge(secId);
+                    const reg = regulationOfSection(secId);
+                    const regId = reg ? reg.id : 'reg-finlex-747-2012';
                     return `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
                       <span class="mono" style="font-size:12.5px;font-weight:600">${esc(label)}</span>
                       <button class="btn btn-sm btn-ghost" data-a="openRegInReader" data-id="${regId}" data-sec="${secId}" style="padding:2px 7px;font-size:11.5px">
@@ -344,23 +339,4 @@ export function govDrawerHtml(gov) {
       }
     </div>
   </aside>`;
-}
-
-function formatGovSecBadge(secId) {
-  if (secId.startsWith('finlex-')) {
-    const parts = secId.replace('finlex-', '').split('-');
-    return `747/2012 ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('sfs-')) {
-    const parts = secId.replace('sfs-', '').split('-');
-    return `SFS ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('dora-')) {
-    return `DORA Art. ${secId.replace('dora-', '')}`;
-  }
-  if (secId.startsWith('aml-')) {
-    const parts = secId.replace('aml-', '').split('-');
-    return `AML 444/2017 ${parts[0]}:${parts[1]} §`;
-  }
-  return secId;
 }

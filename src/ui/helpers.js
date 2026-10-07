@@ -123,3 +123,23 @@ export function diffTokenHtml(tk) {
   if (tk.type === 'delete') return `<del class="diff-token-del">${esc(tk.text)}</del>`;
   return `<span class="diff-token-eq">${esc(tk.text)}</span>`;
 }
+
+export function formatSecBadge(secId) {
+  if (!secId) return '';
+  if (secId.startsWith('finlex-')) {
+    const parts = secId.replace('finlex-', '').split('-');
+    return `747/2012 ${parts[0]}:${parts[1]} §`;
+  }
+  if (secId.startsWith('sfs-')) {
+    const parts = secId.replace('sfs-', '').split('-');
+    return `SFS ${parts[0]}:${parts[1]} §`;
+  }
+  if (secId.startsWith('dora-')) {
+    return `DORA Art. ${secId.replace('dora-', '')}`;
+  }
+  if (secId.startsWith('aml-')) {
+    const parts = secId.replace('aml-', '').split('-');
+    return `AML 444/2017 ${parts[0]}:${parts[1]} §`;
+  }
+  return secId;
+}

@@ -2,6 +2,7 @@
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allControls, policy } from '../core/store.js';
+import { formatSecBadge } from '../ui/helpers.js';
 
 export function pageControls() {
   const u = S.ui;
@@ -174,23 +175,4 @@ function renderControlsTable(controls) {
       </tbody>
     </table>
   </div>`;
-}
-
-function formatSecBadge(secId) {
-  if (secId.startsWith('finlex-')) {
-    const parts = secId.replace('finlex-', '').split('-');
-    return `747/2012 ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('sfs-')) {
-    const parts = secId.replace('sfs-', '').split('-');
-    return `SFS ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('dora-')) {
-    return `DORA Art. ${secId.replace('dora-', '')}`;
-  }
-  if (secId.startsWith('aml-')) {
-    const parts = secId.replace('aml-', '').split('-');
-    return `AML 444/2017 ${parts[0]}:${parts[1]} §`;
-  }
-  return secId;
 }
