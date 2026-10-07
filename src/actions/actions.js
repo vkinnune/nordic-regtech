@@ -1273,6 +1273,7 @@ IN.regLibQ = el => {
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
+  delete S.ui.drawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
   fxSet('drawer');
@@ -1293,6 +1294,20 @@ A.resolveGap = el => {
     delete c.impactedByAmendment;
     logAct('resolved', null, `Signed off compliance gap on ${c.code}`);
     toast(`Kontrolli ${c.code} kuitattu toimivaksi.`);
+    save();
+    render();
+  }
+};
+
+A.signOffPolicy = el => {
+  const p = policy(el.dataset.id);
+  if (p) {
+    p.status = 'ACTIVE';
+    p.reviewedAt = Date.now();
+    p.reviewedBy = D().me;
+    logAct('resolved', null, `Signed off policy review for ${p.code}`);
+    toast(`Käytäntö ${p.code} kuitattu katselmoiduksi.`);
+    save();
     render();
   }
 };
@@ -1302,9 +1317,10 @@ A.createMitigationTask = el => {
   const secId = el.dataset.sec;
   const newId = uid('t');
   const pId = c?.policyId ? policy(c.policyId)?.projectId || 'p5' : 'p5';
+  const ctlKey = c ? c.code.replace(/^CTL-/, '') : 'REG';
   const newTask = {
     id: newId,
-    key: c ? `CTL-${c.code.split('-')[1]}` : `REG-${secId ? secId.split('-')[1] : '1'}`,
+    key: `CTL-${ctlKey}`,
     title: c ? `Päivitä kontrolli ${c.code} vastaamaan lakimuutosta` : `Lakimuutoksen toimeenpanotehtävä`,
     desc: c ? `Säädösmuutosvaatimus kontrollille: ${c.amendmentAlert || c.specification}` : `Vaatimusten arviointi pykälälle ${secId}`,
     project: pId,
@@ -1322,6 +1338,36 @@ A.createMitigationTask = el => {
   toast(`Päivitystehtävä ${newTask.key} luotu.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;
+  save();
+  render();
+};
+
+A.createPolicyUpdateTask = el => {
+  const p = policy(el.dataset.id);
+  const secId = el.dataset.sec;
+  const newId = uid('t');
+  const polKey = p ? p.code.replace(/^POL-/, '') : 'GOV';
+  const newTask = {
+    id: newId,
+    key: `POL-${polKey}`,
+    title: p ? `Päivitä käytäntö ${p.code} (${p.title})` : `Päivitä käytäntödokumentaatio`,
+    desc: `Käytännön katselmointi ja päivitys säädösmuutoksen johdosta (${secId || ''}).`,
+    project: p?.projectId || 'p5',
+    status: 'todo',
+    priority: 'high',
+    assignee: D().me,
+    created: Date.now(),
+    updated: Date.now(),
+    subtasks: [],
+    labels: ['Compliance', 'Policy'],
+  };
+  D().tasks.unshift(newTask);
+  if (p) p.taskId = newId;
+  logAct('created', newTask, `Created policy update task for ${p ? p.code : secId}`);
+  toast(`Päivitystehtävä ${newTask.key} luotu.`);
+  S.ui.drawer = newId;
+  delete S.ui.govDrawer;
+  save();
   render();
 };
 
@@ -1336,6 +1382,7 @@ A.linkControlPick = el => {
       c.statuteSections.push(secId);
     }
     toast(`Kontrolli ${c.code} linkitetty pykälään.`);
+    save();
   }
   closePop();
   render();

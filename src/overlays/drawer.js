@@ -3,7 +3,25 @@
    ===================================================================== */
 import { MOD, TODAY, ago, diffD, esc, fmtDate, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { D, S, commentsOf, isOver, mem, pColor, proj, task, policy, control, risk, regulationOfSection } from '../core/store.js';
+import {
+  D,
+  S,
+  commentsOf,
+  isOver,
+  mem,
+  pColor,
+  proj,
+  task,
+  policy,
+  control,
+  risk,
+  allControls,
+  allPolicies,
+  riskGapStatus,
+  riskControls,
+  riskExposureScore,
+  regulationOfSection,
+} from '../core/store.js';
 import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
@@ -76,6 +94,8 @@ export function drawerHtml(t) {
         ${prop('repeat', 'Repeat', `<button class="pillbtn ${t.recur ? '' : 'empty'}" data-a="pop" data-pop="recur" data-id="${t.id}">${ic('repeat', 13)}${t.recur || 'Does not repeat'}</button>`)}
         ${prop('clock', 'Estimate', `<button class="pillbtn ${t.estimate ? '' : 'empty'}" data-a="pop" data-pop="estimate" data-id="${t.id}">${ic('clock', 13)}${t.estimate ? esc(t.estimate) : 'Set estimate'}</button>`)}
         ${prop('git-branch', 'Dependencies', `<button class="pillbtn ${t.deps.length ? '' : 'empty'}" data-a="pop" data-pop="deps" data-id="${t.id}" style="height:auto;min-height:26px;flex-wrap:wrap">${t.deps.length ? t.deps.map(d => (task(d) ? `<span class="depchip mono" style="font-size:11px;padding:1px 5px;border-radius:4px;background:var(--surface-3)">${task(d).key}</span><span class="trunc" style="max-width:160px">${esc(task(d).title)}</span>` : '')).join('') : ic('git-branch', 13) + 'None'}</button>`)}
+        ${allControls().find(c => c.taskId === t.id) ? prop('shield', 'Kontrolli', `<button class="pillbtn" data-a="openGovDrawer" data-type="control" data-id="${allControls().find(c => c.taskId === t.id).id}" style="height:auto;padding:3px 7px">${ic('shield-check', 13)}<span class="mono">${allControls().find(c => c.taskId === t.id).code}</span> · ${esc(allControls().find(c => c.taskId === t.id).title)}</button>`) : ''}
+        ${allPolicies().find(p => p.taskId === t.id) ? prop('file-text', 'Käytäntö', `<button class="pillbtn" data-a="openGovDrawer" data-type="policy" data-id="${allPolicies().find(p => p.taskId === t.id).id}" style="height:auto;padding:3px 7px">${ic('file-text', 13)}<span class="mono">${allPolicies().find(p => p.taskId === t.id).code}</span> · ${esc(allPolicies().find(p => p.taskId === t.id).title)}</button>`) : ''}
       </dl>
 
       ${t.diff ? diffViewerHtml(t.diff) : ''}
@@ -290,11 +310,152 @@ export function govDrawerHtml(gov) {
       <dl class="kv" style="margin-top:16px">
         ${item.owner ? `<dt>${ic('user', 14)}Vastuu</dt><dd>${esc(item.owner)} ${item.ownerRole ? `<span class="muted" style="font-size:11px">(${esc(item.ownerRole)})</span>` : ''}</dd>` : ''}
         ${item.status ? `<dt>${ic('shield', 14)}Tila</dt><dd><span class="mono" style="font-size:12px;font-weight:600">${esc(item.status)}</span></dd>` : ''}
-        ${item.severity ? `<dt>${ic('alert-octagon', 14)}Vakavuus</dt><dd><span class="mono" style="font-size:12px;font-weight:600">${esc(item.severity)} (Altistus: ${item.exposureScore}/100)</span></dd>` : ''}
+        ${item.severity ? `<dt>${ic('alert-octagon', 14)}Vakavuus</dt><dd><span class="mono" style="font-size:12px;font-weight:600">${esc(item.severity)} (Altistus: ${riskExposureScore(item)}/100, ${riskGapStatus(item)})</span></dd>` : ''}
         ${item.authority ? `<dt>${ic('landmark', 14)}Valvoja</dt><dd>${esc(item.authority)}</dd>` : ''}
         ${item.frequency ? `<dt>${ic('clock', 14)}Tiheys</dt><dd>${esc(item.frequency)}</dd>` : ''}
         ${item.version ? `<dt>${ic('file-text', 14)}Versio</dt><dd>v${esc(item.version)} (Tarkistettu: ${esc(item.lastReviewDate)})</dd>` : ''}
       </dl>
+
+      <!-- Policy Review Alert if needing review -->
+      ${
+        type === 'policy' && item.status === 'NEEDS_REVIEW'
+          ? `<div class="alert danger" style="margin-top:16px">
+              ${ic('alert-triangle', 15)}
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:12.5px">Katselmointitarve: Säädösmuutosvaikutus</div>
+                <div style="font-size:12px;margin-top:2px">Käytäntö vaatii tarkastamisen ja päivityksen säädösmuutoksen johdosta.</div>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button class="btn btn-sm btn-primary" data-a="signOffPolicy" data-id="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('check-circle', 12)} Kuittaa katselmoiduksi</button>
+                  <button class="btn btn-sm btn-ghost" data-a="createPolicyUpdateTask" data-id="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('plus', 12)} Luo päivitystehtävä</button>
+                </div>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Parent Policy (for Controls) -->
+      ${
+        type === 'control' && item.policyId && policy(item.policyId)
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Ylempi organisaatiokäytäntö</h3></div>
+              <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                <div>
+                  <span class="mono" style="font-weight:700;font-size:12px">${esc(policy(item.policyId).code)}</span>
+                  <span style="font-size:12px;margin-left:6px">${esc(policy(item.policyId).title)}</span>
+                </div>
+                <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="policy" data-id="${item.policyId}" style="padding:2px 7px;font-size:11.5px">
+                  ${ic('file-text', 12)} Avaa käytäntö ➔
+                </button>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Linked Risk (for Controls) -->
+      ${
+        type === 'control' && item.riskId && risk(item.riskId)
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Kohteena oleva säädösriski</h3></div>
+              <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                <div>
+                  <span class="mono" style="font-weight:700;font-size:12px">${esc(risk(item.riskId).code)}</span>
+                  <span style="font-size:12px;margin-left:6px">${esc(risk(item.riskId).title)}</span>
+                </div>
+                <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="risk" data-id="${item.riskId}" style="padding:2px 7px;font-size:11.5px">
+                  ${ic('alert-triangle', 12)} Avaa riski ➔
+                </button>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Linked Operational Controls (for Policies & Risks) -->
+      ${
+        type === 'policy'
+          ? (() => {
+              const ctls = allControls().filter(c => c.policyId === item.id || (item.controlIds || []).includes(c.id));
+              if (!ctls.length) return '';
+              return `<div class="dsec" style="margin-top:20px">
+                <div class="dsec-h"><h3>Toteuttavat operatiiviset kontrollit (${ctls.length})</h3></div>
+                <div class="col" style="gap:6px">
+                  ${ctls
+                    .map(
+                      c => `
+                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                      <div>
+                        <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
+                        <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
+                        <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
+                      </div>
+                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
+                        ${ic('shield-check', 12)} Avaa kontrolli ➔
+                      </button>
+                    </div>`,
+                    )
+                    .join('')}
+                </div>
+              </div>`;
+            })()
+          : ''
+      }
+
+      ${
+        type === 'risk'
+          ? (() => {
+              const ctls = riskControls(item);
+              if (!ctls.length) return '';
+              return `<div class="dsec" style="margin-top:20px">
+                <div class="dsec-h"><h3>Mitoitetut suojakontrollit (${ctls.length})</h3></div>
+                <div class="col" style="gap:6px">
+                  ${ctls
+                    .map(
+                      c => `
+                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                      <div>
+                        <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
+                        <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
+                        <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
+                      </div>
+                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
+                        ${ic('shield-check', 12)} Avaa kontrolli ➔
+                      </button>
+                    </div>`,
+                    )
+                    .join('')}
+                </div>
+              </div>`;
+            })()
+          : ''
+      }
+
+      <!-- Linked Policies (for Risks) -->
+      ${
+        type === 'risk'
+          ? (() => {
+              const pols = (item.policyIds || []).map(policy).filter(Boolean);
+              if (!pols.length) return '';
+              return `<div class="dsec" style="margin-top:20px">
+                <div class="dsec-h"><h3>Sovellettavat käytännöt (${pols.length})</h3></div>
+                <div class="col" style="gap:6px">
+                  ${pols
+                    .map(
+                      p => `
+                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                      <div>
+                        <span class="mono" style="font-weight:700;font-size:12px">${esc(p.code)}</span>
+                        <span style="font-size:12px;margin-left:6px">${esc(p.title)}</span>
+                      </div>
+                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" style="padding:2px 7px;font-size:11.5px">
+                        ${ic('file-text', 12)} Avaa käytäntö ➔
+                      </button>
+                    </div>`,
+                    )
+                    .join('')}
+                </div>
+              </div>`;
+            })()
+          : ''
+      }
 
       <!-- Linked Statutory Sections -->
       ${

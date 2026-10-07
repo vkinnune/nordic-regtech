@@ -124,22 +124,19 @@ export function diffTokenHtml(tk) {
   return `<span class="diff-token-eq">${esc(tk.text)}</span>`;
 }
 
+const SEC_BADGE_PREFIXES = [
+  { prefix: 'finlex-', format: p => `747/2012 ${p[0]}:${p[1]} §` },
+  { prefix: 'sfs-', format: p => `SFS ${p[0]}:${p[1]} §` },
+  { prefix: 'dora-', format: p => `DORA Art. ${p.join('-')}` },
+  { prefix: 'aml-', format: p => `AML 444/2017 ${p[0]}:${p[1]} §` },
+];
+
 export function formatSecBadge(secId) {
   if (!secId) return '';
-  if (secId.startsWith('finlex-')) {
-    const parts = secId.replace('finlex-', '').split('-');
-    return `747/2012 ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('sfs-')) {
-    const parts = secId.replace('sfs-', '').split('-');
-    return `SFS ${parts[0]}:${parts[1]} §`;
-  }
-  if (secId.startsWith('dora-')) {
-    return `DORA Art. ${secId.replace('dora-', '')}`;
-  }
-  if (secId.startsWith('aml-')) {
-    const parts = secId.replace('aml-', '').split('-');
-    return `AML 444/2017 ${parts[0]}:${parts[1]} §`;
+  for (const { prefix, format } of SEC_BADGE_PREFIXES) {
+    if (secId.startsWith(prefix)) {
+      return format(secId.slice(prefix.length).split('-'));
+    }
   }
   return secId;
 }

@@ -1,7 +1,7 @@
 /* ---------- RISKS REGISTER (Compliance- ja säädösriskit) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, allRisks } from '../core/store.js';
+import { S, allRisks, riskGapStatus, riskExposureScore, riskControls } from '../core/store.js';
 import { formatSecBadge } from '../ui/helpers.js';
 
 export function pageRisks() {
@@ -11,10 +11,11 @@ export function pageRisks() {
 
   const risks = allRisks();
   const filtered = risks.filter(r => {
+    const gap = riskGapStatus(r);
     if (filter === 'CRITICAL' && r.severity !== 'CRITICAL') return false;
     if (filter === 'HIGH' && r.severity !== 'HIGH') return false;
     if (filter === 'MEDIUM' && r.severity !== 'MEDIUM') return false;
-    if (filter === 'OPEN_GAPS' && r.gapStatus !== 'OPEN_GAPS') return false;
+    if (filter === 'OPEN_GAPS' && gap !== 'OPEN_GAPS') return false;
 
     if (q) {
       const matchCode = r.code.toLowerCase().includes(q);
@@ -31,7 +32,7 @@ export function pageRisks() {
     return true;
   });
 
-  const gapCount = risks.filter(r => r.gapStatus === 'OPEN_GAPS').length;
+  const gapCount = risks.filter(r => riskGapStatus(r) === 'OPEN_GAPS').length;
   const criticalCount = risks.filter(r => r.severity === 'CRITICAL').length;
 
   return `<div class="page flush">
@@ -120,7 +121,10 @@ function renderRisksTable(risks) {
       <tbody>
         ${risks
           .map(r => {
-            const hasGap = r.gapStatus === 'OPEN_GAPS';
+            const gap = riskGapStatus(r);
+            const hasGap = gap === 'OPEN_GAPS';
+            const expScore = riskExposureScore(r);
+            const ctls = riskControls(r);
             const sevClass = r.severity === 'CRITICAL' ? 'gov-status-critical' : r.severity === 'HIGH' ? 'gov-status-high' : 'gov-status-med';
             const sevLabel = r.severity === 'CRITICAL' ? 'Kriittinen' : r.severity === 'HIGH' ? 'Korkea' : 'Kohtalainen';
 
@@ -141,7 +145,7 @@ function renderRisksTable(risks) {
             </td>
             <td>
               <div style="display:flex;align-items:center;gap:6px">
-                <span class="mono" style="font-size:12px;font-weight:600">${r.exposureScore}/100</span>
+                <span class="mono" style="font-size:12px;font-weight:600">${expScore}/100</span>
                 <span class="muted" style="font-size:11px">(${esc(r.likelihood)})</span>
               </div>
             </td>
@@ -166,7 +170,7 @@ function renderRisksTable(risks) {
               </div>
             </td>
             <td style="text-align:right">
-              <span class="mono" style="font-size:12px;font-weight:600">${(r.controlIds || []).length} kpl</span>
+              <span class="mono" style="font-size:12px;font-weight:600">${ctls.length} kpl</span>
             </td>
           </tr>`;
           })

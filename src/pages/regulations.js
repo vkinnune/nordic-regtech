@@ -10,7 +10,9 @@ import {
   allSectionsOf,
   regulation,
   policiesForSection,
+  policiesNeedingReviewForSection,
   controlsForSection,
+  impactedControlsForSection,
   risksForSection,
 } from '../core/store.js';
 import { stIcon } from '../ui/helpers.js';
@@ -437,8 +439,8 @@ function renderSectionGovernanceStrip(s) {
   const pols = policiesForSection(s.id);
   const ctls = controlsForSection(s.id);
   const rsks = risksForSection(s.id);
-  const impacted = ctls.filter(c => c.impactedByAmendment || c.status === 'DEFICIENT');
-  const reviewPols = pols.filter(p => p.status === 'NEEDS_REVIEW');
+  const impacted = impactedControlsForSection(s.id);
+  const reviewPols = policiesNeedingReviewForSection(s.id);
 
   if (!pols.length && !ctls.length && !rsks.length && s.status !== 'MODIFIED' && s.status !== 'ADDED') return '';
 
@@ -486,18 +488,32 @@ function renderSectionGovernanceStrip(s) {
     <!-- Policy Review Alert -->
     ${
       reviewPols.length
-        ? `<div class="finlex-impact-banner" style="border-left: 3px solid var(--text-3)">
+        ? reviewPols
+            .map(
+              p => `
+          <div class="finlex-impact-banner" style="border-left: 3px solid var(--text-3)">
             <div class="finlex-impact-head">
               <span style="display:flex;align-items:center;gap:6px">
                 ${ic('file-text', 13)}
-                <span>Käytännön katselmointitarve: ${reviewPols.map(p => esc(p.code)).join(', ')}</span>
+                <span>Käytännön katselmointitarve: <b>${esc(p.code)}</b> (${esc(p.title)})</span>
               </span>
-              <span class="mono faint" style="font-size:11px">Päivitys vaaditaan</span>
+              <span class="mono faint" style="font-size:11px">${esc(s.amendingAct || 'Päivitys vaaditaan')}</span>
             </div>
             <div class="muted" style="font-size:11.5px;line-height:1.4">
               Lakimuutos edellyttää sisäisen toimintaohjeen ja käytäntödokumentaation tarkastamista ja hyväksyntää.
             </div>
-          </div>`
+            <div class="finlex-impact-actions">
+              <button class="btn btn-sm btn-primary" data-a="createPolicyUpdateTask" data-id="${p.id}" data-sec="${s.id}" style="padding:2px 8px;font-size:11px">
+                ${ic('plus', 11)} Luo päivitystehtävä
+              </button>
+              <button class="btn btn-sm btn-ghost" data-a="signOffPolicy" data-id="${p.id}" style="padding:2px 8px;font-size:11px">
+                ${ic('check-circle', 11)} Kuittaa katselmoiduksi
+              </button>
+            </div>
+          </div>
+        `,
+            )
+            .join('')
         : ''
     }
 

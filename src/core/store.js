@@ -168,8 +168,29 @@ export function risk(id) {
   return allRisks().find(r => r.id === id || r.code === id) || null;
 }
 
+export function sectionOf(secId) {
+  const regs = allRegulations();
+  for (const reg of regs) {
+    const secs = allSectionsOf(reg);
+    const found = secs.find(s => s.id === secId);
+    if (found) return found;
+  }
+  return null;
+}
+
+export function isSectionAmended(sec) {
+  if (!sec) return false;
+  return sec.status === 'MODIFIED' || sec.status === 'ADDED' || !!sec.amendingAct;
+}
+
 export function policiesForSection(secId) {
   return allPolicies().filter(p => p.statuteSections && p.statuteSections.includes(secId));
+}
+
+export function policiesNeedingReviewForSection(secId) {
+  const sec = sectionOf(secId);
+  const amended = isSectionAmended(sec);
+  return policiesForSection(secId).filter(p => p.status === 'NEEDS_REVIEW' || (amended && !p.reviewedAt));
 }
 
 export function controlsForSection(secId) {
@@ -181,7 +202,29 @@ export function risksForSection(secId) {
 }
 
 export function impactedControlsForSection(secId) {
-  return controlsForSection(secId).filter(c => c.impactedByAmendment || c.status === 'DEFICIENT');
+  const sec = sectionOf(secId);
+  const amended = isSectionAmended(sec);
+  return controlsForSection(secId).filter(c => c.status === 'DEFICIENT' || c.impactedByAmendment || (amended && !c.signedOffAt));
+}
+
+export function riskControls(r) {
+  if (!r) return [];
+  const ids = r.controlIds || [];
+  return allControls().filter(c => ids.includes(c.id) || c.riskId === r.id);
+}
+
+export function riskGapStatus(r) {
+  const ctls = riskControls(r);
+  if (!ctls.length) return r.gapStatus || 'AT_RISK';
+  const hasGaps = ctls.some(c => c.status === 'DEFICIENT' || c.impactedByAmendment);
+  return hasGaps ? 'OPEN_GAPS' : 'COVERED';
+}
+
+export function riskExposureScore(r) {
+  const base = r.exposureScore || 70;
+  const status = riskGapStatus(r);
+  if (status === 'COVERED') return Math.max(10, Math.round(base * 0.35));
+  return base;
 }
 
 export function regulationOfSection(secId) {
