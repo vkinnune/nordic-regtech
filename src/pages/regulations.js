@@ -1,9 +1,8 @@
 /* ---------- FINLEX LEGISLATION EXPLORER & REGULATIONS LIBRARY ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, task } from '../core/store.js';
+import { S, task, REGULATIONS, allChaptersOf, allRegulations, allSectionsOf, regulation } from '../core/store.js';
 import { stIcon } from '../ui/helpers.js';
-import { REGULATIONS, allChaptersOf, allRegulations, allSectionsOf, regulation } from '../data/regulations.js';
 
 export function pageRegulations() {
   const u = S.ui;
@@ -370,7 +369,7 @@ function renderLawPicker(curAct, u) {
           }
         </div>
         <button class="btn btn-sm btn-ghost" data-a="setRegView" data-view="library" style="width:100%;justify-content:center;margin-top:4px;border-top:1px solid var(--border);border-radius:0 0 4px 4px;padding-top:6px">
-          ${ic('layout-grid', 13)} <span>Avaa lakikirjasto (Library view)</span>
+          ${ic('layout-grid', 13)} <span>Avaa lakikirjasto</span>
         </button>
       </div>
     `

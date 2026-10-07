@@ -139,3 +139,6 @@ export function team(id) {
   return teamsList().find(t => t.id === id) || null;
 }
 export const TM = new Proxy({}, { get: (_, k) => team(k) || NO_TEAM });
+
+/* ---------- statutory regulations lookups ---------- */
+export { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags } from '../data/regulations.js';

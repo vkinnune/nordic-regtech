@@ -186,7 +186,7 @@
 .finlex-reader-inner {
   max-width: 860px;
   margin: 0 auto;
-  padding: 24px 32px 80px;
+  padding: var(--gutter) var(--gutter) 80px;
 }
 
 .finlex-doc-head {
@@ -346,7 +346,7 @@
   text-underline-offset: 3px;
   font-weight: 600;
   color: var(--text);
-  background: rgba(46, 132, 86, 0.08);
+  background: var(--surface-3);
   padding: 0 2px;
 }
 
@@ -428,7 +428,7 @@
   overflow-y: auto;
   min-height: 0;
   background: var(--surface);
-  padding: 24px 32px 80px;
+  padding: var(--gutter) var(--gutter) 80px;
 }
 
 .finlex-lib-inner {
