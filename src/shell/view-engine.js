@@ -2,7 +2,22 @@
 import { DAY, TODAY, diffD, esc, parse } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { LABELS, PR, PRIOS, STATUSES } from '../core/constants.js';
-import { D, S, canSee, isOver, mem, pColor, proj, visibleProjects } from '../core/store.js';
+import {
+  D,
+  S,
+  canSee,
+  isOver,
+  mem,
+  pColor,
+  proj,
+  visibleProjects,
+  REGULATION_DOMAINS,
+  REGULATION_TIERS,
+  REGULATION_AUTHORITIES,
+  REGULATION_GOV_SCOPES,
+  REGULATION_STATUSES,
+  REGULATION_ERAS,
+} from '../core/store.js';
 import { av, prIcon, stIcon } from '../ui/helpers.js';
 
 export const FIELDS = {
@@ -55,11 +70,53 @@ export const FIELDS = {
     ],
   },
 };
+export const REG_FIELDS = {
+  domain: {
+    name: 'Sector',
+    icon: 'briefcase',
+    opts: () => REGULATION_DOMAINS.filter(d => d.id !== 'all').map(d => ({ id: d.id, name: d.label })),
+  },
+  tier: {
+    name: 'Legal Tier',
+    icon: 'layers',
+    opts: () => REGULATION_TIERS.filter(t => t.id !== 'all').map(t => ({ id: t.id, name: t.label })),
+  },
+  authority: {
+    name: 'Authority',
+    icon: 'landmark',
+    opts: () => REGULATION_AUTHORITIES.filter(a => a.id !== 'all').map(a => ({ id: a.id, name: a.label })),
+  },
+  gov: {
+    name: 'Governance',
+    icon: 'shield-check',
+    opts: () => REGULATION_GOV_SCOPES.filter(g => g.id !== 'all').map(g => ({ id: g.id, name: g.label })),
+  },
+  status: {
+    name: 'Status',
+    icon: 'file-check',
+    opts: () => REGULATION_STATUSES.filter(s => s.id !== 'all').map(s => ({ id: s.id, name: s.label })),
+  },
+  era: {
+    name: 'Era',
+    icon: 'calendar',
+    opts: () => REGULATION_ERAS.filter(e => e.id !== 'all').map(e => ({ id: e.id, name: e.label })),
+  },
+  jurisdiction: {
+    name: 'Jurisdiction',
+    icon: 'globe',
+    opts: () => [
+      { id: 'fi', name: 'Finland' },
+      { id: 'se', name: 'Sweden' },
+      { id: 'eu', name: 'European Union' },
+    ],
+  },
+};
+
 export function viewOf(key) {
   if (!S.views[key])
     S.views[key] = {
       filters: [],
-      sort: { f: 'manual', dir: 1 },
+      sort: key === 'regulations' ? { f: 'relevance', dir: 1 } : { f: 'manual', dir: 1 },
       group: key === 'tasks' || key === 'mytasks' ? 'status' : 'status',
       q: '',
       hidden: ['start', 'created', 'deps'],
@@ -151,9 +208,11 @@ export function groupTasks(ts, g) {
 export function filterChips(key) {
   const v = viewOf(key);
   if (!v.filters.length) return '';
+  const fields = key === 'regulations' ? REG_FIELDS : FIELDS;
   const chips = v.filters
     .map((f, i) => {
-      const F = FIELDS[f.f];
+      const F = fields[f.f] || FIELDS[f.f];
+      if (!F) return '';
       const opts = F.opts();
       const names = f.v.map(id => opts.find(o => o.id === id)?.name || id);
       const val = names.length ? (names.length > 2 ? `${names.length} selected` : names.join(', ')) : 'any';
@@ -162,23 +221,34 @@ export function filterChips(key) {
     .join('');
   return `<div class="chipsbar">${ic('list-filter', 13)}${chips}<button class="btn btn-sm btn-ghost" data-a="pop" data-pop="filter" data-key="${key}">${ic('plus', 12)}Add</button><span class="sp"></span><button class="btn btn-sm btn-ghost" data-a="clearFilters" data-key="${key}">Clear all</button></div>`;
 }
+
 export function viewToolbar(key, opt = {}) {
   const v = viewOf(key);
-  const sortName = {
-    manual: 'Manual',
-    title: 'Title',
-    due: 'Due date',
-    priority: 'Priority',
-    status: 'Status',
-    created: 'Created',
-    updated: 'Updated',
-    assignee: 'Assignee',
-    start: 'Start date',
-    estimate: 'Estimate',
-    project: 'Project',
-  }[v.sort.f];
+  const sortName =
+    key === 'regulations'
+      ? {
+          relevance: 'Relevance',
+          year_desc: 'Newest',
+          year_asc: 'Oldest',
+          title_asc: 'Title (A–Z)',
+          sections_desc: 'Most Sections',
+        }[v.sort.f] || 'Relevance'
+      : {
+          manual: 'Manual',
+          title: 'Title',
+          due: 'Due date',
+          priority: 'Priority',
+          status: 'Status',
+          created: 'Created',
+          updated: 'Updated',
+          assignee: 'Assignee',
+          start: 'Start date',
+          estimate: 'Estimate',
+          project: 'Project',
+        }[v.sort.f] || 'Manual';
+  const searchPlaceholder = opt.placeholder || (key === 'regulations' ? 'Search regulations…' : 'Search tasks');
   return `<div class="toolbar" role="toolbar">
-    <div class="inwrap">${ic('search', 13)}<input class="input search-sm" id="vq-${key}" data-in="viewQ" data-key="${key}" placeholder="Search tasks" value="${esc(v.q)}" aria-label="Search tasks"></div>
+    <div class="inwrap">${ic('search', 13)}<input class="input search-sm" id="vq-${key}" data-in="viewQ" data-key="${key}" placeholder="${searchPlaceholder}" value="${esc(v.q)}" aria-label="${searchPlaceholder}">${v.q ? `<button class="pillbtn" data-a="clearViewQ" data-key="${key}" style="padding:2px 5px;position:absolute;right:6px;top:50%;transform:translateY(-50%)" aria-label="Clear search">${ic('x', 11)}</button>` : ''}</div>
     <button class="btn btn-ghost ${v.filters.length ? 'on' : ''}" data-a="pop" data-pop="filter" data-key="${key}">${ic('list-filter', 14)}Filter${v.filters.length ? ` <span class="badge accent" style="height:16px;padding:0 5px">${v.filters.length}</span>` : ''}</button>
     <button class="btn btn-ghost" data-a="pop" data-pop="sort" data-key="${key}">${ic('arrow-up-down', 14)}<span class="hide-m">Sort:</span> ${sortName}</button>
     ${opt.group !== false ? `<button class="btn btn-ghost" data-a="pop" data-pop="group" data-key="${key}">${ic('rows-3', 14)}<span class="hide-m">Group:</span> ${{ status: 'Status', priority: 'Priority', assignee: 'Assignee', project: 'Project', due: 'Due date', none: 'None' }[v.group]}</button>` : ''}
@@ -187,4 +257,112 @@ export function viewToolbar(key, opt = {}) {
     <span class="sp"></span>
     ${opt.right || ''}
   </div>${filterChips(key)}`;
+}
+
+export function matchRegFilter(item, f) {
+  if (!f.v || !f.v.length) return true;
+  let hit = false;
+  if (f.f === 'domain') {
+    hit = f.v.includes(item.regDomain);
+  } else if (f.f === 'tier') {
+    hit = f.v.includes(item.regTier);
+  } else if (f.f === 'authority') {
+    hit = f.v.includes(item.regAuth);
+  } else if (f.f === 'gov') {
+    hit = f.v.some(val => {
+      if (val === 'controls') return item.hasLinkedControls;
+      if (val === 'policies') return item.hasLinkedPolicies;
+      if (val === 'any_gov') return item.hasLinkedControls || item.hasLinkedPolicies || item.hasLinkedRisks;
+      if (val === 'amended') return item.hasAmended;
+      return false;
+    });
+  } else if (f.f === 'status') {
+    hit = f.v.some(val => {
+      if (val === 'substantive') return !item.isRepeal;
+      if (val === 'repeal') return item.isRepeal;
+      return false;
+    });
+  } else if (f.f === 'era') {
+    hit = f.v.some(val => {
+      if (val === '2020s') return item.year >= 2020;
+      if (val === '2010s') return item.year >= 2010 && item.year <= 2019;
+      if (val === '2000s') return item.year >= 2000 && item.year <= 2009;
+      if (val === '1990s') return item.year >= 1990 && item.year <= 1999;
+      return false;
+    });
+  } else if (f.f === 'jurisdiction') {
+    hit = f.v.some(val => {
+      if (val === 'fi') return item.r.jurisdiction.includes('Finland');
+      if (val === 'se') return item.r.jurisdiction.includes('Sweden');
+      if (val === 'eu') return item.r.jurisdiction.includes('European Union');
+      return false;
+    });
+  }
+  return f.op === 'not' ? !hit : hit;
+}
+
+export function applyRegView(decorated, v, juris = 'all') {
+  let out = decorated;
+  if (juris && juris !== 'all') {
+    out = out.filter(item => {
+      if (juris === 'fi') return item.r.jurisdiction.includes('Finland');
+      if (juris === 'se') return item.r.jurisdiction.includes('Sweden');
+      if (juris === 'eu') return item.r.jurisdiction.includes('European Union');
+      return true;
+    });
+  }
+  if (v.filters && v.filters.length) {
+    out = out.filter(item => v.filters.every(f => matchRegFilter(item, f)));
+  }
+  if (v.q) {
+    const q = v.q.toLowerCase().trim();
+    out = out.filter(item => {
+      const r = item.r;
+      const matchCode = r.code && r.code.toLowerCase().includes(q);
+      const matchTitle = r.title && r.title.toLowerCase().includes(q);
+      const matchShort = r.shortTitle && r.shortTitle.toLowerCase().includes(q);
+      const matchAuth = r.authority && r.authority.toLowerCase().includes(q);
+      const matchSum = r.summary && r.summary.toLowerCase().includes(q);
+      const matchJuris = r.jurisdiction && r.jurisdiction.toLowerCase().includes(q);
+      const matchYear = String(item.year).includes(q);
+      const matchTag = r.tags && r.tags.some(t => t.toLowerCase().includes(q));
+      return matchCode || matchTitle || matchShort || matchAuth || matchSum || matchJuris || matchYear || matchTag;
+    });
+  }
+  return sortRegulations(out, v.sort);
+}
+
+export function sortRegulations(items, s = { f: 'relevance', dir: 1 }) {
+  const f = s?.f || 'relevance';
+  const d = s?.dir || 1;
+  const a = [...items];
+  return a.sort((x, y) => {
+    let diff = 0;
+    if (f === 'year_desc') {
+      diff = y.year - x.year || x.r.code.localeCompare(y.r.code);
+    } else if (f === 'year_asc') {
+      diff = x.year - y.year || x.r.code.localeCompare(y.r.code);
+    } else if (f === 'title_asc') {
+      const tA = (x.r.shortTitle || x.r.title || x.r.code).toLowerCase();
+      const tB = (y.r.shortTitle || y.r.title || y.r.code).toLowerCase();
+      diff = tA.localeCompare(tB);
+    } else if (f === 'sections_desc') {
+      diff = y.secs.length - x.secs.length || y.year - x.year;
+    } else {
+      // relevance
+      const score = item => {
+        let sc = 0;
+        if (item.linkedControlsCount > 0 || item.linkedPoliciesCount > 0) sc += 10000;
+        if (item.hasAmended) sc += 2000;
+        if (item.regTier === 'act' || item.regTier === 'eu') sc += 1000;
+        else if (item.regTier === 'ordinance') sc += 400;
+        if (!item.isRepeal) sc += 200;
+        sc += item.year;
+        sc += Math.min(item.secs.length, 50);
+        return sc;
+      };
+      diff = score(y) - score(x);
+    }
+    return diff * (d < 0 && f !== 'relevance' ? -1 : 1);
+  });
 }

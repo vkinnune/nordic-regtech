@@ -1050,6 +1050,10 @@ IN.viewQ = el => {
   viewOf(el.dataset.key).q = el.value;
   render();
 };
+A.clearViewQ = el => {
+  viewOf(el.dataset.key).q = '';
+  render();
+};
 A.addFilter = el => {
   const v = viewOf(el.dataset.key);
   v.filters.push({ f: el.dataset.f, op: 'is', v: [] });
@@ -1252,6 +1256,9 @@ A.clearRegLibQ = () => {
   render();
 };
 A.clearRegLibFilters = () => {
+  const v = viewOf('regulations');
+  v.filters = [];
+  v.q = '';
   S.ui.regLibQ = '';
   S.ui.regLibJuris = 'all';
   S.ui.regLibDomain = 'all';
@@ -1261,6 +1268,7 @@ A.clearRegLibFilters = () => {
   S.ui.regLibStatus = 'all';
   S.ui.regLibEra = 'all';
   S.ui.regLibSort = 'relevance';
+  S.ui.pop = null;
   fxSet({ tabs: true });
   render();
 };

@@ -2,10 +2,10 @@
 import { $, MOD, MONL, TODAY, WD, addD, dOff, diffD, esc, fmtDate, iso, parse } from '../core/utils.js';
 import { ic, wsLogo } from '../core/icons.js';
 import { LABELS, PRIOS, PSTAT, STATUSES } from '../core/constants.js';
-import { D, S, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects } from '../core/store.js';
+import { D, S, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects, REGULATION_SORTS } from '../core/store.js';
 import { av, avStack, prIcon, stIcon } from '../ui/helpers.js';
 import { focusKey, render } from '../shell/render.js';
-import { FIELDS, viewOf } from '../shell/view-engine.js';
+import { FIELDS, REG_FIELDS, viewOf } from '../shell/view-engine.js';
 import { TCOLS } from '../views/table.js';
 import { startOfWeek } from '../views/calendar.js';
 import { ctxMenu } from './context-menu.js';
@@ -249,6 +249,16 @@ export function popHtml(p) {
       break;
     case 'sort': {
       const v = viewOf(p.key);
+      if (p.key === 'regulations') {
+        inner =
+          `<div class="mh">Sort regulations by</div>` +
+          REGULATION_SORTS.map(
+            s =>
+              `<button class="mi" data-a="setSort" data-key="${p.key}" data-v="${s.id}">${s.label}${v.sort.f === s.id ? `<span class="ck">${ic('check', 14)}</span>` : ''}</button>`,
+          ).join('');
+        style = 'width:240px';
+        break;
+      }
       inner =
         `<div class="mh">Sort by</div>` +
         [
@@ -312,10 +322,12 @@ export function popHtml(p) {
       const v = viewOf(p.key);
       const f = v.filters[p.i];
       if (!f) break;
+      const fields = p.key === 'regulations' ? REG_FIELDS : FIELDS;
+      const F = fields[f.f] || FIELDS[f.f];
+      if (!F) break;
       inner =
-        `<div class="mh">${FIELDS[f.f].name} ${f.op === 'not' ? 'is not' : 'is'}</div>` +
-        FIELDS[f.f]
-          .opts()
+        `<div class="mh">${F.name} ${f.op === 'not' ? 'is not' : 'is'}</div>` +
+        F.opts()
           .map(
             o =>
               `<label class="mi" style="cursor:pointer"><input type="checkbox" class="check" data-a="fToggleVal" data-key="${p.key}" data-i="${p.i}" data-v="${o.id}" ${f.v.includes(o.id) ? 'checked' : ''}>${o.html || ''}${esc(o.name)}</label>`,
@@ -392,14 +404,16 @@ export function popHtml(p) {
 }
 export function filterBuilder(p) {
   const v = viewOf(p.key);
+  const fields = p.key === 'regulations' ? REG_FIELDS : FIELDS;
   const rows = v.filters
     .map((f, i) => {
-      const F = FIELDS[f.f];
+      const F = fields[f.f] || FIELDS[f.f];
+      if (!F) return '';
       const opts = F.opts();
       const names = f.v.map(id => opts.find(o => o.id === id)?.name || id);
       const open = p.edit === i;
       return `<div class="frow"><span class="conj">${i ? 'and' : 'Where'}</span>
-      <select class="select" data-in="fField" data-key="${p.key}" data-i="${i}" aria-label="Field">${Object.entries(FIELDS)
+      <select class="select" data-in="fField" data-key="${p.key}" data-i="${i}" aria-label="Field">${Object.entries(fields)
         .map(([k, x]) => `<option value="${k}" ${f.f === k ? 'selected' : ''}>${x.name}</option>`)
         .join('')}</select>
       <select class="select" data-in="fOp" data-key="${p.key}" data-i="${i}" aria-label="Operator"><option value="is" ${f.op === 'is' ? 'selected' : ''}>is</option><option value="not" ${f.op === 'not' ? 'selected' : ''}>is not</option></select>
@@ -408,9 +422,13 @@ export function filterBuilder(p) {
       ${open ? `<div style="margin-left:50px;border:1px solid var(--border);border-radius:var(--r);padding:4px;max-height:200px;overflow:auto">${opts.map(o => `<label class="mi" style="cursor:pointer;min-height:28px"><input type="checkbox" class="check" data-a="fToggleVal" data-key="${p.key}" data-i="${i}" data-v="${o.id}" ${f.v.includes(o.id) ? 'checked' : ''}>${o.html || ''}${esc(o.name)}</label>`).join('')}</div>` : ''}`;
     })
     .join('');
+  const emptyText =
+    p.key === 'regulations'
+      ? 'No filters applied. Combine filters to narrow the regulation library, e.g. Sector is Banking and Authority is FI.'
+      : 'No filters applied. Combine filters to narrow the task list, e.g. Status is In Progress and Assignee is Sarah.';
   return `<div class="mh fb-h">Filter by${v.filters.length ? `<button class="btn btn-sm btn-ghost" data-a="clearFilters" data-key="${p.key}">Clear all</button>` : ''}</div>
-    ${rows ? `<div class="fb-rows">${rows}</div>` : '<p class="fb-empty">No filters applied. Combine filters to narrow the task list, e.g. Status is In Progress and Assignee is Sarah.</p>'}
-    <div class="msep"></div><div class="fb-add"><span class="faint">Add filter:</span>${Object.entries(FIELDS)
+    ${rows ? `<div class="fb-rows">${rows}</div>` : `<p class="fb-empty">${emptyText}</p>`}
+    <div class="msep"></div><div class="fb-add"><span class="faint">Add filter:</span>${Object.entries(fields)
       .map(([k, x]) => `<button class="badge" style="cursor:pointer" data-a="addFilter" data-key="${p.key}" data-f="${k}">${ic(x.icon, 11)}${x.name}</button>`)
       .join('')}</div>`;
 }
