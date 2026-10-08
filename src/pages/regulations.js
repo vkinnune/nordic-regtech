@@ -3,22 +3,20 @@ import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import {
   S,
-  task,
   REGULATIONS,
   allChaptersOf,
   allRegulations,
   allSectionsOf,
   regulation,
   policiesForSection,
-  policiesNeedingReviewForSection,
   controlsForSection,
-  impactedControlsForSection,
   risksForSection,
   allPolicies,
   allControls,
   isControlImpacted,
+  isPolicyImpacted,
 } from '../core/store.js';
-import { empty, stIcon } from '../ui/helpers.js';
+import { empty } from '../ui/helpers.js';
 
 export function pageRegulations() {
   const u = S.ui;
@@ -364,7 +362,6 @@ function renderFinlexSections(chapters, activeSecId, showPlain, q) {
 
 function renderSectionBlock(s, activeSecId, showPlain) {
   const isActive = s.id === activeSecId;
-  const t = s.taskId ? task(s.taskId) : null;
   const textToShow = s.textEn || s.text;
   const headingToShow = s.headingEn || s.heading;
 
@@ -400,34 +397,25 @@ function renderSectionBlock(s, activeSecId, showPlain) {
       ${formatFinlexBody(textToShow, s.status)}
     </div>
 
-    <!-- GOVERNANCE & CONTROLS STRIP (Policies, Controls, Risks & Impact Alerts) -->
+    <!-- GOVERNANCE & CONTROLS STRIP -->
     ${renderSectionGovernanceStrip(s)}
 
-    <!-- METADATA & LINKED TASKS -->
-    <footer class="finlex-sec-foot">
-      ${
-        s.crossRefs && s.crossRefs.length
-          ? s.crossRefs
+    <!-- CROSS REFERENCES -->
+    ${
+      s.crossRefs && s.crossRefs.length
+        ? `<footer class="finlex-sec-foot">
+            ${s.crossRefs
               .map(
                 cr => `
-            <button class="finlex-ref-chip" data-a="openRegInReader" data-id="${cr.regId}" title="Navigate to regulation">
-              ${ic('link-2', 11)}Ref: ${esc(cr.label)}
-            </button>
-          `,
+              <button class="finlex-ref-chip" data-a="openRegInReader" data-id="${cr.regId}" title="Navigate to regulation">
+                ${ic('link-2', 11)}Ref: ${esc(cr.label)}
+              </button>
+            `,
               )
-              .join('')
-          : ''
-      }
-      ${
-        t
-          ? `<button class="finlex-task-btn" data-a="openTask" data-id="${t.id}" title="Open task and regulatory change requirements">
-              ${stIcon(t.status, 12)}
-              <span>Task: <b>${esc(t.key)}</b> (${esc(t.title)})</span>
-              ${ic('arrow-right', 12)}
-            </button>`
-          : ''
-      }
-    </footer>
+              .join('')}
+          </footer>`
+        : ''
+    }
   </article>`;
 }
 
@@ -435,8 +423,6 @@ function renderSectionGovernanceStrip(s) {
   const pols = policiesForSection(s.id);
   const ctls = controlsForSection(s.id);
   const rsks = risksForSection(s.id);
-  const impacted = impactedControlsForSection(s.id);
-  const reviewPols = policiesNeedingReviewForSection(s.id);
 
   if (!pols.length && !ctls.length && !rsks.length && s.status !== 'MODIFIED' && s.status !== 'ADDED') return '';
 
@@ -447,7 +433,7 @@ function renderSectionGovernanceStrip(s) {
         ${pols
           .map(
             p => `
-          <button class="finlex-gov-chip ${p.status === 'NEEDS_REVIEW' ? 'alert' : ''}" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Open policy ${esc(p.code)}: ${esc(p.title)}">
+          <button class="finlex-gov-chip ${isPolicyImpacted(p) ? 'alert' : ''}" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Open policy ${esc(p.code)}: ${esc(p.title)}">
             ${ic('file-text', 11)}
             <span class="mono">${esc(p.code)}</span>
           </button>
@@ -481,73 +467,6 @@ function renderSectionGovernanceStrip(s) {
         </button>
       </div>
     </div>
-
-    <!-- Policy Review Alert -->
-    ${
-      reviewPols.length
-        ? reviewPols
-            .map(
-              p => `
-          <div class="finlex-impact-banner" style="border-left: 3px solid var(--text-3)">
-            <div class="finlex-impact-head">
-              <span style="display:flex;align-items:center;gap:6px">
-                ${ic('file-text', 13)}
-                <span>Policy review required: <b>${esc(p.code)}</b> (${esc(p.title)})</span>
-              </span>
-              <span class="mono faint" style="font-size:11px">${esc(s.amendingAct || 'Review required')}</span>
-            </div>
-            <div class="muted" style="font-size:11.5px;line-height:1.4">
-              Statutory amendment requires review and sign-off of internal policies and operational documentation.
-            </div>
-            <div class="finlex-impact-actions">
-              <button class="btn btn-sm btn-primary" data-a="createPolicyUpdateTask" data-id="${p.id}" data-sec="${s.id}" style="padding:2px 8px;font-size:11px">
-                ${ic('plus', 11)} Create update task
-              </button>
-              <button class="btn btn-sm btn-ghost" data-a="signOffPolicy" data-id="${p.id}" style="padding:2px 8px;font-size:11px">
-                ${ic('check-circle', 11)} Sign off review
-              </button>
-            </div>
-          </div>
-        `,
-            )
-            .join('')
-        : ''
-    }
-
-    <!-- Law Change Impact Assessment Alerts for impacted controls -->
-    ${
-      impacted.length
-        ? impacted
-            .map(
-              c => `
-          <div class="finlex-impact-banner">
-            <div class="finlex-impact-head">
-              <span style="display:flex;align-items:center;gap:6px">
-                ${ic('alert-circle', 13)}
-                <span>Statutory amendment impacts control <b>${esc(c.code)}</b> (${esc(c.title)})</span>
-              </span>
-              <span class="mono faint" style="font-size:11px">${esc(s.amendingAct || '')}</span>
-            </div>
-            <div class="muted" style="font-size:11.5px;line-height:1.4">
-              ${esc(c.amendmentAlert || 'Control operation and thresholds must be verified against the regulatory amendment.')}
-            </div>
-            <div class="finlex-impact-actions">
-              <button class="btn btn-sm btn-primary" data-a="createMitigationTask" data-sec="${s.id}" data-ctl="${c.id}" style="padding:2px 8px;font-size:11px">
-                ${ic('plus', 11)} Create update task
-              </button>
-              <button class="btn btn-sm btn-ghost" data-a="resolveGap" data-id="${c.id}" style="padding:2px 8px;font-size:11px">
-                ${ic('check-circle', 11)} Sign off as covered
-              </button>
-              <button class="btn btn-sm btn-ghost" data-a="pop" data-pop="linkControl" data-sec="${s.id}" style="padding:2px 8px;font-size:11px">
-                ${ic('link-2', 11)} Link control
-              </button>
-            </div>
-          </div>
-        `,
-            )
-            .join('')
-        : ''
-    }
   </div>`;
 }
 

@@ -367,23 +367,6 @@
   border-color: var(--border-strong);
 }
 
-.finlex-task-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 3px;
-  padding: 2px 8px;
-  cursor: pointer;
-}
-.finlex-task-btn:hover {
-  background: var(--surface-3);
-}
-
 @media (max-width: 840px) {
   .finlex-container {
     flex-direction: column;
