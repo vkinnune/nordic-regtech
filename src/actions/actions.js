@@ -201,7 +201,7 @@ A.openProject = el => go('project', { id: el.dataset.id, tab: S.prefs.defaultTab
 A.set = el => {
   const k = el.dataset.k;
   let v = el.dataset.v;
-  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$|Layout$/.test(k)) fxSet({ tabs: true });
+  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$|Layout$|Domain$|Tier$|Auth$|Gov$|Era$|Sort$/.test(k)) fxSet({ tabs: true });
   if (k === 'inboxSel' && !v) v = null;
   S.ui[k] = v;
   if (k === 'membersTab' || k === 'searchCat') S.ui.pop = null;
@@ -1236,6 +1236,23 @@ A.clearRegLibQ = () => {
 A.clearRegLibFilters = () => {
   S.ui.regLibQ = '';
   S.ui.regLibJuris = 'all';
+  S.ui.regLibDomain = 'all';
+  S.ui.regLibTier = 'all';
+  S.ui.regLibAuth = 'all';
+  S.ui.regLibGov = 'all';
+  S.ui.regLibStatus = 'all';
+  S.ui.regLibEra = 'all';
+  S.ui.regLibSort = 'relevance';
+  fxSet({ tabs: true });
+  render();
+};
+A.removeRegLibFilter = el => {
+  const k = el.dataset.k;
+  if (!k) return;
+  if (k === 'regLibQ') S.ui.regLibQ = '';
+  else if (k === 'regLibJuris') S.ui.regLibJuris = 'all';
+  else if (k === 'regLibSort') S.ui.regLibSort = 'relevance';
+  else S.ui[k] = 'all';
   fxSet({ tabs: true });
   render();
 };
@@ -1259,6 +1276,41 @@ IN.regQ = el => {
 
 IN.regLibQ = el => {
   S.ui.regLibQ = el.value;
+  render();
+};
+IN.regLibDomain = el => {
+  S.ui.regLibDomain = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibTier = el => {
+  S.ui.regLibTier = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibAuth = el => {
+  S.ui.regLibAuth = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibGov = el => {
+  S.ui.regLibGov = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibStatus = el => {
+  S.ui.regLibStatus = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibEra = el => {
+  S.ui.regLibEra = el.value;
+  fxSet({ tabs: true });
+  render();
+};
+IN.regLibSort = el => {
+  S.ui.regLibSort = el.value;
+  fxSet({ tabs: true });
   render();
 };
 

@@ -141,8 +141,48 @@ export function team(id) {
 export const TM = new Proxy({}, { get: (_, k) => team(k) || NO_TEAM });
 
 /* ---------- statutory regulations lookups ---------- */
-import { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags, findSectionAndRegulation } from '../data/regulations.js';
-export { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags };
+import {
+  REGULATIONS,
+  allRegulations,
+  regulation,
+  allChaptersOf,
+  allSectionsOf,
+  allTags,
+  findSectionAndRegulation,
+  getRegulationYear,
+  getRegulationDomain,
+  getRegulationTier,
+  getRegulationAuthority,
+  isRegulationRepeal,
+  REGULATION_DOMAINS,
+  REGULATION_TIERS,
+  REGULATION_AUTHORITIES,
+  REGULATION_GOV_SCOPES,
+  REGULATION_STATUSES,
+  REGULATION_ERAS,
+  REGULATION_SORTS,
+} from '../data/regulations.js';
+export {
+  REGULATIONS,
+  allRegulations,
+  regulation,
+  allChaptersOf,
+  allSectionsOf,
+  allTags,
+  findSectionAndRegulation,
+  getRegulationYear,
+  getRegulationDomain,
+  getRegulationTier,
+  getRegulationAuthority,
+  isRegulationRepeal,
+  REGULATION_DOMAINS,
+  REGULATION_TIERS,
+  REGULATION_AUTHORITIES,
+  REGULATION_GOV_SCOPES,
+  REGULATION_STATUSES,
+  REGULATION_ERAS,
+  REGULATION_SORTS,
+};
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 export { POLICIES, CONTROLS, RISKS } from '../data/governance.js';

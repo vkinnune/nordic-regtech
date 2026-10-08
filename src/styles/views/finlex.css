@@ -428,47 +428,235 @@
   margin-bottom: 24px;
 }
 
-.finlex-lib-search-bar {
+/* Multi-dimensional Filter Toolbar */
+.finlex-filter-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+
+.finlex-filter-main-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
+  flex-wrap: wrap;
 }
 
-.finlex-lib-filters-row {
+.finlex-filter-controls-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.finlex-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.finlex-filter-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.finlex-filter-select {
+  width: 100%;
+  height: 32px;
+  font-size: 12px;
+  padding: 0 24px 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239C988F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur),
+    box-shadow var(--dur);
+}
+.finlex-filter-select:hover {
+  border-color: var(--text-2);
+}
+.finlex-filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  outline: none;
+}
+.finlex-filter-select.is-active {
+  border-color: var(--text);
+  background-color: var(--surface);
+  font-weight: 600;
+}
+
+/* Quick chips strip */
+.finlex-quick-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid var(--divider);
+}
+
+.finlex-quick-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  margin-right: 2px;
+}
+
+.finlex-quick-chip {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all var(--dur);
+  user-select: none;
+}
+.finlex-quick-chip:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.finlex-quick-chip.on {
+  background: var(--text);
+  color: var(--text-inv);
+  border-color: var(--text);
+  font-weight: 600;
+}
+.finlex-quick-chip .chip-cnt {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+/* Active filters summary bar */
+.finlex-active-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  padding: 2px 0 6px;
 }
 
-.finlex-lib-filter-pills {
+.finlex-active-list {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.finlex-filter-pill {
-  font-size: 12px;
+.finlex-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
   font-weight: 500;
-  padding: 3px 10px;
+  padding: 2px 7px 2px 9px;
   border-radius: var(--r-full);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
-  cursor: pointer;
-  transition: all var(--dur);
-}
-.finlex-filter-pill:hover {
   background: var(--surface-3);
+  border: 1px solid var(--border-strong);
   color: var(--text);
 }
-.finlex-filter-pill.on {
-  background: var(--text);
-  color: var(--text-inv);
-  border-color: var(--text);
+.finlex-active-pill-remove {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-3);
+  border-radius: 50%;
+}
+.finlex-active-pill-remove:hover {
+  color: var(--text);
+}
+
+.finlex-count-text {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* Metadata badges */
+.finlex-tier-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.finlex-tier-badge.act {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.finlex-tier-badge.eu {
+  background: color-mix(in srgb, var(--blue, #3b82f6) 12%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--blue, #3b82f6) 30%, transparent);
+}
+
+.finlex-domain-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.finlex-gov-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--green, #10b981) 12%, var(--surface));
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--green, #10b981) 30%, transparent);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.finlex-repeal-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text-3);
+  border: 1px dashed var(--border);
 }
 
 /* Grid Layout */

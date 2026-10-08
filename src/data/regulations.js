@@ -831,3 +831,123 @@ export function allTags() {
   });
   return Array.from(set).sort();
 }
+
+export function getRegulationYear(r) {
+  if (!r) return 0;
+  if (r.inForce) {
+    const m = r.inForce.match(/(\d{4})/);
+    if (m) return parseInt(m[1], 10);
+  }
+  if (r.code) {
+    const m = r.code.match(/(\d{4})/);
+    if (m) return parseInt(m[1], 10);
+  }
+  return 0;
+}
+
+export function getRegulationDomain(r) {
+  if (!r) return 'general';
+  const text = `${r.title || ''} ${r.shortTitle || ''} ${r.summary || ''} ${(r.tags || []).join(' ')}`.toLowerCase();
+  if (/penningtvätt|terroristfinansiering|\baml\b|sanction|fiu|penningtvatt/.test(text)) return 'aml';
+  if (/dora|resilience|cyber|it-drift|informationssäkerhet|it-system|molntjänst|ict\b/.test(text)) return 'ict';
+  if (/hållbar|sfdr|taxonomy|esg|klimat|miljö/.test(text)) return 'esg';
+  if (/\bfond|\baifm\b|\baif\b|ucits|värdepappersfond|kapitalförvaltning|investeringsfond/.test(text)) return 'funds';
+  if (
+    /värdepapper|mifid|börs|\bhandel\b|marknadsmissbruk|clearing|derivat|aktier|prospekt|short selling|finansiella instrument|fondkommission|algorithmic/.test(
+      text,
+    )
+  )
+    return 'securities';
+  if (/\bbank\b|kredit|kapitaltäckning|inlåning|utlåning|bolån|insättningsgaranti|resolution|\bcrd\b|\bcrr\b|likviditet/.test(text)) return 'banking';
+  if (/försäkring|pension|tjänstepension|solvens|livförsäkring|skadeförsäkring/.test(text)) return 'insurance';
+  if (/betalning|betaltjänst|\bpsd\b|elektroniska pengar|e-pengar/.test(text)) return 'payments';
+  return 'general';
+}
+
+export function getRegulationTier(r) {
+  if (!r) return 'other';
+  const t = r.type || '';
+  const code = r.code || '';
+  const title = (r.title || '').toLowerCase();
+  if (t === 'eu_regulation' || t === 'eu_directive' || /^regulation \(eu\)|^directive/i.test(code)) return 'eu';
+  if (title.startsWith('förordning') || title.includes('förordning (')) return 'ordinance';
+  if (t === 'national_act' || (code.startsWith('SFS') && !title.includes('förordning')) || /act\b/i.test(title) || title.startsWith('lag (')) return 'act';
+  if (t === 'fsa_regulation' || code.startsWith('FFFS') || /määräys/i.test(title)) return 'supervisory';
+  return 'other';
+}
+
+export function getRegulationAuthority(r) {
+  if (!r) return 'other';
+  const auth = (r.authority || '').toLowerCase();
+  const jur = (r.jurisdiction || '').toLowerCase();
+  if (auth.includes('finansinspektionen') || jur.includes('finansinspektionen') || (r.code && r.code.startsWith('FFFS'))) return 'fi';
+  if (auth.includes('fin-fsa') || auth.includes('finanssivalvonta') || jur.includes('finland')) return 'fin-fsa';
+  if (auth.includes('riksdagen') || jur.includes('riksdagen')) return 'riksdagen';
+  if (auth.includes('european union') || jur.includes('european union') || auth.includes('esma') || auth.includes('eba')) return 'eu';
+  return 'other';
+}
+
+export function isRegulationRepeal(r) {
+  if (!r) return false;
+  const text = `${r.title || ''} ${r.summary || ''}`.toLowerCase();
+  return text.includes('upphävande av') || text.includes('upphäva ');
+}
+
+export const REGULATION_DOMAINS = [
+  { id: 'all', label: 'All Sectors' },
+  { id: 'securities', label: 'Securities & Markets' },
+  { id: 'banking', label: 'Banking & Credit' },
+  { id: 'funds', label: 'Funds & Asset Management' },
+  { id: 'insurance', label: 'Insurance & Pensions' },
+  { id: 'payments', label: 'Payments & FinTech' },
+  { id: 'aml', label: 'Anti-Money Laundering (AML)' },
+  { id: 'ict', label: 'ICT & Resilience (DORA)' },
+  { id: 'esg', label: 'ESG & Sustainability' },
+  { id: 'general', label: 'General / Cross-Sector' },
+];
+
+export const REGULATION_TIERS = [
+  { id: 'all', label: 'All Legal Tiers' },
+  { id: 'act', label: 'Parliamentary Acts' },
+  { id: 'supervisory', label: 'Supervisory Regulations' },
+  { id: 'ordinance', label: 'Government Ordinances' },
+  { id: 'eu', label: 'EU Directives & Regulations' },
+];
+
+export const REGULATION_AUTHORITIES = [
+  { id: 'all', label: 'All Authorities' },
+  { id: 'fi', label: 'Finansinspektionen (FI)' },
+  { id: 'fin-fsa', label: 'FIN-FSA (Finanssivalvonta)' },
+  { id: 'riksdagen', label: 'Riksdagen / Government' },
+  { id: 'eu', label: 'European Union (ESMA / EBA)' },
+];
+
+export const REGULATION_GOV_SCOPES = [
+  { id: 'all', label: 'All Governance Scopes' },
+  { id: 'controls', label: 'With Linked Controls' },
+  { id: 'policies', label: 'With Linked Policies' },
+  { id: 'any_gov', label: 'Any Governance Links' },
+  { id: 'amended', label: 'Amended / Needs Review' },
+];
+
+export const REGULATION_STATUSES = [
+  { id: 'all', label: 'All Rules' },
+  { id: 'substantive', label: 'Substantive Rules Only' },
+  { id: 'repeal', label: 'Repeal Notices Only' },
+];
+
+export const REGULATION_ERAS = [
+  { id: 'all', label: 'All Eras (1991–2027)' },
+  { id: '2020s', label: '2020–2027 (Current)' },
+  { id: '2010s', label: '2010–2019' },
+  { id: '2000s', label: '2000–2009' },
+  { id: '1990s', label: '1990–1999 (Historical)' },
+];
+
+export const REGULATION_SORTS = [
+  { id: 'relevance', label: 'Relevance & Governance' },
+  { id: 'year_desc', label: 'Year: Newest First' },
+  { id: 'year_asc', label: 'Year: Oldest First' },
+  { id: 'title_asc', label: 'Title & Code (A–Z)' },
+  { id: 'sections_desc', label: 'Most Sections First' },
+];

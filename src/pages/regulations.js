@@ -13,8 +13,22 @@ import {
   risksForSection,
   allPolicies,
   allControls,
+  allRisks,
   isControlImpacted,
   isPolicyImpacted,
+  isSectionAmended,
+  getRegulationYear,
+  getRegulationDomain,
+  getRegulationTier,
+  getRegulationAuthority,
+  isRegulationRepeal,
+  REGULATION_DOMAINS,
+  REGULATION_TIERS,
+  REGULATION_AUTHORITIES,
+  REGULATION_GOV_SCOPES,
+  REGULATION_STATUSES,
+  REGULATION_ERAS,
+  REGULATION_SORTS,
 } from '../core/store.js';
 import { empty } from '../ui/helpers.js';
 
@@ -33,16 +47,122 @@ export function pageRegulations() {
 function renderRegulationsLibrary(u) {
   const libQ = (u.regLibQ || '').toLowerCase().trim();
   const juris = u.regLibJuris || 'all'; // 'all', 'fi', 'se', 'eu'
+  const domain = u.regLibDomain || 'all';
+  const tier = u.regLibTier || 'all';
+  const auth = u.regLibAuth || 'all';
+  const gov = u.regLibGov || 'all';
+  const status = u.regLibStatus || 'all';
+  const era = u.regLibEra || 'all';
+  const sort = u.regLibSort || 'relevance';
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
-  const allActs = allRegulations();
-  const filtered = allActs.filter(r => {
-    // Jurisdiction filter
-    if (juris === 'fi' && !r.jurisdiction.includes('Finland')) return false;
-    if (juris === 'se' && !r.jurisdiction.includes('Sweden')) return false;
-    if (juris === 'eu' && !r.jurisdiction.includes('European Union')) return false;
+  const policies = allPolicies();
+  const controls = allControls();
+  const risks = allRisks();
 
-    // Search query
+  const polSecSet = new Set(policies.flatMap(p => p.statuteSections || []));
+  const ctlSecSet = new Set(controls.flatMap(c => c.statuteSections || []));
+  const rskSecSet = new Set(risks.flatMap(r => r.statuteSections || []));
+
+  const allActs = allRegulations();
+  const totalSections = allActs.reduce((sum, a) => sum + allSectionsOf(a).length, 0);
+  const totalPoliciesCount = policies.length;
+  const totalControlsCount = controls.length;
+
+  // Decorate all acts with precomputed metadata for fast multi-dimensional evaluation
+  const decorated = allActs.map(r => {
+    const secs = allSectionsOf(r);
+    const year = getRegulationYear(r);
+    const regDomain = getRegulationDomain(r);
+    const regTier = getRegulationTier(r);
+    const regAuth = getRegulationAuthority(r);
+    const isRepeal = isRegulationRepeal(r);
+    const hasLinkedPolicies = secs.some(s => polSecSet.has(s.id));
+    const hasLinkedControls = secs.some(s => ctlSecSet.has(s.id));
+    const hasLinkedRisks = secs.some(s => rskSecSet.has(s.id));
+    const hasAmended = secs.some(isSectionAmended);
+    const linkedControlsCount = secs.reduce((acc, s) => acc + controlsForSection(s.id).length, 0);
+    const linkedPoliciesCount = secs.reduce((acc, s) => acc + policiesForSection(s.id).length, 0);
+
+    return {
+      r,
+      secs,
+      year,
+      regDomain,
+      regTier,
+      regAuth,
+      isRepeal,
+      hasLinkedPolicies,
+      hasLinkedControls,
+      hasLinkedRisks,
+      hasAmended,
+      linkedControlsCount,
+      linkedPoliciesCount,
+    };
+  });
+
+  // Base subset scoped by jurisdiction
+  const jurisScoped = decorated.filter(item => {
+    if (juris === 'fi' && !item.r.jurisdiction.includes('Finland')) return false;
+    if (juris === 'se' && !item.r.jurisdiction.includes('Sweden')) return false;
+    if (juris === 'eu' && !item.r.jurisdiction.includes('European Union')) return false;
+    return true;
+  });
+
+  // Compute live match counts for current jurisdiction scope
+  const domainCounts = {};
+  const tierCounts = {};
+  const authCounts = {};
+  const govCounts = { all: jurisScoped.length, controls: 0, policies: 0, any_gov: 0, amended: 0 };
+  const statusCounts = { all: jurisScoped.length, substantive: 0, repeal: 0 };
+  const eraCounts = { all: jurisScoped.length, '2020s': 0, '2010s': 0, '2000s': 0, '1990s': 0 };
+
+  jurisScoped.forEach(item => {
+    domainCounts[item.regDomain] = (domainCounts[item.regDomain] || 0) + 1;
+    tierCounts[item.regTier] = (tierCounts[item.regTier] || 0) + 1;
+    authCounts[item.regAuth] = (authCounts[item.regAuth] || 0) + 1;
+    if (item.hasLinkedControls) govCounts.controls++;
+    if (item.hasLinkedPolicies) govCounts.policies++;
+    if (item.hasLinkedControls || item.hasLinkedPolicies || item.hasLinkedRisks) govCounts.any_gov++;
+    if (item.hasAmended) govCounts.amended++;
+    if (item.isRepeal) statusCounts.repeal++;
+    else statusCounts.substantive++;
+    if (item.year >= 2020) eraCounts['2020s']++;
+    else if (item.year >= 2010) eraCounts['2010s']++;
+    else if (item.year >= 2000) eraCounts['2000s']++;
+    else if (item.year >= 1990) eraCounts['1990s']++;
+  });
+
+  // Multi-dimensional filtering
+  const filtered = jurisScoped.filter(item => {
+    const { r, year, regDomain, regTier, regAuth, isRepeal, hasLinkedControls, hasLinkedPolicies, hasLinkedRisks, hasAmended } = item;
+
+    // Sector / domain
+    if (domain !== 'all' && regDomain !== domain) return false;
+
+    // Legal tier
+    if (tier !== 'all' && regTier !== tier) return false;
+
+    // Supervisory authority
+    if (auth !== 'all' && regAuth !== auth) return false;
+
+    // Governance linkage
+    if (gov === 'controls' && !hasLinkedControls) return false;
+    if (gov === 'policies' && !hasLinkedPolicies) return false;
+    if (gov === 'any_gov' && !hasLinkedControls && !hasLinkedPolicies && !hasLinkedRisks) return false;
+    if (gov === 'amended' && !hasAmended) return false;
+
+    // Rule status
+    if (status === 'substantive' && isRepeal) return false;
+    if (status === 'repeal' && !isRepeal) return false;
+
+    // Era / Year range
+    if (era === '2020s' && year < 2020) return false;
+    if (era === '2010s' && (year < 2010 || year > 2019)) return false;
+    if (era === '2000s' && (year < 2000 || year > 2009)) return false;
+    if (era === '1990s' && (year < 1990 || year > 1999)) return false;
+
+    // Free-text search query
     if (libQ) {
       const matchCode = r.code && r.code.toLowerCase().includes(libQ);
       const matchTitle = r.title && r.title.toLowerCase().includes(libQ);
@@ -50,23 +170,106 @@ function renderRegulationsLibrary(u) {
       const matchAuth = r.authority && r.authority.toLowerCase().includes(libQ);
       const matchSum = r.summary && r.summary.toLowerCase().includes(libQ);
       const matchJuris = r.jurisdiction && r.jurisdiction.toLowerCase().includes(libQ);
+      const matchYear = String(year).includes(libQ);
       const matchTag = r.tags && r.tags.some(t => t.toLowerCase().includes(libQ));
-      if (!matchCode && !matchTitle && !matchShort && !matchAuth && !matchSum && !matchJuris && !matchTag) {
+      if (!matchCode && !matchTitle && !matchShort && !matchAuth && !matchSum && !matchJuris && !matchYear && !matchTag) {
         return false;
       }
     }
+
     return true;
   });
 
-  const totalSections = allActs.reduce((sum, a) => sum + allSectionsOf(a).length, 0);
-  const totalPoliciesCount = allPolicies().length;
-  const totalControlsCount = allControls().length;
+  // Sorting
+  filtered.sort((a, b) => {
+    if (sort === 'year_desc') {
+      return b.year - a.year || a.r.code.localeCompare(b.r.code);
+    }
+    if (sort === 'year_asc') {
+      return a.year - b.year || a.r.code.localeCompare(b.r.code);
+    }
+    if (sort === 'title_asc') {
+      const tA = (a.r.shortTitle || a.r.title || a.r.code).toLowerCase();
+      const tB = (b.r.shortTitle || b.r.title || b.r.code).toLowerCase();
+      return tA.localeCompare(tB);
+    }
+    if (sort === 'sections_desc') {
+      return b.secs.length - a.secs.length || b.year - a.year;
+    }
+    // Default: 'relevance' (governance linked + core acts first, then newest)
+    const score = item => {
+      let s = 0;
+      if (item.linkedControlsCount > 0 || item.linkedPoliciesCount > 0) s += 10000;
+      if (item.hasAmended) s += 2000;
+      if (item.regTier === 'act' || item.regTier === 'eu') s += 1000;
+      else if (item.regTier === 'ordinance') s += 400;
+      if (!item.isRepeal) s += 200;
+      s += item.year;
+      s += Math.min(item.secs.length, 50);
+      return s;
+    };
+    return score(b) - score(a);
+  });
+
+  const hasActiveFilters =
+    Boolean(libQ) ||
+    juris !== 'all' ||
+    domain !== 'all' ||
+    tier !== 'all' ||
+    auth !== 'all' ||
+    gov !== 'all' ||
+    status !== 'all' ||
+    era !== 'all' ||
+    sort !== 'relevance';
+
+  // Build active filter tags
+  const activePills = [];
+  if (libQ) {
+    activePills.push({ label: `Query: "${libQ}"`, key: 'regLibQ' });
+  }
+  if (juris !== 'all') {
+    const jName = juris === 'fi' ? 'Finland' : juris === 'se' ? 'Sweden' : 'European Union';
+    activePills.push({ label: `Jurisdiction: ${jName}`, key: 'regLibJuris' });
+  }
+  if (domain !== 'all') {
+    const dObj = REGULATION_DOMAINS.find(d => d.id === domain);
+    activePills.push({ label: `Sector: ${dObj ? dObj.label : domain}`, key: 'regLibDomain' });
+  }
+  if (tier !== 'all') {
+    const tObj = REGULATION_TIERS.find(t => t.id === tier);
+    activePills.push({ label: `Tier: ${tObj ? tObj.label : tier}`, key: 'regLibTier' });
+  }
+  if (auth !== 'all') {
+    const aObj = REGULATION_AUTHORITIES.find(a => a.id === auth);
+    activePills.push({ label: `Authority: ${aObj ? aObj.label : auth}`, key: 'regLibAuth' });
+  }
+  if (gov !== 'all') {
+    const gObj = REGULATION_GOV_SCOPES.find(g => g.id === gov);
+    activePills.push({ label: `Governance: ${gObj ? gObj.label : gov}`, key: 'regLibGov' });
+  }
+  if (status !== 'all') {
+    const sObj = REGULATION_STATUSES.find(s => s.id === status);
+    activePills.push({ label: `Status: ${sObj ? sObj.label : status}`, key: 'regLibStatus' });
+  }
+  if (era !== 'all') {
+    const eObj = REGULATION_ERAS.find(e => e.id === era);
+    activePills.push({ label: `Era: ${eObj ? eObj.label : era}`, key: 'regLibEra' });
+  }
+  if (sort !== 'relevance') {
+    const srtObj = REGULATION_SORTS.find(s => s.id === sort);
+    activePills.push({ label: `Sort: ${srtObj ? srtObj.label : sort}`, key: 'regLibSort' });
+  }
 
   let body;
   if (!allActs.length) {
     body = `<div class="panel">${empty('scale', 'No regulations found', 'No statutory regulations in the library.')}</div>`;
   } else if (!filtered.length) {
-    body = `<div class="panel">${empty('search-x', 'No matching regulations found', `No regulations match "${esc(libQ)}".`, `<button class="btn btn-secondary btn-sm" data-a="clearRegLibFilters">Clear filters</button>`)}</div>`;
+    body = `<div class="panel">${empty(
+      'search-x',
+      'No matching regulations found',
+      'Try adjusting your search query, sector, document type, or active filters.',
+      `<button class="btn btn-secondary btn-sm" data-a="clearRegLibFilters">${ic('rotate-ccw', 13)} Reset all filters</button>`,
+    )}</div>`;
   } else if (layout === 'list') {
     body = `<div class="panel" style="overflow-x:auto">${renderRegulationsList(filtered)}</div>`;
   } else {
@@ -94,44 +297,165 @@ function renderRegulationsLibrary(u) {
       <div class="stat"><span class="k">Enforcing Controls</span><span class="v">${totalControlsCount}</span><span class="d">operational safeguards</span></div>
     </div>
 
-    <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div class="inwrap" style="flex:1;max-width:400px">
-        ${ic('search', 13)}
-        <input class="input search-sm" id="reg-lib-q" data-in="regLibQ" placeholder="Search regulations by title, code, or topic (e.g. 747/2012, DORA)..." value="${esc(u.regLibQ || '')}" aria-label="Search regulations">
-        ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+    <!-- Multi-Dimensional Filter Toolbar -->
+    <div class="finlex-filter-toolbar">
+      <!-- Search & Primary Jurisdiction Row -->
+      <div class="finlex-filter-main-row">
+        <div class="inwrap" style="flex:1;min-width:280px">
+          ${ic('search', 13)}
+          <input class="input search-sm" id="reg-lib-q" data-in="regLibQ" placeholder="Search regulations by title, code, topic, or year (e.g. 747/2012, DORA, 2024)..." value="${esc(u.regLibQ || '')}" aria-label="Search regulations">
+          ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+        </div>
+        <div class="seg" role="tablist">
+          <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="all">All (${allActs.length})</button>
+          <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finland</button>
+          <button class="${juris === 'se' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="se">Sweden</button>
+          <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="eu">European Union</button>
+        </div>
       </div>
-      <div class="seg" role="tablist">
-        <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="all">All (${allActs.length})</button>
-        <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finland</button>
-        <button class="${juris === 'se' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="se">Sweden</button>
-        <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="eu">European Union</button>
+
+      <!-- Secondary Multi-dimensional Selects Grid -->
+      <div class="finlex-filter-controls-row">
+        <!-- Sector / Domain -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-domain">${ic('briefcase', 11)} Sector</label>
+          <select id="reg-filter-domain" class="finlex-filter-select ${domain !== 'all' ? 'is-active' : ''}" data-in="regLibDomain">
+            ${REGULATION_DOMAINS.map(d => `<option value="${d.id}" ${domain === d.id ? 'selected' : ''}>${esc(d.label)}${d.id === 'all' ? ` (${jurisScoped.length})` : domainCounts[d.id] ? ` (${domainCounts[d.id]})` : ' (0)'}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Document Type / Legal Tier -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-tier">${ic('layers', 11)} Legal Tier</label>
+          <select id="reg-filter-tier" class="finlex-filter-select ${tier !== 'all' ? 'is-active' : ''}" data-in="regLibTier">
+            ${REGULATION_TIERS.map(t => `<option value="${t.id}" ${tier === t.id ? 'selected' : ''}>${esc(t.label)}${t.id === 'all' ? ` (${jurisScoped.length})` : tierCounts[t.id] ? ` (${tierCounts[t.id]})` : ' (0)'}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Supervisory Authority -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-auth">${ic('landmark', 11)} Authority</label>
+          <select id="reg-filter-auth" class="finlex-filter-select ${auth !== 'all' ? 'is-active' : ''}" data-in="regLibAuth">
+            ${REGULATION_AUTHORITIES.map(a => `<option value="${a.id}" ${auth === a.id ? 'selected' : ''}>${esc(a.label)}${a.id === 'all' ? ` (${jurisScoped.length})` : authCounts[a.id] ? ` (${authCounts[a.id]})` : ' (0)'}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Governance Scope -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-gov">${ic('shield-check', 11)} Governance</label>
+          <select id="reg-filter-gov" class="finlex-filter-select ${gov !== 'all' ? 'is-active' : ''}" data-in="regLibGov">
+            ${REGULATION_GOV_SCOPES.map(g => `<option value="${g.id}" ${gov === g.id ? 'selected' : ''}>${esc(g.label)}${g.id === 'all' ? ` (${jurisScoped.length})` : ` (${govCounts[g.id] || 0})`}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Rule Status -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-status">${ic('file-check', 11)} Status</label>
+          <select id="reg-filter-status" class="finlex-filter-select ${status !== 'all' ? 'is-active' : ''}" data-in="regLibStatus">
+            ${REGULATION_STATUSES.map(s => `<option value="${s.id}" ${status === s.id ? 'selected' : ''}>${esc(s.label)}${s.id === 'all' ? ` (${jurisScoped.length})` : ` (${statusCounts[s.id] || 0})`}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Era / Year Range -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-era">${ic('calendar', 11)} Era</label>
+          <select id="reg-filter-era" class="finlex-filter-select ${era !== 'all' ? 'is-active' : ''}" data-in="regLibEra">
+            ${REGULATION_ERAS.map(e => `<option value="${e.id}" ${era === e.id ? 'selected' : ''}>${esc(e.label)}${e.id === 'all' ? ` (${jurisScoped.length})` : ` (${eraCounts[e.id] || 0})`}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Sort Order -->
+        <div class="finlex-filter-field">
+          <label class="finlex-filter-field-label" for="reg-filter-sort">${ic('arrow-down-up', 11)} Sort By</label>
+          <select id="reg-filter-sort" class="finlex-filter-select ${sort !== 'relevance' ? 'is-active' : ''}" data-in="regLibSort">
+            ${REGULATION_SORTS.map(s => `<option value="${s.id}" ${sort === s.id ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}
+          </select>
+        </div>
       </div>
+
+      <!-- Quick Fast-Filter Chips -->
+      <div class="finlex-quick-strip">
+        <span class="finlex-quick-label">Quick:</span>
+        <button class="finlex-quick-chip ${domain === 'all' && tier === 'all' && gov === 'all' && status === 'all' ? 'on' : ''}" data-a="clearRegLibFilters">All</button>
+        <button class="finlex-quick-chip ${tier === 'act' ? 'on' : ''}" data-a="set" data-k="regLibTier" data-v="${tier === 'act' ? 'all' : 'act'}">Acts & Statutes <span class="chip-cnt">(${tierCounts.act || 0})</span></button>
+        <button class="finlex-quick-chip ${gov === 'controls' ? 'on' : ''}" data-a="set" data-k="regLibGov" data-v="${gov === 'controls' ? 'all' : 'controls'}">With Controls <span class="chip-cnt">(${govCounts.controls || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'securities' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'securities' ? 'all' : 'securities'}">Securities <span class="chip-cnt">(${domainCounts.securities || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'banking' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'banking' ? 'all' : 'banking'}">Banking <span class="chip-cnt">(${domainCounts.banking || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'funds' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'funds' ? 'all' : 'funds'}">Funds <span class="chip-cnt">(${domainCounts.funds || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'aml' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'aml' ? 'all' : 'aml'}">AML <span class="chip-cnt">(${domainCounts.aml || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'ict' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'ict' ? 'all' : 'ict'}">DORA / ICT <span class="chip-cnt">(${domainCounts.ict || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'insurance' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'insurance' ? 'all' : 'insurance'}">Insurance <span class="chip-cnt">(${domainCounts.insurance || 0})</span></button>
+        <button class="finlex-quick-chip ${domain === 'payments' ? 'on' : ''}" data-a="set" data-k="regLibDomain" data-v="${domain === 'payments' ? 'all' : 'payments'}">Payments <span class="chip-cnt">(${domainCounts.payments || 0})</span></button>
+        <button class="finlex-quick-chip ${status === 'substantive' ? 'on' : ''}" data-a="set" data-k="regLibStatus" data-v="${status === 'substantive' ? 'all' : 'substantive'}">Substantive Only <span class="chip-cnt">(${statusCounts.substantive || 0})</span></button>
+      </div>
+
+      <!-- Active Filters Strip & Results Counter -->
+      ${
+        hasActiveFilters
+          ? `<div class="finlex-active-bar">
+        <div class="finlex-active-list">
+          <span class="finlex-count-text">Showing <b>${filtered.length}</b> of <b>${allActs.length}</b> regulations</span>
+          ${activePills
+            .map(
+              p => `<span class="finlex-active-pill">
+            <span>${esc(p.label)}</span>
+            <button class="finlex-active-pill-remove" data-a="removeRegLibFilter" data-k="${p.key}" title="Remove filter">${ic('x', 11)}</button>
+          </span>`,
+            )
+            .join('')}
+        </div>
+        <button class="btn btn-secondary btn-sm" data-a="clearRegLibFilters" style="padding:2px 8px;font-size:11.5px">
+          ${ic('rotate-ccw', 12)} Clear all filters
+        </button>
+      </div>`
+          : `<div class="finlex-active-bar">
+        <span class="finlex-count-text">Showing <b>${filtered.length}</b> regulations</span>
+      </div>`
+      }
     </div>
 
     ${body}
   </div>`;
 }
 
-function renderRegulationsGrid(acts) {
+function renderRegulationsGrid(decoratedActs) {
   return `<div class="finlex-lib-grid">
-    ${acts
-      .map(r => {
-        const secs = allSectionsOf(r);
+    ${decoratedActs
+      .map(item => {
+        const { r, secs, year, regDomain, regTier, isRepeal, hasAmended, linkedControlsCount, linkedPoliciesCount } = item;
+        const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
+        const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
+        const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
+        const tierLabel = tierObj ? tierObj.label.replace('Parliamentary ', '').replace('Supervisory ', '').replace('Government ', '') : regTier;
+
         return `<article class="finlex-lib-card" data-a="openRegInReader" data-id="${r.id}" title="Open regulation in reader">
         <div class="finlex-lib-card-top">
-          <span class="finlex-jurisdiction-tag">${esc(r.jurisdiction)}</span>
+          <div class="row" style="gap:6px;align-items:center">
+            <span class="finlex-jurisdiction-tag">${esc(r.jurisdiction)}</span>
+            <span class="finlex-tier-badge ${regTier}">${esc(tierLabel)}</span>
+          </div>
           <span class="finlex-code-badge">${esc(r.code)}</span>
         </div>
 
-        <h2 class="finlex-lib-card-title">${esc(r.shortTitle || r.title)}</h2>
+        <div>
+          <h2 class="finlex-lib-card-title">${esc(displayTitle)}</h2>
+          ${r.shortTitle && r.shortTitle !== r.code && r.title && r.title !== r.shortTitle ? `<div class="faint trunc" style="font-size:11.5px;margin-top:2px" title="${esc(r.title)}">${esc(r.title)}</div>` : ''}
+        </div>
+
         <p class="finlex-lib-card-desc">${esc(r.summary)}</p>
 
         <div class="finlex-lib-card-meta">
+          <span class="finlex-domain-badge">${esc(domainObj ? domainObj.label : regDomain)}</span>
+          <span>·</span>
           <span>${esc(r.authority)}</span>
           <span>·</span>
-          <span>${esc(r.inForce || 'In force')}</span>
+          <span>${year || esc(r.inForce || 'In force')}</span>
           <span>·</span>
           <span>${secs.length} sections</span>
+          ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
+          ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber);border-color:var(--amber)">Amended</span>` : ''}
+          ${linkedControlsCount ? `<span class="finlex-gov-badge" title="${linkedControlsCount} linked controls">${ic('shield-check', 11)} ${linkedControlsCount} ${linkedControlsCount === 1 ? 'control' : 'controls'}</span>` : ''}
+          ${linkedPoliciesCount ? `<span class="finlex-gov-badge" title="${linkedPoliciesCount} linked policies">${ic('file-text', 11)} ${linkedPoliciesCount} ${linkedPoliciesCount === 1 ? 'policy' : 'policies'}</span>` : ''}
         </div>
 
         ${
@@ -152,32 +476,49 @@ function renderRegulationsGrid(acts) {
   </div>`;
 }
 
-function renderRegulationsList(acts) {
+function renderRegulationsList(decoratedActs) {
   return `<table class="finlex-lib-table">
       <thead>
         <tr>
-          <th style="width:300px">Regulation</th>
-          <th>Jurisdiction</th>
-          <th>Supervisory Authority</th>
+          <th style="width:320px">Regulation & Title</th>
+          <th>Sector</th>
+          <th>Legal Tier</th>
+          <th>Authority</th>
           <th>In Force</th>
-          <th>Scope</th>
+          <th>Governance</th>
+          <th>Sections</th>
         </tr>
       </thead>
       <tbody>
-        ${acts
-          .map(r => {
-            const secs = allSectionsOf(r);
+        ${decoratedActs
+          .map(item => {
+            const { r, secs, year, regDomain, regTier, isRepeal, hasAmended, linkedControlsCount, linkedPoliciesCount } = item;
+            const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
+            const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
+            const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
+            const tierLabel = tierObj ? tierObj.label.replace('Parliamentary ', '').replace('Supervisory ', '').replace('Government ', '') : regTier;
+
             return `<tr data-a="openRegInReader" data-id="${r.id}" title="Open ${esc(r.code)}">
             <td>
               <div style="font-weight:700;display:flex;align-items:center;gap:6px">
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(r.code)}</span>
-                <span>${esc(r.shortTitle || r.title)}</span>
+                <span class="trunc" style="max-width:260px">${esc(displayTitle)}</span>
               </div>
             </td>
-            <td><span class="faint" style="font-size:12px">${esc(r.jurisdiction)}</span></td>
+            <td><span class="finlex-domain-badge">${esc(domainObj ? domainObj.label : regDomain)}</span></td>
+            <td><span class="finlex-tier-badge ${regTier}">${esc(tierLabel)}</span></td>
             <td><span style="font-size:12px;font-weight:500">${esc(r.authority)}</span></td>
-            <td><span class="mono faint" style="font-size:11.5px">${esc(r.inForce || 'In force')}</span></td>
-            <td><span style="font-size:12px">${secs.length} sections</span></td>
+            <td><span class="mono faint" style="font-size:11.5px">${year || esc(r.inForce || 'In force')}</span></td>
+            <td>
+              <div class="row" style="gap:4px;align-items:center">
+                ${linkedControlsCount ? `<span class="finlex-gov-badge">${ic('shield-check', 11)} ${linkedControlsCount}</span>` : ''}
+                ${linkedPoliciesCount ? `<span class="finlex-gov-badge">${ic('file-text', 11)} ${linkedPoliciesCount}</span>` : ''}
+                ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber)">Amended</span>` : ''}
+                ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
+                ${!linkedControlsCount && !linkedPoliciesCount && !hasAmended && !isRepeal ? `<span class="faint" style="font-size:12px">—</span>` : ''}
+              </div>
+            </td>
+            <td><span style="font-size:12px">${secs.length}</span></td>
           </tr>`;
           })
           .join('')}
