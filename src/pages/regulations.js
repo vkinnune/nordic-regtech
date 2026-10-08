@@ -538,6 +538,7 @@ function renderRegulationsReader(u) {
   const allSecs = allSectionsOf(curAct);
   const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
   const chapters = allChaptersOf(curAct);
+  const isFffs = Boolean((curAct.jurisdiction && curAct.jurisdiction.includes('Finansinspektionen')) || (curAct.code && curAct.code.startsWith('FFFS')));
 
   return `<div class="page flush">
     <div class="finlex-container">
@@ -584,15 +585,152 @@ function renderRegulationsReader(u) {
 
           <!-- Act Document Header -->
           <header class="finlex-doc-head">
-            <div class="finlex-doc-act-no">${esc(curAct.jurisdiction)} · ${esc(curAct.code)}</div>
+            <div class="finlex-doc-act-no">
+              ${esc(curAct.jurisdiction)} · ${esc(curAct.code)}${curAct.type ? ` · ${esc(curAct.type.replace('_', ' '))}` : ''}
+            </div>
             <h1 class="finlex-doc-title">${esc(curAct.shortTitle || curAct.title)}</h1>
+            ${
+              curAct.shortTitle && curAct.shortTitle !== curAct.code && curAct.title && curAct.title !== curAct.shortTitle
+                ? `<p class="finlex-doc-subtitle">${esc(curAct.title)}</p>`
+                : ''
+            }
+
             <div class="finlex-doc-meta">
-              <span>In force: <b>${esc(curAct.inForce || 'In force')}</b></span>
+              ${curAct.issueDate ? `<span>Issued: <b>${esc(curAct.issueDate)}</b></span><span>·</span>` : ''}
+              <span>In force: <b>${esc(curAct.effectiveDate || curAct.inForce || 'In force')}</b></span>
               <span>·</span>
               <span>Supervisory authority: <b>${esc(curAct.authority)}</b></span>
-              ${curAct.amendedBy ? `<span>·</span><span>Amended by: <b>${esc(curAct.amendedBy)}</b></span>` : ''}
+              ${curAct.latestAmendment ? `<span>·</span><span>Latest amendment: <b>${esc(curAct.latestAmendment)}</b></span>` : ''}
+              ${
+                curAct.amends
+                  ? `
+                <span>·</span>
+                <span>Amends: ${curAct.amendsId ? `<button class="finlex-link-btn" data-a="openRegInReader" data-id="${curAct.amendsId}" title="Open amended regulation">${esc(curAct.amends)}</button>` : `<span class="mono">${esc(curAct.amends)}</span>`}</span>
+              `
+                  : ''
+              }
+              ${
+                curAct.amendments && curAct.amendments.length
+                  ? `
+                <span>·</span>
+                <span>Amended by: <span class="finlex-amendments-group">${curAct.amendments.map(a => `<button class="finlex-link-btn" data-a="openRegInReader" data-id="${a.id}" title="Open amending regulation ${esc(a.code)}">${esc(a.code)}</button>`).join(', ')}</span></span>
+              `
+                  : curAct.amendedBy
+                    ? `<span>·</span><span>Amended by: <b>${esc(curAct.amendedBy)}</b></span>`
+                    : ''
+              }
+              ${curAct.incomingCount ? `<span>·</span><span class="finlex-cite-count-badge" title="Referenced by ${curAct.incomingCount} provisions across supervisory database">${ic('link', 11)} Cited by ${curAct.incomingCount}</span>` : ''}
             </div>
+
+            <!-- Official Documents & Attachments Toolbar -->
+            ${
+              curAct.pdfUrl || curAct.memoUrl || curAct.sourceUrl
+                ? `
+              <div class="finlex-attachments-bar">
+                <span class="finlex-attachments-label">${ic('paperclip', 12)} Official Attachments & Links:</span>
+                <div class="finlex-attachments-links">
+                  ${
+                    curAct.pdfUrl
+                      ? `
+                    <a href="${esc(curAct.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip pdf" title="Download official PDF Gazette document">
+                      ${ic('file-text', 12)}
+                      <span>Official PDF</span>
+                      ${ic('external-link', 10)}
+                    </a>
+                  `
+                      : ''
+                  }
+                  ${
+                    curAct.memoUrl
+                      ? `
+                    <a href="${esc(curAct.memoUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip memo" title="Read supervisory decision memorandum (Besluts-PM)">
+                      ${ic('file-check', 12)}
+                      <span>Decision Memo (Besluts-PM)</span>
+                      ${ic('external-link', 10)}
+                    </a>
+                  `
+                      : ''
+                  }
+                  ${
+                    curAct.sourceUrl
+                      ? `
+                    <a href="${esc(curAct.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="Open official supervisory registry page">
+                      ${ic('globe', 12)}
+                      <span>Official Page</span>
+                      ${ic('external-link', 10)}
+                    </a>
+                  `
+                      : ''
+                  }
+                </div>
+              </div>
+            `
+                : ''
+            }
+
+            <!-- Delegated Authority Strip -->
+            ${
+              curAct.authorizations && curAct.authorizations.length
+                ? `
+              <div class="finlex-auth-bar">
+                <span class="finlex-auth-label">${ic('scale', 12)} Issued with authority from:</span>
+                <div class="finlex-auth-chips">
+                  ${curAct.authorizations
+                    .map(
+                      a => `
+                    <button class="finlex-auth-chip ${a.targetDocId ? 'is-link' : 'is-external'}" data-a="openRegInReader" data-id="${a.targetDocId || ''}" data-sec="${a.targetChunkId || ''}" title="${a.targetDocId ? `Jump to enabling statute ${esc(a.rawText)}` : 'External enabling statute / ordinance'}">
+                      ${ic('shield-alert', 11)}
+                      <span>${esc(a.rawText)}</span>
+                    </button>
+                  `,
+                    )
+                    .join('')}
+                </div>
+              </div>
+            `
+                : ''
+            }
+
+            <!-- Document-level Incoming References -->
+            ${
+              curAct.incomingRefs && curAct.incomingRefs.length
+                ? `
+              <details class="finlex-incoming-refs finlex-doc-incoming">
+                <summary class="finlex-incoming-summary">
+                  ${ic('corner-down-right', 11)}
+                  <span>${curAct.incomingRefs.length} incoming reference${curAct.incomingRefs.length === 1 ? '' : 's'} to this regulation</span>
+                </summary>
+                <ul class="finlex-incoming-list">
+                  ${curAct.incomingRefs
+                    .map(
+                      ref => `
+                    <li>
+                      <button class="finlex-incoming-link" data-a="openRegInReader" data-id="${ref.docId}" data-sec="${ref.chunkId || ''}">
+                        ${esc(ref.label)}
+                      </button>
+                      ${ref.via ? `<span class="finlex-incoming-via">via ${esc(ref.via)}</span>` : ''}
+                    </li>
+                  `,
+                    )
+                    .join('')}
+                </ul>
+              </details>
+            `
+                : ''
+            }
           </header>
+
+          <!-- Preamble Container (if document has both preamble and indexed sections) -->
+          ${
+            curAct.preamble && chapters.length > 0 && curAct.preamble !== curAct.summary
+              ? `
+            <div class="finlex-preamble-box">
+              <div class="finlex-preamble-label">${ic('info', 11)} Statutory Preamble</div>
+              <p class="finlex-preamble-text">${esc(curAct.preamble)}</p>
+            </div>
+          `
+              : ''
+          }
 
           <!-- Simple Toolbar: Plain English Toggle & Clear Search -->
           <div class="finlex-toolbar">
@@ -621,7 +759,7 @@ function renderRegulationsReader(u) {
                       <button class="btn btn-secondary btn-sm" data-a="setRegView" data-view="library">${ic('arrow-left', 13)} Back to Regulations</button>
                     </div>
                   </div>`
-                : renderFinlexSections(chapters, activeSecId, showPlain, q)
+                : renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs)
             }
           </div>
         </div>
@@ -681,7 +819,7 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
     .join('');
 }
 
-function renderFinlexSections(chapters, activeSecId, showPlain, q) {
+function renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs) {
   return chapters
     .map(ch => {
       const matchingSecs = (ch.sections || []).filter(s => {
@@ -704,26 +842,30 @@ function renderFinlexSections(chapters, activeSecId, showPlain, q) {
           <h2 class="finlex-chap-name">${esc(ch.title)}</h2>
         </div>
         <div class="finlex-chap-body">
-          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, showPlain)).join('')}
+          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, showPlain, isFffs)).join('')}
         </div>
       `;
     })
     .join('');
 }
 
-function renderSectionBlock(s, activeSecId, showPlain) {
+function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
   const isActive = s.id === activeSecId;
   const textToShow = s.textEn || s.text;
   const headingToShow = s.headingEn || s.heading;
+  const hasParagraphs = Boolean(s.paragraphs && s.paragraphs.length);
+  const isGuidanceSec = s.ruleType === 'guidance';
 
-  return `<article class="finlex-sec ${isActive ? 'active' : ''}" id="sec-${s.id}">
+  return `<article class="finlex-sec ${isActive ? 'active' : ''} ${isGuidanceSec ? 'is-guidance' : ''}" id="sec-${s.id}">
     <!-- Section Citation & Heading -->
     <header class="finlex-sec-head">
       <div class="finlex-sec-cite">
         <span class="finlex-sec-num">${esc(s.number)}</span>
+        ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${s.inForceFrom ? `, in force ${esc(s.inForceFrom)}` : ''}</span>` : ''}
+        ${s.inForceUntil ? `<span class="finlex-tag-badge past">In force until ${esc(s.inForceUntil)}</span>` : ''}
         ${s.amendingAct ? `<span class="finlex-sec-amendment">${esc(s.amendingAct)}</span>` : ''}
       </div>
-      <h3 class="finlex-sec-title">${esc(headingToShow)}</h3>
+      ${headingToShow ? `<h3 class="finlex-sec-title">${esc(headingToShow)}</h3>` : ''}
     </header>
 
     <!-- PLAIN ENGLISH BOX (Clean, simple, no fancy colors) -->
@@ -743,28 +885,94 @@ function renderSectionBlock(s, activeSecId, showPlain) {
         : ''
     }
 
-    <!-- STATUTORY BODY TEXT -->
-    <div class="finlex-body">
-      ${formatFinlexBody(textToShow, s.status)}
-    </div>
+    <!-- STATUTORY BODY / PARAGRAPHS -->
+    ${
+      hasParagraphs
+        ? s.paragraphs
+            .map(p => {
+              const pGuidance = p.ruleType === 'guidance';
+              return `<div class="finlex-para ${pGuidance ? 'is-guidance' : ''}">
+                ${isFffs ? `<span class="finlex-rule-badge ${pGuidance ? 'guidance' : 'binding'}">${pGuidance ? 'Allmänna råd · comply or explain' : 'Binding rule'}</span>` : ''}
+                ${p.text ? `<p class="finlex-para-text">${esc(p.text)}</p>` : ''}
+                ${
+                  p.points && p.points.length
+                    ? `<ul class="finlex-points-list">
+                        ${p.points
+                          .map(
+                            pt => `
+                          <li>
+                            <div class="finlex-point-item">
+                              <span class="finlex-point-num">${esc(pt.number ? pt.number + '.' : '–')}</span>
+                              <span class="finlex-point-text">${esc(pt.text)}</span>
+                            </div>
+                            ${
+                              pt.items && pt.items.length
+                                ? `<ul class="finlex-subitems-list">
+                                    ${pt.items.map(it => `<li>${esc(it.startsWith('–') || it.includes(')') ? it : '– ' + it)}</li>`).join('')}
+                                  </ul>`
+                                : ''
+                            }
+                          </li>`,
+                          )
+                          .join('')}
+                      </ul>`
+                    : ''
+                }
+              </div>`;
+            })
+            .join('')
+        : `<div class="finlex-body">${formatFinlexBody(textToShow, s.status)}</div>`
+    }
 
     <!-- GOVERNANCE & CONTROLS STRIP -->
     ${renderSectionGovernanceStrip(s)}
 
-    <!-- CROSS REFERENCES -->
+    <!-- OUTGOING CITATIONS -->
     ${
       s.crossRefs && s.crossRefs.length
         ? `<footer class="finlex-sec-foot">
-            ${s.crossRefs
-              .map(
-                cr => `
-              <button class="finlex-ref-chip" data-a="openRegInReader" data-id="${cr.regId}" title="Navigate to regulation">
-                ${ic('link-2', 11)}Ref: ${esc(cr.label)}
-              </button>
-            `,
-              )
-              .join('')}
+            <div class="finlex-sec-citations">
+              <span class="finlex-sec-citations-label">${ic('link-2', 11)} Citations:</span>
+              <div class="row" style="gap:4px;flex-wrap:wrap">
+                ${s.crossRefs
+                  .map(
+                    cr => `
+                  <button class="finlex-ref-chip ${cr.regId ? 'is-link' : 'is-external'}" data-a="openRegInReader" data-id="${cr.regId || ''}" data-sec="${cr.targetSectionId || ''}" title="${cr.regId ? `Navigate to ${esc(cr.label)}` : 'External citation'}">
+                    ${ic('link-2', 11)}
+                    <span>${esc(cr.label)}</span>
+                  </button>
+                `,
+                  )
+                  .join('')}
+              </div>
+            </div>
           </footer>`
+        : ''
+    }
+
+    <!-- INCOMING REFERENCES -->
+    ${
+      s.incomingRefs && s.incomingRefs.length
+        ? `<details class="finlex-incoming-refs">
+            <summary class="finlex-incoming-summary">
+              ${ic('corner-down-right', 11)}
+              <span>${s.incomingRefs.length} reference${s.incomingRefs.length === 1 ? '' : 's'} here</span>
+            </summary>
+            <ul class="finlex-incoming-list">
+              ${s.incomingRefs
+                .map(
+                  ref => `
+                <li>
+                  <button class="finlex-incoming-link" data-a="openRegInReader" data-id="${ref.docId}" data-sec="${ref.chunkId || ''}">
+                    ${esc(ref.label)}
+                  </button>
+                  ${ref.via ? `<span class="finlex-incoming-via">via ${esc(ref.via)}</span>` : ''}
+                </li>
+              `,
+                )
+                .join('')}
+            </ul>
+          </details>`
         : ''
     }
   </article>`;

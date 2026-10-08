@@ -21,6 +21,7 @@ import {
   visibleProjects,
   control,
   policy,
+  findSectionAndRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
 import { effectiveDark } from '../core/theme.js';
@@ -1212,10 +1213,20 @@ IN.tlGroup = el => {
 
 /* regulations */
 A.openRegInReader = el => {
+  let targetRegId = el.dataset.id;
+  const targetSecId = el.dataset.sec;
+  if (!targetRegId && targetSecId) {
+    const found = findSectionAndRegulation(targetSecId);
+    if (found) targetRegId = found.regulation.id;
+  }
+  if (!targetRegId && !targetSecId) return;
+
   S.ui.route = 'regulations';
-  S.ui.regSel = el.dataset.id;
-  if (el.dataset.sec) {
-    S.ui.regSec = el.dataset.sec;
+  if (targetRegId) {
+    S.ui.regSel = targetRegId;
+  }
+  if (targetSecId) {
+    S.ui.regSec = targetSecId;
   } else {
     delete S.ui.regSec;
   }
@@ -1223,6 +1234,13 @@ A.openRegInReader = el => {
   delete S.ui.govDrawer;
   fxSet({ route: true, tabs: true });
   render();
+
+  if (targetSecId) {
+    setTimeout(() => {
+      const targetEl = document.getElementById(`sec-${targetSecId}`);
+      if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
 };
 A.setRegView = el => {
   S.ui.regView = el.dataset.view || 'library';

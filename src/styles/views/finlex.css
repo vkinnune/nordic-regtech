@@ -189,8 +189,15 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--text);
-  margin: 4px 0 8px;
+  margin: 4px 0 6px;
   letter-spacing: -0.02em;
+}
+
+.finlex-doc-subtitle {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+  margin: 0 0 10px;
 }
 
 .finlex-doc-meta {
@@ -200,6 +207,254 @@
   gap: 8px;
   font-size: 12.5px;
   color: var(--text-3);
+}
+
+.finlex-link-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color var(--dur);
+}
+.finlex-link-btn:hover {
+  color: var(--text-strong);
+  text-decoration-thickness: 2px;
+}
+
+.finlex-amendments-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.finlex-cite-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+/* Official Documents & Attachments Toolbar */
+.finlex-attachments-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.finlex-attachments-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finlex-attachments-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.finlex-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  transition: all var(--dur);
+}
+.finlex-attach-chip:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.finlex-attach-chip.pdf {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--text);
+}
+.finlex-attach-chip.pdf:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+.finlex-attach-chip.memo {
+  border-color: rgba(59, 130, 246, 0.35);
+  color: var(--text);
+}
+.finlex-attach-chip.memo:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+/* Delegated Authority Strip */
+.finlex-auth-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.finlex-auth-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.finlex-auth-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.finlex-auth-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 7px;
+  text-decoration: none;
+}
+.finlex-auth-chip.is-link {
+  cursor: pointer;
+  color: var(--text);
+}
+.finlex-auth-chip.is-link:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.finlex-auth-chip.is-external {
+  opacity: 0.85;
+  border-style: dashed;
+  cursor: default;
+}
+
+/* Incoming References Collapsible */
+.finlex-incoming-refs {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.finlex-incoming-refs.finlex-doc-incoming {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.finlex-incoming-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--text-2);
+  font-weight: 500;
+  user-select: none;
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: all var(--dur);
+}
+.finlex-incoming-summary:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+
+.finlex-incoming-list {
+  list-style: disc;
+  margin: 6px 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.finlex-incoming-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-align: left;
+}
+.finlex-incoming-link:hover {
+  color: var(--text-strong);
+  text-decoration-thickness: 2px;
+}
+
+.finlex-incoming-via {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* Preamble Box */
+.finlex-preamble-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.finlex-preamble-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.finlex-preamble-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0;
+  white-space: pre-line;
 }
 
 .finlex-toolbar {
@@ -337,6 +592,122 @@
   padding: 0 2px;
 }
 
+/* SECTION PARAGRAPHS & RULE TYPES */
+.finlex-para {
+  margin: 10px 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.finlex-para.is-guidance {
+  border-left: 3px solid var(--amber, #f59e0b);
+  background: rgba(245, 158, 11, 0.08);
+  padding: 8px 14px;
+  border-radius: 0 4px 4px 0;
+}
+
+.finlex-rule-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.finlex-rule-badge.guidance {
+  background: var(--amber-soft, #fef3c7);
+  color: var(--amber, #b45309);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.finlex-rule-badge.binding {
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.finlex-para-text {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.finlex-points-list {
+  margin: 6px 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.finlex-point-item {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.finlex-point-num {
+  font-weight: 600;
+  color: var(--text-2);
+  min-width: 18px;
+}
+
+.finlex-point-text {
+  flex: 1;
+}
+
+.finlex-subitems-list {
+  margin: 4px 0 0 20px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* Upcoming / Past wording badges */
+.finlex-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.finlex-tag-badge.upcoming {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+.finlex-tag-badge.past {
+  background: var(--surface-3);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+
+/* Section outgoing citations */
+.finlex-sec-citations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.finlex-sec-citations-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* FOOTER META / ACTIONS */
 .finlex-sec-foot {
   display: flex;
@@ -365,6 +736,14 @@
 .finlex-ref-chip:hover {
   color: var(--text);
   border-color: var(--border-strong);
+}
+.finlex-ref-chip.is-link {
+  cursor: pointer;
+}
+.finlex-ref-chip.is-external {
+  opacity: 0.8;
+  cursor: default;
+  border-style: dashed;
 }
 
 @media (max-width: 840px) {
