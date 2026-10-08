@@ -1,4 +1,4 @@
-# Nordic RegTech Studio
+# Nordic RegTech
 
 A structured compliance and project management workspace with statutory diffs,
 task tracking, board / list / table / calendar / timeline views, team permissions,

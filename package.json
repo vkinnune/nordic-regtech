@@ -1,8 +1,8 @@
 {
-  "name": "gr8r-studio",
+  "name": "nordic-regtech",
   "version": "1.0.0",
   "private": true,
-  "description": "Gr8r Studio: a calm, structured project management workspace.",
+  "description": "Nordic RegTech: statutory governance, compliance matrices, and project management workspace.",
   "type": "module",
   "scripts": {
     "dev": "vite",
