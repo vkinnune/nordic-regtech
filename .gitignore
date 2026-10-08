@@ -9,9 +9,11 @@ __MACOSX/
 # Python & Pipeline data
 pipeline/data/
 pipeline/.venv/
-pipeline/__pycache__/
+**/__pycache__/
+*.pyc
 pipeline/.pytest_cache/
 pipeline/.ruff_cache/
 *.db
 *.sqlite
+
 

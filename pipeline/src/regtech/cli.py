@@ -22,6 +22,32 @@ DB_NAME = "regtech.db"
 DEFAULT_PORT = 8000
 VIEWER_HOST = "127.0.0.1"
 
+FINANCIAL_PRESETS: dict[str, list[str]] = {
+    "financial": [
+        "2007:528",  # Lag om värdepappersmarknaden (MiFID II)
+        "2007:572",  # Förordning om värdepappersmarknaden
+        "2017:630",  # Lag om åtgärder mot penningtvätt (AML)
+        "2018:1219", # Lag om försäkringsdistribution (IDD)
+        "2004:297",  # Lag om bank- och finansieringsrörelse
+        "2004:329",  # Förordning om bank- och finansieringsrörelse
+        "2013:561",  # Lag om förvaltare av alternativa investeringsfonder (AIFM)
+        "2004:46",   # Lag om värdepappersfonder (UCITS)
+        "2010:751",  # Lag om betaltjänster (PSD2)
+        "2010:2043", # Försäkringsrörelselag
+        "2014:968",  # Lag om särskild tillsyn över kreditinstitut och värdepappersbolag
+        "2015:1016", # Lag om resolution
+        "2015:1017", # Lag om förebyggande statligt stöd till kreditinstitut
+        "1995:1571", # Lag om insättningsgaranti
+        "1999:158",  # Lag om investerarskydd
+        "2016:1306", # Marknadsmissbruksförordningens kompletteringslag (MAR)
+        "2019:742",  # Lag om tjänstepensionsföretag (IORP II)
+    ],
+    "banking": ["2004:297", "2004:329", "2014:968", "2015:1016", "1995:1571"],
+    "funds": ["2004:46", "2013:561", "2019:742"],
+    "aml": ["2017:630"],
+    "insurance": ["2010:2043", "2018:1219"],
+}
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="regtech")
@@ -34,8 +60,12 @@ def main(argv: list[str] | None = None) -> int:
         "--number",
         type=_sfs_number,
         action="append",
-        required=True,
         help="SFS number such as 2007:528; repeat the flag for several laws",
+    )
+    fetch_sfs.add_argument(
+        "--preset",
+        choices=list(FINANCIAL_PRESETS.keys()),
+        help="fetch a predefined collection of Swedish financial laws",
     )
     _add_download_flags(fetch_sfs)
 
@@ -75,9 +105,18 @@ def _add_download_flags(command: argparse.ArgumentParser) -> None:
 
 
 def _fetch_sfs(args: argparse.Namespace) -> int:
+    numbers: list[str] = list(args.number or [])
+    if args.preset:
+        for num in FINANCIAL_PRESETS.get(args.preset, []):
+            if num not in numbers:
+                numbers.append(num)
+    if not numbers:
+        print("regtech: either --number or --preset must be provided", file=sys.stderr)
+        return 2
+
     downloader = OfflineDownloader() if args.offline else HttpxDownloader()
     raw_dir = args.data_dir / "raw" / RiksdagenSource.name
-    source = RiksdagenSource(args.number, downloader, raw_dir, RegexExtractor())
+    source = RiksdagenSource(numbers, downloader, raw_dir, RegexExtractor())
     docs, failures = _run_source(source, args)
 
     sys.stdout.buffer.write(TypeAdapter(list[LegalDocument]).dump_json(docs, indent=2) + b"\n")

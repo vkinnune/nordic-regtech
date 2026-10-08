@@ -54,4 +54,16 @@ function lucideSubset() {
 export default defineConfig({
   plugins: [lucideSubset()],
   server: { port: 5173 },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('swedish_regulations.json')) {
+            return 'swedish-regulations';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 3000,
+  },
 });

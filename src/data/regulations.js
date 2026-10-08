@@ -763,12 +763,38 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
 
 export const REGULATIONS = [...BASE_REGULATIONS, ...swedishRegs];
 
+let _sectionIndex = null;
+let _regIndex = null;
+
+function ensureIndexes() {
+  if (_sectionIndex) return;
+  _sectionIndex = new Map();
+  _regIndex = new Map();
+  for (const reg of REGULATIONS) {
+    if (reg.id) _regIndex.set(reg.id, reg);
+    if (reg.code && !_regIndex.has(reg.code)) _regIndex.set(reg.code, reg);
+    for (const sec of allSectionsOf(reg)) {
+      if (sec.id) {
+        _sectionIndex.set(sec.id, { section: sec, regulation: reg });
+      }
+    }
+  }
+}
+
 export function allRegulations() {
   return REGULATIONS;
 }
 
 export function regulation(id) {
-  return REGULATIONS.find(r => r.id === id || r.code === id);
+  if (!id) return null;
+  ensureIndexes();
+  return _regIndex.get(id) || null;
+}
+
+export function findSectionAndRegulation(secId) {
+  if (!secId) return null;
+  ensureIndexes();
+  return _sectionIndex.get(secId) || null;
 }
 
 export function allChaptersOf(reg) {

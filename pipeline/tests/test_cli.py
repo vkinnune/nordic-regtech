@@ -186,3 +186,23 @@ def test_empty_register_listing_removes_nothing(data_dir, capsysbinary):
 
     assert b"removed" not in capsysbinary.readouterr().err
     assert len(SqliteStorage(data_dir / "regtech.db").list_documents()) == 5
+
+
+def test_fetch_sfs_without_number_or_preset_fails(data_dir, capsys):
+    exit_code = main(["fetch-sfs", "--data-dir", str(data_dir)])
+    assert exit_code == 2
+    assert "either --number or --preset must be provided" in capsys.readouterr().err
+
+
+def test_fetch_sfs_preset_resolves_numbers(data_dir, capsysbinary, monkeypatch):
+    from regtech import cli
+
+    monkeypatch.setitem(cli.FINANCIAL_PRESETS, "sample", ["2007:528", "2007:572"])
+    exit_code = main(
+        ["fetch-sfs", "--offline", "--preset", "sample", "--limit", "1", "--data-dir", str(data_dir)]
+    )
+    assert exit_code == 0
+    printed = json.loads(capsysbinary.readouterr().out)
+    assert len(printed) == 1
+    assert printed[0]["id"] == "sfs-2007-528"
+

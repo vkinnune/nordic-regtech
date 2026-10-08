@@ -141,7 +141,7 @@ export function team(id) {
 export const TM = new Proxy({}, { get: (_, k) => team(k) || NO_TEAM });
 
 /* ---------- statutory regulations lookups ---------- */
-import { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags } from '../data/regulations.js';
+import { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags, findSectionAndRegulation } from '../data/regulations.js';
 export { REGULATIONS, allRegulations, regulation, allChaptersOf, allSectionsOf, allTags };
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
@@ -169,13 +169,7 @@ export function risk(id) {
 }
 
 export function sectionOf(secId) {
-  const regs = allRegulations();
-  for (const reg of regs) {
-    const secs = allSectionsOf(reg);
-    const found = secs.find(s => s.id === secId);
-    if (found) return found;
-  }
-  return null;
+  return findSectionAndRegulation(secId)?.section || null;
 }
 
 export function isSectionAmended(sec) {
@@ -237,10 +231,5 @@ export function riskExposureScore(r) {
 }
 
 export function regulationOfSection(secId) {
-  const regs = allRegulations();
-  for (const reg of regs) {
-    const secs = allSectionsOf(reg);
-    if (secs.some(s => s.id === secId)) return reg;
-  }
-  return null;
+  return findSectionAndRegulation(secId)?.regulation || null;
 }
