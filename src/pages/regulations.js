@@ -82,8 +82,8 @@ function renderRegulationsLibrary(u) {
       </div>
       <div class="acts">
         <div class="seg" role="tablist">
-          <button class="${layout !== 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="grid" title="Cards view">${ic('layout-grid', 14)} Cards</button>
-          <button class="${layout === 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="list" title="List view">${ic('list', 14)} List</button>
+          <button class="${layout !== 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="grid" title="Cards view">${ic('layout-grid', 14)} Cards</button>
+          <button class="${layout === 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="list" title="List view">${ic('list', 14)} List</button>
         </div>
       </div>
     </div>
@@ -102,10 +102,10 @@ function renderRegulationsLibrary(u) {
         ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
       </div>
       <div class="seg" role="tablist">
-        <button class="${juris === 'all' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="all">All (${allActs.length})</button>
-        <button class="${juris === 'fi' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="fi">Finland</button>
-        <button class="${juris === 'se' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="se">Sweden</button>
-        <button class="${juris === 'eu' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="eu">European Union</button>
+        <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="all">All (${allActs.length})</button>
+        <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finland</button>
+        <button class="${juris === 'se' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="se">Sweden</button>
+        <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="eu">European Union</button>
       </div>
     </div>
 
@@ -194,7 +194,6 @@ function renderRegulationsReader(u) {
   const curAct = regulation(selActId) || REGULATIONS[0];
   const q = (u.regQ || '').toLowerCase().trim();
   const showPlain = u.regPlain !== false;
-  const lang = u.regLang || 'en'; // 'en' (default translated) or 'original'
 
   const allSecs = allSectionsOf(curAct);
   const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
@@ -255,15 +254,11 @@ function renderRegulationsReader(u) {
             </div>
           </header>
 
-          <!-- Simple Toolbar: Plain English and Language Toggles Only -->
+          <!-- Simple Toolbar: Plain English Toggle & Clear Search -->
           <div class="finlex-toolbar">
             <button class="btn btn-sm ${showPlain ? 'btn-primary' : 'btn-ghost'}" data-a="toggleRegPlain" title="Toggle Plain English summary">
               ${ic('sparkles', 13)}
               <span>Plain English</span>
-            </button>
-            <button class="btn btn-sm btn-ghost" data-a="toggleRegLang" title="Toggle language">
-              ${ic('languages', 13)}
-              <span>${lang === 'en' ? 'English' : 'Original'}</span>
             </button>
             <span class="sp"></span>
             ${
@@ -277,7 +272,7 @@ function renderRegulationsReader(u) {
 
           <!-- Statutory Sections Stream -->
           <div class="finlex-sections-stream">
-            ${renderFinlexSections(chapters, activeSecId, showPlain, lang, q)}
+            ${renderFinlexSections(chapters, activeSecId, showPlain, q)}
           </div>
         </div>
       </main>
@@ -305,7 +300,9 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
         return (
           s.number.toLowerCase().includes(q) ||
           s.heading.toLowerCase().includes(q) ||
+          (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
           s.text.toLowerCase().includes(q) ||
+          (s.textEn && s.textEn.toLowerCase().includes(q)) ||
           (s.plainEnglish && s.plainEnglish.summary.toLowerCase().includes(q))
         );
       });
@@ -315,8 +312,9 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
       const secItems = matchingSecs
         .map(s => {
           const isActive = s.id === activeSecId;
-          return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)} ${esc(s.heading)}">
-          ${esc(s.number)} - ${esc(s.heading)}
+          const heading = s.headingEn || s.heading;
+          return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)} ${esc(heading)}">
+          ${esc(s.number)} - ${esc(heading)}
         </button>`;
         })
         .join('');
@@ -333,7 +331,7 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
     .join('');
 }
 
-function renderFinlexSections(chapters, activeSecId, showPlain, lang, q) {
+function renderFinlexSections(chapters, activeSecId, showPlain, q) {
   return chapters
     .map(ch => {
       const matchingSecs = (ch.sections || []).filter(s => {
@@ -341,7 +339,9 @@ function renderFinlexSections(chapters, activeSecId, showPlain, lang, q) {
         return (
           s.number.toLowerCase().includes(q) ||
           s.heading.toLowerCase().includes(q) ||
+          (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
           s.text.toLowerCase().includes(q) ||
+          (s.textEn && s.textEn.toLowerCase().includes(q)) ||
           (s.plainEnglish && s.plainEnglish.summary.toLowerCase().includes(q))
         );
       });
@@ -354,17 +354,18 @@ function renderFinlexSections(chapters, activeSecId, showPlain, lang, q) {
           <h2 class="finlex-chap-name">${esc(ch.title)}</h2>
         </div>
         <div class="finlex-chap-body">
-          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, showPlain, lang)).join('')}
+          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, showPlain)).join('')}
         </div>
       `;
     })
     .join('');
 }
 
-function renderSectionBlock(s, activeSecId, showPlain, lang) {
+function renderSectionBlock(s, activeSecId, showPlain) {
   const isActive = s.id === activeSecId;
   const t = s.taskId ? task(s.taskId) : null;
-  const textToShow = lang === 'en' && s.textEn ? s.textEn : s.text;
+  const textToShow = s.textEn || s.text;
+  const headingToShow = s.headingEn || s.heading;
 
   return `<article class="finlex-sec ${isActive ? 'active' : ''}" id="sec-${s.id}">
     <!-- Section Citation & Heading -->
@@ -373,7 +374,7 @@ function renderSectionBlock(s, activeSecId, showPlain, lang) {
         <span class="finlex-sec-num">${esc(s.number)}</span>
         ${s.amendingAct ? `<span class="finlex-sec-amendment">${esc(s.amendingAct)}</span>` : ''}
       </div>
-      <h3 class="finlex-sec-title">${esc(s.heading)}</h3>
+      <h3 class="finlex-sec-title">${esc(headingToShow)}</h3>
     </header>
 
     <!-- PLAIN ENGLISH BOX (Clean, simple, no fancy colors) -->

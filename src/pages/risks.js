@@ -71,7 +71,7 @@ export function pageRisks() {
       <div class="stat"><span class="k">Regulatory Risks</span><span class="v">${risks.length}</span><span class="d">${criticalCount + highCount} high or critical</span></div>
       <div class="stat"><span class="k">Open Gaps</span><span class="v" style="${gapCount ? 'color:var(--amber)' : ''}">${gapCount}</span><span class="d">${gapCount ? 'requiring mitigation' : 'all gaps closed'}</span></div>
       <div class="stat"><span class="k">Critical Severity</span><span class="v" style="${criticalCount ? 'color:var(--red)' : ''}">${criticalCount}</span><span class="d">supervisory sanctions</span></div>
-      <div class="stat"><span class="k">Avg Exposure</span><span class="v">${avgExposure}/100</span><span class="d">aggregate risk index</span></div>
+      <div class="stat"><span class="k">Avg Exposure</span><span class="v">${avgExposure}</span><span class="d">out of 100 aggregate score</span></div>
     </div>
 
     <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">

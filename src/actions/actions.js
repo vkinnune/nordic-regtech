@@ -201,7 +201,7 @@ A.openProject = el => go('project', { id: el.dataset.id, tab: S.prefs.defaultTab
 A.set = el => {
   const k = el.dataset.k;
   let v = el.dataset.v;
-  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$/.test(k)) fxSet({ tabs: true });
+  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$|Layout$/.test(k)) fxSet({ tabs: true });
   if (k === 'inboxSel' && !v) v = null;
   S.ui[k] = v;
   if (k === 'membersTab' || k === 'searchCat') S.ui.pop = null;
@@ -396,7 +396,7 @@ A.openTask = el => {
     toast("You don't have access to that task", { kind: 'err' });
     return;
   }
-  if (!S.ui.drawer || !document.activeElement?.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  if ((!S.ui.drawer && !S.ui.govDrawer) || !document.activeElement?.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   S.ui.drawer = id;
   S.ui.drawerFull = S.prefs.openTasks === 'full' || (S.ui.drawerFull && S.ui.drawer === id);
   S.ui.pop = null;
@@ -1229,16 +1229,6 @@ A.setRegView = el => {
   fxSet({ route: true, tabs: true });
   render();
 };
-A.setRegLibLayout = el => {
-  S.ui.regLibLayout = el.dataset.layout;
-  fxSet({ tabs: true });
-  render();
-};
-A.setRegLibJuris = el => {
-  S.ui.regLibJuris = el.dataset.juris;
-  fxSet({ tabs: true });
-  render();
-};
 A.clearRegLibQ = () => {
   S.ui.regLibQ = '';
   render();
@@ -1262,10 +1252,6 @@ A.toggleDiffPlain = () => {
   S.ui.diffPlain = S.ui.diffPlain === false ? true : false;
   render();
 };
-A.toggleRegLang = () => {
-  S.ui.regLang = S.ui.regLang === 'en' ? 'fi' : 'en';
-  render();
-};
 IN.regQ = el => {
   S.ui.regQ = el.value;
   render();
@@ -1278,10 +1264,10 @@ IN.regLibQ = el => {
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
+  if ((!S.ui.drawer && !S.ui.govDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   delete S.ui.drawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
-  S.ui.drawerOpener = focusKey(el);
   fxSet({ drawer: true });
   render();
 };
@@ -1318,63 +1304,61 @@ A.signOffPolicy = el => {
   }
 };
 
-A.createMitigationTask = el => {
-  const c = el.dataset.ctl ? control(el.dataset.ctl) : null;
-  const secId = el.dataset.sec;
+function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage }) {
   const newId = uid('t');
-  const pId = c?.policyId ? policy(c.policyId)?.projectId || 'p5' : 'p5';
-  const ctlKey = c ? c.code.replace(/^CTL-/, '') : 'REG';
   const newTask = {
     id: newId,
-    key: `CTL-${ctlKey}`,
-    title: c ? `Update control ${c.code} for statutory amendment` : `Statutory amendment implementation task`,
-    desc: c ? `Regulatory change requirement for control: ${c.amendmentAlert || c.specification}` : `Requirement assessment for section ${secId}`,
-    project: pId,
+    key,
+    title,
+    desc,
+    project: project || 'p5',
     status: 'todo',
     priority: 'high',
     assignee: D().me,
     created: Date.now(),
     updated: Date.now(),
     subtasks: [],
-    labels: ['Compliance', 'Regulatory Amendment'],
+    labels: labels || ['Compliance'],
   };
   D().tasks.unshift(newTask);
-  if (c) c.taskId = newId;
-  logAct('created', newTask, `Created mitigation task for ${c ? c.code : secId}`);
-  toast(`Update task ${newTask.key} created.`);
+  logAct('created', newTask, logMessage);
+  toast(toastMessage || `Update task ${newTask.key} created.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;
   save();
   render();
+  return newId;
+}
+
+A.createMitigationTask = el => {
+  const c = el.dataset.ctl ? control(el.dataset.ctl) : null;
+  const secId = el.dataset.sec;
+  const pId = c?.policyId ? policy(c.policyId)?.projectId || 'p5' : 'p5';
+  const ctlKey = c ? c.code.replace(/^CTL-/, '') : 'REG';
+  const newId = dispatchGovTask({
+    key: `CTL-${ctlKey}`,
+    title: c ? `Update control ${c.code} for statutory amendment` : `Statutory amendment implementation task`,
+    desc: c ? `Regulatory change requirement for control: ${c.amendmentAlert || c.specification}` : `Requirement assessment for section ${secId}`,
+    project: pId,
+    labels: ['Compliance', 'Regulatory Amendment'],
+    logMessage: `Created mitigation task for ${c ? c.code : secId}`,
+  });
+  if (c) c.taskId = newId;
 };
 
 A.createPolicyUpdateTask = el => {
   const p = policy(el.dataset.id);
   const secId = el.dataset.sec;
-  const newId = uid('t');
   const polKey = p ? p.code.replace(/^POL-/, '') : 'GOV';
-  const newTask = {
-    id: newId,
+  const newId = dispatchGovTask({
     key: `POL-${polKey}`,
     title: p ? `Update policy ${p.code} (${p.title})` : `Update policy documentation`,
     desc: `Policy review and update following statutory amendment (${secId || ''}).`,
     project: p?.projectId || 'p5',
-    status: 'todo',
-    priority: 'high',
-    assignee: D().me,
-    created: Date.now(),
-    updated: Date.now(),
-    subtasks: [],
     labels: ['Compliance', 'Policy'],
-  };
-  D().tasks.unshift(newTask);
+    logMessage: `Created policy update task for ${p ? p.code : secId}`,
+  });
   if (p) p.taskId = newId;
-  logAct('created', newTask, `Created policy update task for ${p ? p.code : secId}`);
-  toast(`Update task ${newTask.key} created.`);
-  S.ui.drawer = newId;
-  delete S.ui.govDrawer;
-  save();
-  render();
 };
 
 A.linkControlPick = el => {

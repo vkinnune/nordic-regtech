@@ -12,7 +12,7 @@ export const REGULATIONS = [
     inForce: '2013-01-01',
     status: 'In force',
     amendedBy: '28.12.2017/1069',
-    tags: ['InvestmentServices', 'Finanssivalvonta', 'MiFID', 'AlgorithmicTrading'],
+    tags: ['InvestmentServices', 'FIN-FSA', 'MiFID', 'AlgorithmicTrading'],
     summary:
       'The Finnish Investment Services Act (transposing MiFID II). Governs investment firms, exemptions from licensing, algorithmic trading obligations, structured deposits, and commodity derivative position limits.',
     projectId: 'p5',
@@ -153,7 +153,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                   { regId: 'reg-sfs-2004-46', label: 'SFS 2004:46 1 kap. 100 § (AI & Algoritmer)' },
                   { regId: 'reg-mifid', label: 'MiFID II Art. 17 (Algorithmic Trading)' },
                 ],
-                tags: ['AlgorithmicTrading', 'Risk', 'HFT', 'Finanssivalvonta'],
+                tags: ['AlgorithmicTrading', 'Risk', 'HFT', 'FIN-FSA'],
                 taskId: 't1',
                 taskKey: 'SFS 1:100',
                 status: 'MODIFIED',
