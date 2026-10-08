@@ -1305,9 +1305,7 @@ A.signOffPolicy = el => {
 };
 
 function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage, onBeforeCommit }) {
-  const newId = uid('t');
-  const newTask = {
-    id: newId,
+  const newTask = createTask({
     key,
     title,
     desc,
@@ -1315,14 +1313,11 @@ function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastM
     status: 'todo',
     priority: 'high',
     assignee: D().me,
-    created: Date.now(),
-    updated: Date.now(),
-    subtasks: [],
     labels: labels || ['Compliance'],
-  };
-  D().tasks.unshift(newTask);
+  });
+  const newId = newTask.id;
   if (onBeforeCommit) onBeforeCommit(newId);
-  logAct('created', newTask, logMessage);
+  if (logMessage) logAct('created', newTask, logMessage);
   toast(toastMessage || `Update task ${newTask.key} created.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;

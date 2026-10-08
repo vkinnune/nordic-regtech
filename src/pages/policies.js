@@ -1,7 +1,7 @@
 /* ---------- POLICIES REGISTRY (Governance Policies & Standards) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, allPolicies } from '../core/store.js';
+import { S, allPolicies, isPolicyImpacted, regulationOfSection } from '../core/store.js';
 import { empty, formatSecBadge } from '../ui/helpers.js';
 
 export function pagePolicies() {
@@ -11,7 +11,8 @@ export function pagePolicies() {
 
   const policies = allPolicies();
   const filtered = policies.filter(p => {
-    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+    if (statusFilter === 'NEEDS_REVIEW' && !isPolicyImpacted(p)) return false;
+    if (statusFilter !== 'all' && statusFilter !== 'NEEDS_REVIEW' && p.status !== statusFilter) return false;
     if (q) {
       const matchCode = p.code.toLowerCase().includes(q);
       const matchTitle = p.title.toLowerCase().includes(q);
@@ -27,10 +28,10 @@ export function pagePolicies() {
     return true;
   });
 
-  const needsReviewCount = policies.filter(p => p.status === 'NEEDS_REVIEW').length;
-  const activeCount = policies.filter(p => p.status === 'ACTIVE').length;
+  const needsReviewCount = policies.filter(isPolicyImpacted).length;
+  const activeCount = policies.filter(p => p.status === 'ACTIVE' && !isPolicyImpacted(p)).length;
   const totalControlsLinked = policies.reduce((sum, p) => sum + (p.controlIds || []).length, 0);
-  const distinctStatutes = new Set(policies.flatMap(p => (p.statuteSections || []).map(s => s.split(':')[0]))).size;
+  const distinctStatutes = new Set(policies.flatMap(p => (p.statuteSections || []).map(s => regulationOfSection(s)?.id || s.split('-')[0]))).size;
 
   let body;
   if (!policies.length) {
@@ -103,9 +104,9 @@ function renderPoliciesTable(policies) {
       <tbody>
         ${policies
           .map(p => {
-            const isAlert = p.status === 'NEEDS_REVIEW';
-            const statusLabel = p.status === 'NEEDS_REVIEW' ? 'Needs Review' : p.status === 'ACTIVE' ? 'Active' : p.status === 'DRAFT' ? 'Draft' : 'Archived';
-            const statusClass = p.status === 'NEEDS_REVIEW' ? 'gov-status-alert' : p.status === 'ACTIVE' ? 'gov-status-ok' : 'gov-status-draft';
+            const isAlert = isPolicyImpacted(p);
+            const statusLabel = isAlert ? 'Needs Review' : p.status === 'ACTIVE' ? 'Active' : p.status === 'DRAFT' ? 'Draft' : 'Archived';
+            const statusClass = isAlert ? 'gov-status-alert' : p.status === 'ACTIVE' ? 'gov-status-ok' : 'gov-status-draft';
 
             return `<tr data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Open policy details">
             <td>

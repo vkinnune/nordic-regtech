@@ -188,14 +188,23 @@ export function isControlImpacted(c) {
   });
 }
 
+export function isPolicyImpacted(p) {
+  if (!p) return false;
+  if (p.status === 'NEEDS_REVIEW') return true;
+  if (p.impactedByAmendment && !p.reviewedAt) return true;
+  const sections = p.statuteSections || [];
+  return sections.some(secId => {
+    const sec = sectionOf(secId);
+    return isSectionAmended(sec) && !p.reviewedAt;
+  });
+}
+
 export function policiesForSection(secId) {
   return allPolicies().filter(p => p.statuteSections && p.statuteSections.includes(secId));
 }
 
 export function policiesNeedingReviewForSection(secId) {
-  const sec = sectionOf(secId);
-  const amended = isSectionAmended(sec);
-  return policiesForSection(secId).filter(p => p.status === 'NEEDS_REVIEW' || (amended && !p.reviewedAt));
+  return policiesForSection(secId).filter(isPolicyImpacted);
 }
 
 export function controlsForSection(secId) {

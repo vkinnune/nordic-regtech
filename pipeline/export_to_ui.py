@@ -53,28 +53,44 @@ def export():
         chapters_dict = {}
 
         for sec in sections:
-            ch_num = sec.get("chapter") or "Allmänt"
+            ch_num = sec.get("chapter") or "General"
             ch_title = sec.get("chapter_title") or ""
             ch_key = (ch_num, ch_title)
-            
+
             if ch_key not in chapters_dict:
-                ch_label = f"{ch_num} kap." if ch_num != "Allmänt" and not str(ch_num).lower().endswith("kap.") else str(ch_num)
+                if (
+                    ch_num != "General"
+                    and not str(ch_num).lower().endswith("kap.")
+                    and not str(ch_num).lower().startswith("chapter")
+                ):
+                    ch_label = f"Chapter {ch_num}"
+                elif str(ch_num).lower().endswith("kap."):
+                    num_part = str(ch_num)[:-4].strip()
+                    ch_label = f"Chapter {num_part}"
+                else:
+                    ch_label = str(ch_num)
+
                 chapters_dict[ch_key] = {
                     "number": ch_label,
                     "title": ch_title,
-                    "sections": []
+                    "sections": [],
                 }
 
-            sec_id = sec.get("id") or f"{doc_id}-{len(chapters_dict[ch_key]['sections'])}"
-            sec_refs = citations_map.get((doc_id, sec.get("id")), [])
+            chunk_id = sec.get("chunk_id")
+            sec_id = chunk_id or f"{doc_id}-{len(chapters_dict[ch_key]['sections'])}"
+            sec_refs = citations_map.get((doc_id, chunk_id), [])
+
+            sec_num = sec.get("section") or "§"
+            if not sec_num.endswith("§"):
+                sec_num = f"{sec_num} §"
 
             chapters_dict[ch_key]["sections"].append({
-                "id": f"{doc_id}-{sec_id}",
-                "number": sec.get("section") or "§",
+                "id": sec_id,
+                "number": sec_num,
                 "heading": sec.get("heading") or "",
-                "text": sec.get("text") or "",
+                "text": sec.get("full_text") or sec.get("text") or "",
                 "crossRefs": sec_refs,
-                "status": "UNCHANGED"
+                "status": "UNCHANGED",
             })
 
         chapters_list = list(chapters_dict.values())
@@ -90,17 +106,17 @@ def export():
                     "heading": "Provisions & Application",
                     "text": data.get("preamble"),
                     "crossRefs": [],
-                    "status": "UNCHANGED"
-                }]
+                    "status": "UNCHANGED",
+                }],
             })
 
         tags = ["Sweden"]
         if is_sfs:
             tags.append("SFS")
-            tags.append("Lag")
+            tags.append("Statute")
         else:
             tags.append("FFFS")
-            tags.append("Föreskrifter")
+            tags.append("Regulation")
 
         docs.append({
             "id": doc_id,

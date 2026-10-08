@@ -1,7 +1,6 @@
-/* ---------- CONTROLS MATRIX (Operational Controls & Safeguards) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, allControls, policy, isControlImpacted } from '../core/store.js';
+import { S, allControls, policy, isControlImpacted, sectionOf, isSectionAmended } from '../core/store.js';
 import { empty, formatSecBadge } from '../ui/helpers.js';
 
 export function pageControls() {
@@ -35,7 +34,7 @@ export function pageControls() {
   const effectiveCount = controls.filter(c => !isControlImpacted(c)).length;
   const automatedCount = controls.filter(c => c.type === 'AUTOMATED').length;
   const automatedPct = Math.round((automatedCount / Math.max(controls.length, 1)) * 100);
-  const distinctRisks = new Set(controls.flatMap(c => c.riskIds || [])).size;
+  const distinctRisks = new Set(controls.flatMap(c => (Array.isArray(c.riskIds) ? c.riskIds : c.riskId ? [c.riskId] : [])).filter(Boolean)).size;
 
   let body;
   if (!controls.length) {
@@ -109,10 +108,12 @@ function renderControlsTable(controls) {
       <tbody>
         ${controls
           .map(c => {
-            const isDeficient = c.status === 'DEFICIENT';
+            const isDeficient = isControlImpacted(c);
             const statusLabel = isDeficient ? 'Needs Update' : 'Effective';
             const statusClass = isDeficient ? 'gov-status-alert' : 'gov-status-ok';
             const p = c.policyId ? policy(c.policyId) : null;
+            const impactedSec = (c.statuteSections || []).map(sectionOf).find(isSectionAmended);
+            const amendBadge = c.impactedByAmendment || (impactedSec ? impactedSec.amendingAct || 'Amended' : null);
 
             return `<tr data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Open control details">
             <td>
@@ -136,10 +137,10 @@ function renderControlsTable(controls) {
             </td>
             <td>
               ${
-                c.impactedByAmendment
-                  ? `<div class="gov-amendment-pill" title="${esc(c.amendmentAlert || '')}">
+                amendBadge
+                  ? `<div class="gov-amendment-pill" title="${esc(c.amendmentAlert || (impactedSec ? `${impactedSec.number} amended by ${impactedSec.amendingAct || 'statutory diff'}` : 'Statutory amendment'))}">
                       ${ic('alert-circle', 11)}
-                      <span class="mono trunc" style="max-width:140px">${esc(c.impactedByAmendment)}</span>
+                      <span class="mono trunc" style="max-width:140px">${esc(amendBadge)}</span>
                     </div>`
                   : `<span class="faint mono" style="font-size:11px">—</span>`
               }

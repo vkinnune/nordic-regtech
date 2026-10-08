@@ -125,14 +125,31 @@ export function diffTokenHtml(tk) {
 }
 
 const SEC_BADGE_PREFIXES = [
-  { prefix: 'finlex-', format: p => `747/2012 ${p[0]}:${p[1]} §` },
-  { prefix: 'sfs-', format: p => `SFS ${p[0]}:${p[1]} §` },
+  { prefix: 'finlex-', format: p => `747/2012 ${p.join(':')} §` },
+  {
+    prefix: 'sfs-',
+    format: p => (p.length >= 3 ? `SFS ${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `SFS ${p.join(':')} §`),
+  },
   { prefix: 'dora-', format: p => `DORA Art. ${p.join('-')}` },
-  { prefix: 'aml-', format: p => `AML 444/2017 ${p[0]}:${p[1]} §` },
+  { prefix: 'aml-', format: p => `AML 444/2017 ${p.join(':')} §` },
 ];
 
 export function formatSecBadge(secId) {
   if (!secId) return '';
+  if (secId.startsWith('riksdagen_sfs-')) {
+    const rest = secId.replace('riksdagen_sfs-', '');
+    const [statute, ...parts] = rest.split('_');
+    const statuteFormatted = statute.replace('-', ':');
+    const chapSec = parts.map(p => p.replace('k', '').replace('p', '')).join(':');
+    return `SFS ${statuteFormatted} ${chapSec ? chapSec + ' §' : ''}`.trim();
+  }
+  if (secId.startsWith('fi_fffs_fffs-')) {
+    const rest = secId.replace('fi_fffs_fffs-', '');
+    const [statute, ...parts] = rest.split('_');
+    const statuteFormatted = statute.replace('-', ':');
+    const chapSec = parts.map(p => p.replace('k', '').replace('p', '')).join(':');
+    return `FFFS ${statuteFormatted} ${chapSec ? chapSec + ' §' : ''}`.trim();
+  }
   for (const { prefix, format } of SEC_BADGE_PREFIXES) {
     if (secId.startsWith(prefix)) {
       return format(secId.slice(prefix.length).split('-'));
