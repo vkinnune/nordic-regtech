@@ -1246,6 +1246,10 @@ A.setRegView = el => {
   fxSet({ route: true, tabs: true });
   render();
 };
+A.toggleRegToc = () => {
+  S.ui.regTocCollapsed = !S.ui.regTocCollapsed;
+  render();
+};
 A.clearRegLibQ = () => {
   S.ui.regLibQ = '';
   render();

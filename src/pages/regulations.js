@@ -272,18 +272,27 @@ function renderRegulationsReader(u) {
     <div class="finlex-container">
 
       <!-- LEFT SIDEBAR: Finlex Sisällysluettelo (TOC) -->
-      <aside class="finlex-toc" aria-label="Table of Contents">
+      <aside class="finlex-toc ${u.regTocCollapsed ? 'collapsed' : ''}" aria-label="Table of Contents">
         <div class="finlex-toc-top">
           <!-- Back to Library Button -->
-          <button class="finlex-toc-back-btn" data-a="setRegView" data-view="library" title="Back to regulations library">
-            ${ic('arrow-left', 13)}
-            <span>Back to Regulations</span>
-          </button>
+          <div class="row" style="gap:6px">
+            <button class="finlex-toc-back-btn grow" data-a="setRegView" data-view="library" title="Back to regulations library">
+              ${ic('arrow-left', 13)}
+              <span>Back to Regulations</span>
+            </button>
+            <button class="btn btn-ghost btn-icon btn-sm" data-a="toggleRegToc" title="Collapse table of contents" aria-label="Collapse table of contents">
+              ${ic('panel-left-close', 13)}
+            </button>
+          </div>
 
           <!-- Current Act Title in Sidebar -->
           <div class="finlex-toc-act-label">
             <span class="mono" style="font-size:11px;color:var(--text-3)">${esc(curAct.code)}</span>
-            <span class="trunc" style="font-weight:700;font-size:13px;color:var(--text)">${esc(curAct.shortTitle || curAct.title)}</span>
+            <span class="trunc" style="font-weight:700;font-size:13px;color:var(--text)">${
+              curAct.shortTitle && curAct.shortTitle !== curAct.code
+                ? esc(curAct.shortTitle)
+                : esc(curAct.title && curAct.title !== curAct.code ? curAct.title : curAct.shortTitle || curAct.title)
+            }</span>
           </div>
 
           <!-- Sisällysluettelo Title -->
@@ -310,6 +319,16 @@ function renderRegulationsReader(u) {
       <!-- RIGHT MAIN CONTENT: Finlex Document Reader -->
       <main class="finlex-reader" id="finlex-doc-content" tabindex="-1">
         <div class="finlex-reader-inner">
+          ${
+            u.regTocCollapsed
+              ? `<div style="margin-bottom:14px">
+                  <button class="btn btn-secondary btn-sm" data-a="toggleRegToc" title="Show table of contents">
+                    ${ic('panel-left', 13)}
+                    <span>Table of Contents</span>
+                  </button>
+                </div>`
+              : ''
+          }
 
           <!-- Act Document Header -->
           <header class="finlex-doc-head">

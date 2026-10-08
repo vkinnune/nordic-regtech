@@ -23,6 +23,10 @@
   flex-direction: column;
   min-height: 0;
   user-select: none;
+  transition: width var(--dur) var(--ease);
+}
+.finlex-toc.collapsed {
+  display: none;
 }
 
 .finlex-toc-top {
@@ -89,9 +93,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 8px 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: block;
 }
 
 .finlex-tree-part {
@@ -106,6 +108,7 @@
   align-items: center;
   gap: 6px;
   border-top: 1px solid var(--divider);
+  flex-shrink: 0;
 }
 .finlex-tree-part:first-child {
   border-top: none;
@@ -120,21 +123,28 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  flex-shrink: 0;
+  min-height: 26px;
 }
 
 .finlex-tree-sec {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   text-align: left;
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
-  padding: 5px 8px 5px 22px;
+  padding: 6px 8px 6px 22px;
   font-size: 12.5px;
   line-height: 1.35;
   color: var(--text-2);
   cursor: pointer;
   border-radius: 2px;
+  flex-shrink: 0;
+  min-height: 28px;
+  box-sizing: border-box;
+  margin-bottom: 2px;
   transition:
     background var(--dur),
     color var(--dur);
@@ -489,7 +499,7 @@
   margin-bottom: 30px;
   padding-left: 14px;
   border-left: 3px solid var(--border-strong);
-  scroll-margin-top: 30px;
+  scroll-margin-top: 14px;
 }
 
 .finlex-sec.active {
@@ -738,6 +748,17 @@
   opacity: 0.8;
   cursor: default;
   border-style: dashed;
+}
+
+@media (max-width: 1100px) {
+  .finlex-toc {
+    width: 270px;
+    min-width: 240px;
+    max-width: 300px;
+  }
+  .finlex-reader-inner {
+    padding: 16px 18px 80px;
+  }
 }
 
 @media (max-width: 840px) {

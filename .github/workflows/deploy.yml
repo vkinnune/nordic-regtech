@@ -27,6 +27,7 @@ jobs:
       - name: Quality checks
         run: |
           npm run lint
+          npm test
           npm run format:check
 
       - name: Build site
