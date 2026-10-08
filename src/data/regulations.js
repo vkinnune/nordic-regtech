@@ -4,10 +4,10 @@ export const REGULATIONS = [
   {
     id: 'reg-finlex-747-2012',
     code: '747/2012',
-    title: 'Sijoituspalvelulaki (747/2012)',
-    shortTitle: 'Sijoituspalvelulaki',
+    title: 'Investment Services Act (747/2012)',
+    shortTitle: 'Investment Services Act',
     jurisdiction: 'Finland (Eduskunta / Finlex)',
-    authority: 'Finanssivalvonta (FIN-FSA)',
+    authority: 'Financial Supervisory Authority (FIN-FSA)',
     type: 'national_act',
     inForce: '2013-01-01',
     status: 'In force',
@@ -18,18 +18,18 @@ export const REGULATIONS = [
     projectId: 'p5',
     parts: [
       {
-        number: 'I OSA',
-        title: 'YLEISET SÄÄNNÖKSET JA OIKEUS TARJOTA SIJOITUSPALVELUA',
+        number: 'Part I',
+        title: 'GENERAL PROVISIONS AND RIGHT TO PROVIDE INVESTMENT SERVICES',
         chapters: [
           {
-            number: '1 luku',
-            title: 'Yleiset säännökset',
+            number: 'Chapter 1',
+            title: 'General provisions',
             sections: [
               {
                 id: 'finlex-1-1',
                 number: '1 §',
                 amendingAct: '(28.12.2017/1069)',
-                heading: 'Soveltamisala',
+                heading: 'Scope',
                 text: 'Tätä lakia sovelletaan liiketoimintaan, jossa tarjotaan sijoituspalvelua tai harjoitetaan sijoitustoimintaa.',
                 plainEnglish: {
                   summary: 'Applies to any business that offers investment services or carries out investment activities commercially in Finland.',
@@ -48,7 +48,7 @@ export const REGULATIONS = [
                 id: 'finlex-1-2',
                 number: '2 §',
                 amendingAct: '(28.12.2017/1069)',
-                heading: 'Poikkeukset lain soveltamisalasta',
+                heading: 'Exemptions from scope',
                 text: `Tätä lakia ei sovelleta, jos:
 1) palvelua tarjotaan yksinomaan samaan konserniin kuuluvalle kirjanpitovelvolliselle;
 2) toimintaa harjoitetaan satunnaisesti muun laissa säännellyssä ammattitoiminnassa kuin sijoituspalvelujen tarjoamisessa, eikä siitä peritä erillistä palkkiota;
@@ -88,7 +88,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                 id: 'finlex-1-3',
                 number: '3 §',
                 amendingAct: '(28.12.2017/1069)',
-                heading: 'Osittaiset poikkeukset lain soveltamisesta',
+                heading: 'Partial exemptions from scope',
                 text: 'Mitä tässä laissa säädetään sijoituspalveluyrityksen toimiluvan hakemisesta ja vakavaraisuusvaatimuksista, ei sovelleta sellaisiin yhteisöihin, jotka tarjoavat ainoastaan toimeksiantojen välittämistä tai sijoitusneuvontaa eivätkä pidä hallussaan asiakasvaroja.',
                 plainEnglish: {
                   summary: 'Lighter licensing and capital rules apply to small advisory firms that never hold client money or assets.',
@@ -107,7 +107,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                 id: 'finlex-1-8',
                 number: '8 §',
                 amendingAct: '(28.12.2017/1069)',
-                heading: 'Strukturoitujen talletusten myyntiin ja niitä koskevaan sijoitusneuvontaan sovellettavat säännökset',
+                heading: 'Provisions applicable to structured deposits and related advice',
                 text: 'Luottolaitokseen, joka myy strukturoituja talletuksia tai antaa niistä sijoitusneuvontaa asiakkaille, sovelletaan mitä 10 luvussa säädetään menettelytavoista asiakassuhteessa ja 10 a luvussa tuotehallintavaatimuksista.',
                 plainEnglish: {
                   summary:
@@ -127,7 +127,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                 id: 'finlex-1-9',
                 number: '9 §',
                 amendingAct: '(4.7.2025/526)',
-                heading: 'Algoritmiseen kaupankäyntiin sovellettavat säännökset',
+                heading: 'Provisions applicable to algorithmic trading',
                 text: `Algoritmista kaupankäyntiä harjoittavalla sijoituspalveluyrityksellä on oltava:
 1) toimivat ja häiriönsietokykyiset järjestelmät sekä riittävä kapasiteetti, joilla varmistetaan, etteivät kaupankäyntijärjestelmät luo tai lisää markkinahäiriöitä;
 2) tehokkaat kaupankäyntilimiitit ja -rajat, joilla estetään virheellisten toimeksiantojen lähettäminen;
@@ -162,7 +162,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                 id: 'finlex-1-10',
                 number: '10 §',
                 amendingAct: '(28.12.2017/1069)',
-                heading: 'Positiolimiittien ja hyödykejohdannaispositioiden valvontaan ja raportointiin sovellettavat säännökset',
+                heading: 'Provisions applicable to commodity derivative position limits and reporting',
                 text: 'Hyödykejohdannaisilla tai päästöoikeuksilla kauppaa käyvän sijoituspalveluyrityksen on noudatettava Finanssivalvonnan asettamia positiolimiittejä sekä raportoitava positionsa päivittäin Finanssivalvonnalle ja asianomaiselle kauppapaikalle.',
                 plainEnglish: {
                   summary:
@@ -289,7 +289,7 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
                 textEn:
                   'A fund company using artificial intelligence or fully automated trading algorithms in managing an investment fund must ensure that systems are subject to continuous human oversight, that the fund risk profile is monitored in real time, and that all management and asset allocation decisions can be reconstructed in hindsight upon request by Finansinspektionen.',
                 crossRefs: [
-                  { regId: 'reg-finlex-747-2012', label: 'Sijoituspalvelulaki 1 luku 9 § (Algoritminen kaupankäynti)' },
+                  { regId: 'reg-finlex-747-2012', label: 'Investment Services Act Ch. 1 Sec. 9 (Algorithmic Trading)' },
                   { regId: 'reg-mifid', label: 'MiFID II Delegated Reg 2017/565 Art. 21' },
                 ],
                 tags: ['AI', 'AlgorithmicTrading', 'Supervision', 'Finansinspektionen'],

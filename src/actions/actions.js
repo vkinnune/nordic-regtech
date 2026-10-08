@@ -1293,7 +1293,7 @@ A.resolveGap = el => {
     c.signedOffBy = D().me;
     delete c.impactedByAmendment;
     logAct('resolved', null, `Signed off compliance gap on ${c.code}`);
-    toast(`Kontrolli ${c.code} kuitattu toimivaksi.`);
+    toast(`Control ${c.code} marked effective.`);
     save();
     render();
   }
@@ -1306,7 +1306,7 @@ A.signOffPolicy = el => {
     p.reviewedAt = Date.now();
     p.reviewedBy = D().me;
     logAct('resolved', null, `Signed off policy review for ${p.code}`);
-    toast(`Käytäntö ${p.code} kuitattu katselmoiduksi.`);
+    toast(`Policy ${p.code} signed off as reviewed.`);
     save();
     render();
   }
@@ -1321,8 +1321,8 @@ A.createMitigationTask = el => {
   const newTask = {
     id: newId,
     key: `CTL-${ctlKey}`,
-    title: c ? `Päivitä kontrolli ${c.code} vastaamaan lakimuutosta` : `Lakimuutoksen toimeenpanotehtävä`,
-    desc: c ? `Säädösmuutosvaatimus kontrollille: ${c.amendmentAlert || c.specification}` : `Vaatimusten arviointi pykälälle ${secId}`,
+    title: c ? `Update control ${c.code} for statutory amendment` : `Statutory amendment implementation task`,
+    desc: c ? `Regulatory change requirement for control: ${c.amendmentAlert || c.specification}` : `Requirement assessment for section ${secId}`,
     project: pId,
     status: 'todo',
     priority: 'high',
@@ -1330,12 +1330,12 @@ A.createMitigationTask = el => {
     created: Date.now(),
     updated: Date.now(),
     subtasks: [],
-    labels: ['Compliance', 'Lakimuutos'],
+    labels: ['Compliance', 'Regulatory Amendment'],
   };
   D().tasks.unshift(newTask);
   if (c) c.taskId = newId;
   logAct('created', newTask, `Created mitigation task for ${c ? c.code : secId}`);
-  toast(`Päivitystehtävä ${newTask.key} luotu.`);
+  toast(`Update task ${newTask.key} created.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;
   save();
@@ -1350,8 +1350,8 @@ A.createPolicyUpdateTask = el => {
   const newTask = {
     id: newId,
     key: `POL-${polKey}`,
-    title: p ? `Päivitä käytäntö ${p.code} (${p.title})` : `Päivitä käytäntödokumentaatio`,
-    desc: `Käytännön katselmointi ja päivitys säädösmuutoksen johdosta (${secId || ''}).`,
+    title: p ? `Update policy ${p.code} (${p.title})` : `Update policy documentation`,
+    desc: `Policy review and update following statutory amendment (${secId || ''}).`,
     project: p?.projectId || 'p5',
     status: 'todo',
     priority: 'high',
@@ -1364,7 +1364,7 @@ A.createPolicyUpdateTask = el => {
   D().tasks.unshift(newTask);
   if (p) p.taskId = newId;
   logAct('created', newTask, `Created policy update task for ${p ? p.code : secId}`);
-  toast(`Päivitystehtävä ${newTask.key} luotu.`);
+  toast(`Update task ${newTask.key} created.`);
   S.ui.drawer = newId;
   delete S.ui.govDrawer;
   save();
@@ -1381,7 +1381,7 @@ A.linkControlPick = el => {
     if (!c.statuteSections.includes(secId)) {
       c.statuteSections.push(secId);
     }
-    toast(`Kontrolli ${c.code} linkitetty pykälään.`);
+    toast(`Control ${c.code} linked to section.`);
     save();
   }
   closePop();

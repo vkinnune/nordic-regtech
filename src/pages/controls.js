@@ -1,4 +1,4 @@
-/* ---------- CONTROLS MATRIX (Kontrollit & Toimenpiteet) ---------- */
+/* ---------- CONTROLS MATRIX (Operational Controls & Safeguards) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allControls, policy } from '../core/store.js';
@@ -43,20 +43,20 @@ export function pageControls() {
           <div class="gov-title-box">
             <h1 style="display:flex;align-items:center;gap:8px">
               ${ic('shield-check', 20)}
-              <span>Kontrollit ja suojatoimenpiteet</span>
+              <span>Controls & Safeguards Matrix</span>
               <span class="pill" style="font-size:12px;font-weight:600">${controls.length}</span>
             </h1>
-            <p>Operatiiviset kontrollit, järjestelmäsuodattimet ja niiden säädöskohtainen toimivuus</p>
+            <p>Operational safeguards, automated system filters, and statutory compliance health</p>
           </div>
           ${
             deficientCount > 0
-              ? `<div class="gov-alert-badge" title="Lakimuutoksen tai puutteen vuoksi päivitettäviä kontrolleja">
+              ? `<div class="gov-alert-badge" title="Controls requiring updates due to statutory amendments or deficiencies">
                   ${ic('alert-triangle', 13)}
-                  <span>${deficientCount} kontrollia vaatii lakimuutospäivityksen</span>
+                  <span>${deficientCount} controls require statutory amendment update</span>
                 </div>`
               : `<div class="gov-ok-badge">
                   ${ic('check-circle', 13)}
-                  <span>Kaikki kontrollit toimivia</span>
+                  <span>All controls effective</span>
                 </div>`
           }
         </header>
@@ -66,22 +66,22 @@ export function pageControls() {
           <div class="gov-search-bar">
             <div class="inwrap" style="flex:1">
               ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="ctlQ" placeholder="Etsi kontrollia koodilla, nimellä tai säädöksellä (esim. CTL-ALG, DORA, kill switch)..." value="${esc(u.ctlQ || '')}">
-              ${u.ctlQ ? `<button class="pillbtn" data-a="set" data-k="ctlQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Tyhjennä</button>` : ''}
+              <input class="input" style="height:36px;font-size:13.5px" data-in="ctlQ" placeholder="Search controls by code, title or statutory citation (e.g. CTL-ALG, DORA, kill switch)..." value="${esc(u.ctlQ || '')}">
+              ${u.ctlQ ? `<button class="pillbtn" data-a="set" data-k="ctlQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
             </div>
           </div>
 
           <div class="gov-filters-row">
             <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="all">Kaikki (${controls.length})</button>
+              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="all">All (${controls.length})</button>
               <button class="finlex-filter-pill ${filter === 'DEFICIENT' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="DEFICIENT">
-                Vaatii päivityksen (${deficientCount})
+                Needs Update (${deficientCount})
               </button>
               <button class="finlex-filter-pill ${filter === 'EFFECTIVE' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="EFFECTIVE">
-                Toimivat (${effectiveCount})
+                Effective (${effectiveCount})
               </button>
-              <button class="finlex-filter-pill ${filter === 'AUTOMATED' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="AUTOMATED">Automaattiset</button>
-              <button class="finlex-filter-pill ${filter === 'MANUAL' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="MANUAL">Manuaaliset</button>
+              <button class="finlex-filter-pill ${filter === 'AUTOMATED' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="AUTOMATED">Automated</button>
+              <button class="finlex-filter-pill ${filter === 'MANUAL' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="MANUAL">Manual</button>
             </div>
           </div>
         </div>
@@ -91,9 +91,9 @@ export function pageControls() {
           filtered.length === 0
             ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
                 ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">Ei hakua vastaavia kontrolleja</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">Hakusanalla tai valitulla suodattimella ei löytynyt tuloksia.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="ctlFilter" data-v="all">${ic('refresh-cw', 13)} Nollaa suodattimet</button>
+                <h3 style="margin:12px 0 4px;font-size:16px">No matching controls found</h3>
+                <p class="muted" style="margin:0 0 16px;font-size:13px">No controls matched the search query or active filter.</p>
+                <button class="btn btn-sm btn-ghost" data-a="set" data-k="ctlFilter" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
               </div>`
             : renderControlsTable(filtered)
         }
@@ -108,24 +108,24 @@ function renderControlsTable(controls) {
     <table class="gov-table">
       <thead>
         <tr>
-          <th style="width:340px">Kontrolli & Koodi</th>
-          <th>Tyyppi</th>
-          <th>Tila</th>
-          <th>Lakimuutosvaikutus</th>
-          <th>Liitetty säädöspykalä</th>
-          <th>Vastuuhenkilö & Tiheys</th>
-          <th style="text-align:right">Käytäntö</th>
+          <th style="width:340px">Control & Code</th>
+          <th>Type</th>
+          <th>Health & Status</th>
+          <th>Statutory Impact</th>
+          <th>Linked Section</th>
+          <th>Owner & Frequency</th>
+          <th style="text-align:right">Policy</th>
         </tr>
       </thead>
       <tbody>
         ${controls
           .map(c => {
             const isDeficient = c.status === 'DEFICIENT';
-            const statusLabel = isDeficient ? 'Vaatii päivityksen' : 'Toimiva';
+            const statusLabel = isDeficient ? 'Needs Update' : 'Effective';
             const statusClass = isDeficient ? 'gov-status-alert' : 'gov-status-ok';
             const p = c.policyId ? policy(c.policyId) : null;
 
-            return `<tr data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Avaa kontrollin tiedot">
+            return `<tr data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Open control details">
             <td>
               <div style="font-weight:700;display:flex;align-items:center;gap:6px">
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(c.code)}</span>
@@ -136,7 +136,7 @@ function renderControlsTable(controls) {
             <td>
               <span class="pill" style="font-size:11px">
                 ${c.type === 'AUTOMATED' ? ic('cpu', 11) : c.type === 'MANUAL' ? ic('user', 11) : ic('file-text', 11)}
-                <span>${c.type === 'AUTOMATED' ? 'Automaattinen' : c.type === 'MANUAL' ? 'Manuaalinen' : 'Raportointi'}</span>
+                <span>${c.type === 'AUTOMATED' ? 'Automated' : c.type === 'MANUAL' ? 'Manual' : 'Reporting'}</span>
               </span>
             </td>
             <td>

@@ -110,11 +110,11 @@ export function renderSidebar() {
       ${sItem('favorites', 'Favorites', 'star')}
       ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">
-        <div class="sgroup-h">Säädökset & Hallinto</div>
-        ${sItem('regulations', 'Säädökset', 'scale')}
-        ${sItem('policies', 'Käytännöt', 'file-text')}
-        ${sItem('controls', 'Kontrollit', 'shield-check')}
-        ${sItem('risks', 'Riskit', 'alert-triangle')}
+        <div class="sgroup-h">Regulations & Governance</div>
+        ${sItem('regulations', 'Regulations', 'scale')}
+        ${sItem('policies', 'Policies', 'file-text')}
+        ${sItem('controls', 'Controls', 'shield-check')}
+        ${sItem('risks', 'Risks', 'alert-triangle')}
       </div>
       <div class="sgroup">
         <div class="sgroup-h">Workspace</div>

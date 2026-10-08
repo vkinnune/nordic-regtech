@@ -1,4 +1,4 @@
-/* ---------- RISKS REGISTER (Compliance- ja säädösriskit) ---------- */
+/* ---------- RISKS REGISTER (Regulatory Risks & Sanctions) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allRisks, riskGapStatus, riskExposureScore, riskControls } from '../core/store.js';
@@ -44,20 +44,20 @@ export function pageRisks() {
           <div class="gov-title-box">
             <h1 style="display:flex;align-items:center;gap:8px">
               ${ic('alert-triangle', 20)}
-              <span>Säädösriskit ja seuraamusrekisteri</span>
+              <span>Regulatory Risks & Sanctions</span>
               <span class="pill" style="font-size:12px;font-weight:600">${risks.length}</span>
             </h1>
-            <p>Viranomaismääräysten noudattamatta jättämisestä aiheutuvat sanktiot, taloudelliset riskit ja kontrollikattavuus</p>
+            <p>Supervisory sanctions, financial penalty exposures, and operational control coverage</p>
           </div>
           ${
             gapCount > 0
-              ? `<div class="gov-alert-badge" title="Riskikohteita joissa on avoimia kontrollikuiluja">
+              ? `<div class="gov-alert-badge" title="Risks with open compliance gaps requiring mitigation">
                   ${ic('alert-triangle', 13)}
-                  <span>${gapCount} riskissä avoin kontrollikuilu</span>
+                  <span>${gapCount} risks with open compliance gaps</span>
                 </div>`
               : `<div class="gov-ok-badge">
                   ${ic('check-circle', 13)}
-                  <span>Kaikki riskit katettu</span>
+                  <span>All risks covered</span>
                 </div>`
           }
         </header>
@@ -67,22 +67,22 @@ export function pageRisks() {
           <div class="gov-search-bar">
             <div class="inwrap" style="flex:1">
               ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="rskQ" placeholder="Etsi riskiä koodilla, nimellä tai viranomaisella (esim. RSK-ALG, FIN-FSA, sakko)..." value="${esc(u.rskQ || '')}">
-              ${u.rskQ ? `<button class="pillbtn" data-a="set" data-k="rskQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Tyhjennä</button>` : ''}
+              <input class="input" style="height:36px;font-size:13.5px" data-in="rskQ" placeholder="Search risks by code, title or supervisory authority (e.g. RSK-ALG, FIN-FSA, penalty)..." value="${esc(u.rskQ || '')}">
+              ${u.rskQ ? `<button class="pillbtn" data-a="set" data-k="rskQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
             </div>
           </div>
 
           <div class="gov-filters-row">
             <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="all">Kaikki (${risks.length})</button>
+              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="all">All (${risks.length})</button>
               <button class="finlex-filter-pill ${filter === 'OPEN_GAPS' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="OPEN_GAPS">
-                Avoimet kuilut (${gapCount})
+                Open Gaps (${gapCount})
               </button>
               <button class="finlex-filter-pill ${filter === 'CRITICAL' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="CRITICAL">
-                Kriittiset (${criticalCount})
+                Critical (${criticalCount})
               </button>
-              <button class="finlex-filter-pill ${filter === 'HIGH' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="HIGH">Korkea riski</button>
-              <button class="finlex-filter-pill ${filter === 'MEDIUM' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="MEDIUM">Kohtalainen</button>
+              <button class="finlex-filter-pill ${filter === 'HIGH' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="HIGH">High Risk</button>
+              <button class="finlex-filter-pill ${filter === 'MEDIUM' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="MEDIUM">Medium Risk</button>
             </div>
           </div>
         </div>
@@ -92,9 +92,9 @@ export function pageRisks() {
           filtered.length === 0
             ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
                 ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">Ei hakua vastaavia riskejä</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">Hakusanalla tai valitulla suodattimella ei löytynyt tuloksia.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="rskFilter" data-v="all">${ic('refresh-cw', 13)} Nollaa suodattimet</button>
+                <h3 style="margin:12px 0 4px;font-size:16px">No matching risks found</h3>
+                <p class="muted" style="margin:0 0 16px;font-size:13px">No risks matched the search query or active filter.</p>
+                <button class="btn btn-sm btn-ghost" data-a="set" data-k="rskFilter" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
               </div>`
             : renderRisksTable(filtered)
         }
@@ -109,13 +109,13 @@ function renderRisksTable(risks) {
     <table class="gov-table">
       <thead>
         <tr>
-          <th style="width:340px">Riski & Koodi</th>
-          <th>Valvova viranomainen</th>
-          <th>Vakavuus</th>
-          <th>Altistus</th>
-          <th>Kuilutilanne</th>
-          <th>Liitetyt säädökset</th>
-          <th style="text-align:right">Kontrollit</th>
+          <th style="width:340px">Risk & Code</th>
+          <th>Supervisory Authority</th>
+          <th>Severity</th>
+          <th>Exposure</th>
+          <th>Gap Status</th>
+          <th>Linked Statutes</th>
+          <th style="text-align:right">Controls</th>
         </tr>
       </thead>
       <tbody>
@@ -126,9 +126,9 @@ function renderRisksTable(risks) {
             const expScore = riskExposureScore(r);
             const ctls = riskControls(r);
             const sevClass = r.severity === 'CRITICAL' ? 'gov-status-critical' : r.severity === 'HIGH' ? 'gov-status-high' : 'gov-status-med';
-            const sevLabel = r.severity === 'CRITICAL' ? 'Kriittinen' : r.severity === 'HIGH' ? 'Korkea' : 'Kohtalainen';
+            const sevLabel = r.severity === 'CRITICAL' ? 'Critical' : r.severity === 'HIGH' ? 'High' : 'Medium';
 
-            return `<tr data-a="openGovDrawer" data-type="risk" data-id="${r.id}" title="Avaa riskin tiedot">
+            return `<tr data-a="openGovDrawer" data-type="risk" data-id="${r.id}" title="Open risk details">
             <td>
               <div style="font-weight:700;display:flex;align-items:center;gap:6px">
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(r.code)}</span>
@@ -154,11 +154,11 @@ function renderRisksTable(risks) {
                 hasGap
                   ? `<div class="gov-badge gov-status-alert" title="${esc(r.gapSummary || '')}">
                       ${ic('alert-triangle', 11)}
-                      <span>Avoin kuilu</span>
+                      <span>Open Gap</span>
                     </div>`
                   : `<div class="gov-badge gov-status-ok">
                       ${ic('check', 11)}
-                      <span>Katettu</span>
+                      <span>Covered</span>
                     </div>`
               }
             </td>
@@ -170,7 +170,7 @@ function renderRisksTable(risks) {
               </div>
             </td>
             <td style="text-align:right">
-              <span class="mono" style="font-size:12px;font-weight:600">${ctls.length} kpl</span>
+              <span class="mono" style="font-size:12px;font-weight:600">${ctls.length} controls</span>
             </td>
           </tr>`;
           })

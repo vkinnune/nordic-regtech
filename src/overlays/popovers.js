@@ -373,7 +373,7 @@ export function popHtml(p) {
       const secId = p.sec || p.id;
       const allCtls = allControls();
       const unlinked = allCtls.filter(c => !(c.statuteSections || []).includes(secId));
-      inner = `<div class="mh">Linkitä kontrolli</div>
+      inner = `<div class="mh">Link control</div>
         ${popList(
           unlinked.map(c => ({
             id: c.id,
@@ -381,7 +381,7 @@ export function popHtml(p) {
             act: 'linkControlPick',
             html: `${ic('shield', 13)} `,
           })),
-          { search: 'Etsi kontrollia...' },
+          { search: 'Search controls...' },
         )}`;
       style = 'width:320px';
       break;

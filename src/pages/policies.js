@@ -1,4 +1,4 @@
-/* ---------- POLICIES REGISTRY (Käytännöt & Hallintoperiaatteet) ---------- */
+/* ---------- POLICIES REGISTRY (Governance Policies & Standards) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allPolicies } from '../core/store.js';
@@ -38,16 +38,16 @@ export function pagePolicies() {
           <div class="gov-title-box">
             <h1 style="display:flex;align-items:center;gap:8px">
               ${ic('file-text', 20)}
-              <span>Käytännöt ja toimintaperiaatteet</span>
+              <span>Policies & Governance Standards</span>
               <span class="pill" style="font-size:12px;font-weight:600">${policies.length}</span>
             </h1>
-            <p>Sisäiset compliance-politiikat, hallituksen hyväksymät toimintaperiaatteet ja niiden säädössidokset</p>
+            <p>Internal compliance policies, board-approved governance standards, and statutory linkages</p>
           </div>
           ${
             needsReviewCount > 0
-              ? `<div class="gov-alert-badge" title="Lakimuutoksen vuoksi tarkastettavia käytäntöjä">
+              ? `<div class="gov-alert-badge" title="Policies requiring review due to statutory amendments">
                   ${ic('alert-triangle', 13)}
-                  <span>${needsReviewCount} käytäntöä vaatii lakimuutostarkastuksen</span>
+                  <span>${needsReviewCount} policies require statutory review</span>
                 </div>`
               : ''
           }
@@ -58,19 +58,19 @@ export function pagePolicies() {
           <div class="gov-search-bar">
             <div class="inwrap" style="flex:1">
               ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="polQ" placeholder="Etsi käytäntöä koodilla, nimellä tai säädöksellä (esim. POL-ALG, DORA, KYC)..." value="${esc(u.polQ || '')}">
-              ${u.polQ ? `<button class="pillbtn" data-a="set" data-k="polQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Tyhjennä</button>` : ''}
+              <input class="input" style="height:36px;font-size:13.5px" data-in="polQ" placeholder="Search policies by code, title or statutory citation (e.g. POL-ALG, DORA, KYC)..." value="${esc(u.polQ || '')}">
+              ${u.polQ ? `<button class="pillbtn" data-a="set" data-k="polQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
             </div>
           </div>
 
           <div class="gov-filters-row">
             <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${statusFilter === 'all' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="all">Kaikki (${policies.length})</button>
+              <button class="finlex-filter-pill ${statusFilter === 'all' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="all">All (${policies.length})</button>
               <button class="finlex-filter-pill ${statusFilter === 'NEEDS_REVIEW' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="NEEDS_REVIEW">
-                Tarkastettavat (${needsReviewCount})
+                Needs Review (${needsReviewCount})
               </button>
-              <button class="finlex-filter-pill ${statusFilter === 'ACTIVE' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="ACTIVE">Voimassa olevat</button>
-              <button class="finlex-filter-pill ${statusFilter === 'DRAFT' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="DRAFT">Luonnokset</button>
+              <button class="finlex-filter-pill ${statusFilter === 'ACTIVE' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="ACTIVE">Active</button>
+              <button class="finlex-filter-pill ${statusFilter === 'DRAFT' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="DRAFT">Drafts</button>
             </div>
           </div>
         </div>
@@ -80,9 +80,9 @@ export function pagePolicies() {
           filtered.length === 0
             ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
                 ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">Ei hakua vastaavia käytäntöjä</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">Hakusanalla tai valitulla suodattimella ei löytynyt tuloksia.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="polStatus" data-v="all">${ic('refresh-cw', 13)} Nollaa suodattimet</button>
+                <h3 style="margin:12px 0 4px;font-size:16px">No matching policies found</h3>
+                <p class="muted" style="margin:0 0 16px;font-size:13px">No policies matched the search query or active filter.</p>
+                <button class="btn btn-sm btn-ghost" data-a="set" data-k="polStatus" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
               </div>`
             : renderPoliciesTable(filtered)
         }
@@ -97,24 +97,23 @@ function renderPoliciesTable(policies) {
     <table class="gov-table">
       <thead>
         <tr>
-          <th style="width:320px">Käytäntö & Koodi</th>
-          <th>Kategoria</th>
-          <th>Vastuuhenkilö</th>
-          <th>Versio & Katsaus</th>
-          <th>Tila</th>
-          <th>Liitetyt säädöspykälät</th>
-          <th style="text-align:right">Kontrollit</th>
+          <th style="width:320px">Policy & Code</th>
+          <th>Category</th>
+          <th>Owner</th>
+          <th>Version & Review</th>
+          <th>Status</th>
+          <th>Linked Statutory Sections</th>
+          <th style="text-align:right">Controls</th>
         </tr>
       </thead>
       <tbody>
         ${policies
           .map(p => {
             const isAlert = p.status === 'NEEDS_REVIEW';
-            const statusLabel =
-              p.status === 'NEEDS_REVIEW' ? 'Tarkastettava' : p.status === 'ACTIVE' ? 'Voimassa' : p.status === 'DRAFT' ? 'Luonnos' : 'Arkistoitu';
+            const statusLabel = p.status === 'NEEDS_REVIEW' ? 'Needs Review' : p.status === 'ACTIVE' ? 'Active' : p.status === 'DRAFT' ? 'Draft' : 'Archived';
             const statusClass = p.status === 'NEEDS_REVIEW' ? 'gov-status-alert' : p.status === 'ACTIVE' ? 'gov-status-ok' : 'gov-status-draft';
 
-            return `<tr data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Avaa käytännön tiedot">
+            return `<tr data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Open policy details">
             <td>
               <div style="font-weight:700;display:flex;align-items:center;gap:6px">
                 <span class="mono" style="font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:3px">${esc(p.code)}</span>
@@ -129,7 +128,7 @@ function renderPoliciesTable(policies) {
             </td>
             <td>
               <div class="mono" style="font-size:11.5px">v${esc(p.version)}</div>
-              <div class="faint" style="font-size:11px">Tarkistettu: ${esc(p.lastReviewDate)}</div>
+              <div class="faint" style="font-size:11px">Reviewed: ${esc(p.lastReviewDate)}</div>
             </td>
             <td>
               <span class="gov-badge ${statusClass}">
@@ -145,7 +144,7 @@ function renderPoliciesTable(policies) {
               </div>
             </td>
             <td style="text-align:right">
-              <span class="mono" style="font-size:12px;font-weight:600">${(p.controlIds || []).length} kpl</span>
+              <span class="mono" style="font-size:12px;font-weight:600">${(p.controlIds || []).length} controls</span>
             </td>
           </tr>`;
           })
