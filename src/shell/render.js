@@ -127,7 +127,13 @@ export function makeFocusable() {
 export function render() {
   applyPrefs();
   const prevOv = render._ov || {};
-  const ov = { pop: !!S.ui.pop, modals: S.ui.modals.length, drawer: S.ui.drawer, pal: !!S.ui.palette, sub: !!S.ui.subOpen };
+  const ov = {
+    pop: !!S.ui.pop,
+    modals: S.ui.modals.length,
+    drawer: S.ui.drawer || (S.ui.govDrawer ? S.ui.govDrawer.type + ':' + S.ui.govDrawer.id : null),
+    pal: !!S.ui.palette,
+    sub: !!S.ui.subOpen,
+  };
   // Entrances animate only on the render where the surface first appears.
   const fx = S.ui.fx || (S.ui.fx = {});
   if (ov.drawer && prevOv.drawer !== ov.drawer) fx.drawer = true;

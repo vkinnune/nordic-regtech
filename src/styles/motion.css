@@ -137,6 +137,39 @@
 .pbody.fx-tab .bcol:nth-child(n + 4) .kcard {
   animation-delay: 0.09s;
 }
+/* governance & regulations tabs/filters animation */
+.fx-tabs .gov-table tbody tr,
+.fx-tabs .finlex-lib-card,
+.fx-tabs .finlex-lib-table tbody tr {
+  animation: riseIn 0.25s var(--ease) both;
+}
+.fx-tabs .gov-table tbody tr:nth-child(2),
+.fx-tabs .finlex-lib-card:nth-child(2),
+.fx-tabs .finlex-lib-table tbody tr:nth-child(2) {
+  animation-delay: 0.02s;
+}
+.fx-tabs .gov-table tbody tr:nth-child(3),
+.fx-tabs .finlex-lib-card:nth-child(3),
+.fx-tabs .finlex-lib-table tbody tr:nth-child(3) {
+  animation-delay: 0.04s;
+}
+.fx-tabs .gov-table tbody tr:nth-child(4),
+.fx-tabs .finlex-lib-card:nth-child(4),
+.fx-tabs .finlex-lib-table tbody tr:nth-child(4) {
+  animation-delay: 0.06s;
+}
+.fx-tabs .gov-table tbody tr:nth-child(n + 5),
+.fx-tabs .finlex-lib-card:nth-child(n + 5),
+.fx-tabs .finlex-lib-table tbody tr:nth-child(n + 5) {
+  animation-delay: 0.08s;
+}
+/* reader entrance when opening finlex statutory reader */
+.fx-route .finlex-container > .finlex-toc {
+  animation: riseIn 0.3s var(--ease) both;
+}
+.fx-route .finlex-container > .finlex-reader {
+  animation: riseIn 0.36s 0.04s var(--ease) both;
+}
 /* task completed */
 .trow.fx-done,
 .mini.fx-done {
@@ -256,6 +289,32 @@
 }
 .kcard:hover {
   transform: translateY(-1px);
+}
+.finlex-lib-card {
+  transition:
+    border-color var(--dur),
+    box-shadow 0.2s var(--ease),
+    transform 0.2s var(--ease),
+    background var(--dur);
+}
+.finlex-lib-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+.gov-table tbody tr {
+  transition: background var(--dur);
+}
+.finlex-gov-chip {
+  transition:
+    background var(--dur),
+    border-color var(--dur),
+    transform 0.15s var(--ease);
+}
+.finlex-gov-chip:hover {
+  transform: translateY(-1px);
+}
+.finlex-plain-box {
+  animation: riseIn 0.3s var(--ease) both;
 }
 .stat .v {
   font-variant-numeric: tabular-nums;

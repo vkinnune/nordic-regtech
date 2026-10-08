@@ -2,7 +2,7 @@
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allPolicies } from '../core/store.js';
-import { formatSecBadge } from '../ui/helpers.js';
+import { empty, formatSecBadge } from '../ui/helpers.js';
 
 export function pagePolicies() {
   const u = S.ui;
@@ -28,73 +28,67 @@ export function pagePolicies() {
   });
 
   const needsReviewCount = policies.filter(p => p.status === 'NEEDS_REVIEW').length;
+  const activeCount = policies.filter(p => p.status === 'ACTIVE').length;
+  const totalControlsLinked = policies.reduce((sum, p) => sum + (p.controlIds || []).length, 0);
+  const distinctStatutes = new Set(policies.flatMap(p => (p.statuteSections || []).map(s => s.split(':')[0]))).size;
 
-  return `<div class="page flush">
-    <div class="gov-page-wrap">
-      <div class="gov-page-inner">
+  let body;
+  if (!policies.length) {
+    body = `<div class="panel">${empty('file-text', 'No policies found', 'No policies registered in the statutory governance matrix.')}</div>`;
+  } else if (!filtered.length) {
+    body = `<div class="panel">${empty('search-x', 'No matching policies found', 'No policies matched your search or active filter.', `<button class="btn btn-secondary btn-sm" data-a="set" data-k="polStatus" data-v="all">Clear filters</button>`)}</div>`;
+  } else {
+    body = `<div class="panel" style="overflow-x:auto">${renderPoliciesTable(filtered)}</div>`;
+  }
 
-        <!-- Header -->
-        <header class="gov-header">
-          <div class="gov-title-box">
-            <h1 style="display:flex;align-items:center;gap:8px">
-              ${ic('file-text', 20)}
-              <span>Policies & Governance Standards</span>
-              <span class="pill" style="font-size:12px;font-weight:600">${policies.length}</span>
-            </h1>
-            <p>Internal compliance policies, board-approved governance standards, and statutory linkages</p>
-          </div>
-          ${
-            needsReviewCount > 0
-              ? `<div class="gov-alert-badge" title="Policies requiring review due to statutory amendments">
-                  ${ic('alert-triangle', 13)}
-                  <span>${needsReviewCount} policies require statutory review</span>
-                </div>`
-              : ''
-          }
-        </header>
-
-        <!-- Search & Filter Controls -->
-        <div class="gov-controls">
-          <div class="gov-search-bar">
-            <div class="inwrap" style="flex:1">
-              ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="polQ" placeholder="Search policies by code, title or statutory citation (e.g. POL-ALG, DORA, KYC)..." value="${esc(u.polQ || '')}">
-              ${u.polQ ? `<button class="pillbtn" data-a="set" data-k="polQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
-            </div>
-          </div>
-
-          <div class="gov-filters-row">
-            <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${statusFilter === 'all' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="all">All (${policies.length})</button>
-              <button class="finlex-filter-pill ${statusFilter === 'NEEDS_REVIEW' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="NEEDS_REVIEW">
-                Needs Review (${needsReviewCount})
-              </button>
-              <button class="finlex-filter-pill ${statusFilter === 'ACTIVE' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="ACTIVE">Active</button>
-              <button class="finlex-filter-pill ${statusFilter === 'DRAFT' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="DRAFT">Drafts</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Table View -->
+  return `<div class="page wide">
+    <div class="ph">
+      <div>
+        <h1>Policies & Governance Standards</h1>
+        <p>Internal compliance policies, board-approved governance standards, and statutory linkages</p>
+      </div>
+      <div class="acts">
         ${
-          filtered.length === 0
-            ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
-                ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">No matching policies found</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">No policies matched the search query or active filter.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="polStatus" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
+          needsReviewCount > 0
+            ? `<div class="gov-alert-badge" title="Policies requiring review due to statutory amendments">
+                ${ic('alert-triangle', 13)}
+                <span>${needsReviewCount} require review</span>
               </div>`
-            : renderPoliciesTable(filtered)
+            : `<div class="gov-ok-badge">
+                ${ic('check-circle', 13)}
+                <span>All policies up to date</span>
+              </div>`
         }
-
       </div>
     </div>
+
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><span class="k">Policies</span><span class="v">${policies.length}</span><span class="d">${activeCount} active standards</span></div>
+      <div class="stat"><span class="k">Needs Review</span><span class="v" style="${needsReviewCount ? 'color:var(--amber)' : ''}">${needsReviewCount}</span><span class="d">${needsReviewCount ? 'flagged by law amendments' : 'all standards cleared'}</span></div>
+      <div class="stat"><span class="k">Linked Controls</span><span class="v">${totalControlsLinked}</span><span class="d">operational controls</span></div>
+      <div class="stat"><span class="k">Statutory Acts</span><span class="v">${distinctStatutes}</span><span class="d">Nordic & EU directives</span></div>
+    </div>
+
+    <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div class="inwrap" style="flex:1;max-width:400px">
+        ${ic('search', 13)}
+        <input class="input search-sm" id="pol-q" data-in="polQ" placeholder="Search policies by code, title or citation..." value="${esc(u.polQ || '')}" aria-label="Search policies">
+        ${u.polQ ? `<button class="pillbtn" data-a="set" data-k="polQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+      </div>
+      <div class="seg" role="tablist">
+        <button class="${statusFilter === 'all' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="all">All (${policies.length})</button>
+        <button class="${statusFilter === 'NEEDS_REVIEW' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="NEEDS_REVIEW">Needs Review (${needsReviewCount})</button>
+        <button class="${statusFilter === 'ACTIVE' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="ACTIVE">Active (${activeCount})</button>
+        <button class="${statusFilter === 'DRAFT' ? 'on' : ''}" data-a="set" data-k="polStatus" data-v="DRAFT">Drafts</button>
+      </div>
+    </div>
+
+    ${body}
   </div>`;
 }
 
 function renderPoliciesTable(policies) {
-  return `<div class="gov-table-wrap">
-    <table class="gov-table">
+  return `<table class="gov-table">
       <thead>
         <tr>
           <th style="width:320px">Policy & Code</th>
@@ -150,6 +144,5 @@ function renderPoliciesTable(policies) {
           })
           .join('')}
       </tbody>
-    </table>
-  </div>`;
+    </table>`;
 }

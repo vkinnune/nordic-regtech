@@ -201,7 +201,7 @@ A.openProject = el => go('project', { id: el.dataset.id, tab: S.prefs.defaultTab
 A.set = el => {
   const k = el.dataset.k;
   let v = el.dataset.v;
-  if (/Tab$|Cat$|Mode$|View$/.test(k)) fxSet({ tabs: true });
+  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$/.test(k)) fxSet({ tabs: true });
   if (k === 'inboxSel' && !v) v = null;
   S.ui[k] = v;
   if (k === 'membersTab' || k === 'searchCat') S.ui.pop = null;
@@ -1221,18 +1221,22 @@ A.openRegInReader = el => {
   }
   S.ui.regView = 'reader';
   delete S.ui.govDrawer;
+  fxSet({ route: true, tabs: true });
   render();
 };
 A.setRegView = el => {
   S.ui.regView = el.dataset.view || 'library';
+  fxSet({ route: true, tabs: true });
   render();
 };
 A.setRegLibLayout = el => {
   S.ui.regLibLayout = el.dataset.layout;
+  fxSet({ tabs: true });
   render();
 };
 A.setRegLibJuris = el => {
   S.ui.regLibJuris = el.dataset.juris;
+  fxSet({ tabs: true });
   render();
 };
 A.clearRegLibQ = () => {
@@ -1242,6 +1246,7 @@ A.clearRegLibQ = () => {
 A.clearRegLibFilters = () => {
   S.ui.regLibQ = '';
   S.ui.regLibJuris = 'all';
+  fxSet({ tabs: true });
   render();
 };
 
@@ -1276,7 +1281,8 @@ A.openGovDrawer = el => {
   delete S.ui.drawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
-  fxSet('drawer');
+  S.ui.drawerOpener = focusKey(el);
+  fxSet({ drawer: true });
   render();
 };
 

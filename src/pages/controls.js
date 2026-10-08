@@ -2,7 +2,7 @@
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allControls, policy } from '../core/store.js';
-import { formatSecBadge } from '../ui/helpers.js';
+import { empty, formatSecBadge } from '../ui/helpers.js';
 
 export function pageControls() {
   const u = S.ui;
@@ -33,79 +33,68 @@ export function pageControls() {
 
   const deficientCount = controls.filter(c => c.status === 'DEFICIENT').length;
   const effectiveCount = controls.filter(c => c.status === 'EFFECTIVE').length;
+  const automatedCount = controls.filter(c => c.type === 'AUTOMATED').length;
+  const automatedPct = Math.round((automatedCount / Math.max(controls.length, 1)) * 100);
+  const distinctRisks = new Set(controls.flatMap(c => c.riskIds || [])).size;
 
-  return `<div class="page flush">
-    <div class="gov-page-wrap">
-      <div class="gov-page-inner">
+  let body;
+  if (!controls.length) {
+    body = `<div class="panel">${empty('shield-check', 'No controls found', 'No controls registered in the governance matrix.')}</div>`;
+  } else if (!filtered.length) {
+    body = `<div class="panel">${empty('search-x', 'No matching controls found', 'No controls matched your search or active filter.', `<button class="btn btn-secondary btn-sm" data-a="set" data-k="ctlFilter" data-v="all">Clear filters</button>`)}</div>`;
+  } else {
+    body = `<div class="panel" style="overflow-x:auto">${renderControlsTable(filtered)}</div>`;
+  }
 
-        <!-- Header -->
-        <header class="gov-header">
-          <div class="gov-title-box">
-            <h1 style="display:flex;align-items:center;gap:8px">
-              ${ic('shield-check', 20)}
-              <span>Controls & Safeguards Matrix</span>
-              <span class="pill" style="font-size:12px;font-weight:600">${controls.length}</span>
-            </h1>
-            <p>Operational safeguards, automated system filters, and statutory compliance health</p>
-          </div>
-          ${
-            deficientCount > 0
-              ? `<div class="gov-alert-badge" title="Controls requiring updates due to statutory amendments or deficiencies">
-                  ${ic('alert-triangle', 13)}
-                  <span>${deficientCount} controls require statutory amendment update</span>
-                </div>`
-              : `<div class="gov-ok-badge">
-                  ${ic('check-circle', 13)}
-                  <span>All controls effective</span>
-                </div>`
-          }
-        </header>
-
-        <!-- Search & Filter Controls -->
-        <div class="gov-controls">
-          <div class="gov-search-bar">
-            <div class="inwrap" style="flex:1">
-              ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="ctlQ" placeholder="Search controls by code, title or statutory citation (e.g. CTL-ALG, DORA, kill switch)..." value="${esc(u.ctlQ || '')}">
-              ${u.ctlQ ? `<button class="pillbtn" data-a="set" data-k="ctlQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
-            </div>
-          </div>
-
-          <div class="gov-filters-row">
-            <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="all">All (${controls.length})</button>
-              <button class="finlex-filter-pill ${filter === 'DEFICIENT' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="DEFICIENT">
-                Needs Update (${deficientCount})
-              </button>
-              <button class="finlex-filter-pill ${filter === 'EFFECTIVE' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="EFFECTIVE">
-                Effective (${effectiveCount})
-              </button>
-              <button class="finlex-filter-pill ${filter === 'AUTOMATED' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="AUTOMATED">Automated</button>
-              <button class="finlex-filter-pill ${filter === 'MANUAL' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="MANUAL">Manual</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Table View -->
+  return `<div class="page wide">
+    <div class="ph">
+      <div>
+        <h1>Controls & Safeguards Matrix</h1>
+        <p>Operational safeguards, automated system filters, and statutory compliance health</p>
+      </div>
+      <div class="acts">
         ${
-          filtered.length === 0
-            ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
-                ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">No matching controls found</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">No controls matched the search query or active filter.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="ctlFilter" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
+          deficientCount > 0
+            ? `<div class="gov-alert-badge" title="Controls requiring updates due to statutory amendments or deficiencies">
+                ${ic('alert-triangle', 13)}
+                <span>${deficientCount} require update</span>
               </div>`
-            : renderControlsTable(filtered)
+            : `<div class="gov-ok-badge">
+                ${ic('check-circle', 13)}
+                <span>All controls effective</span>
+              </div>`
         }
-
       </div>
     </div>
+
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><span class="k">Controls</span><span class="v">${controls.length}</span><span class="d">${effectiveCount} operational safeguards</span></div>
+      <div class="stat"><span class="k">Needs Update</span><span class="v" style="${deficientCount ? 'color:var(--amber)' : ''}">${deficientCount}</span><span class="d">${deficientCount ? 'impacted by amendments' : 'zero deficiencies'}</span></div>
+      <div class="stat"><span class="k">Automated</span><span class="v">${automatedPct}%</span><span class="d">${automatedCount} automated system filters</span></div>
+      <div class="stat"><span class="k">Mitigated Risks</span><span class="v">${distinctRisks}</span><span class="d">regulatory risk categories</span></div>
+    </div>
+
+    <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div class="inwrap" style="flex:1;max-width:400px">
+        ${ic('search', 13)}
+        <input class="input search-sm" id="ctl-q" data-in="ctlQ" placeholder="Search controls by code, title or citation..." value="${esc(u.ctlQ || '')}" aria-label="Search controls">
+        ${u.ctlQ ? `<button class="pillbtn" data-a="set" data-k="ctlQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+      </div>
+      <div class="seg" role="tablist">
+        <button class="${filter === 'all' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="all">All (${controls.length})</button>
+        <button class="${filter === 'DEFICIENT' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="DEFICIENT">Needs Update (${deficientCount})</button>
+        <button class="${filter === 'EFFECTIVE' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="EFFECTIVE">Effective (${effectiveCount})</button>
+        <button class="${filter === 'AUTOMATED' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="AUTOMATED">Automated</button>
+        <button class="${filter === 'MANUAL' ? 'on' : ''}" data-a="set" data-k="ctlFilter" data-v="MANUAL">Manual</button>
+      </div>
+    </div>
+
+    ${body}
   </div>`;
 }
 
 function renderControlsTable(controls) {
-  return `<div class="gov-table-wrap">
-    <table class="gov-table">
+  return `<table class="gov-table">
       <thead>
         <tr>
           <th style="width:340px">Control & Code</th>
@@ -173,6 +162,5 @@ function renderControlsTable(controls) {
           })
           .join('')}
       </tbody>
-    </table>
-  </div>`;
+    </table>`;
 }

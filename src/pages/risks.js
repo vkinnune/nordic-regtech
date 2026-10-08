@@ -2,7 +2,7 @@
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allRisks, riskGapStatus, riskExposureScore, riskControls } from '../core/store.js';
-import { formatSecBadge } from '../ui/helpers.js';
+import { empty, formatSecBadge, progBar } from '../ui/helpers.js';
 
 export function pageRisks() {
   const u = S.ui;
@@ -34,85 +34,73 @@ export function pageRisks() {
 
   const gapCount = risks.filter(r => riskGapStatus(r) === 'OPEN_GAPS').length;
   const criticalCount = risks.filter(r => r.severity === 'CRITICAL').length;
+  const highCount = risks.filter(r => r.severity === 'HIGH').length;
+  const avgExposure = Math.round(risks.reduce((sum, r) => sum + riskExposureScore(r), 0) / Math.max(risks.length, 1));
 
-  return `<div class="page flush">
-    <div class="gov-page-wrap">
-      <div class="gov-page-inner">
+  let body;
+  if (!risks.length) {
+    body = `<div class="panel">${empty('alert-triangle', 'No risks found', 'No regulatory risks registered in the matrix.')}</div>`;
+  } else if (!filtered.length) {
+    body = `<div class="panel">${empty('search-x', 'No matching risks found', 'No risks matched your search or active filter.', `<button class="btn btn-secondary btn-sm" data-a="set" data-k="rskFilter" data-v="all">Clear filters</button>`)}</div>`;
+  } else {
+    body = `<div class="panel" style="overflow-x:auto">${renderRisksTable(filtered)}</div>`;
+  }
 
-        <!-- Header -->
-        <header class="gov-header">
-          <div class="gov-title-box">
-            <h1 style="display:flex;align-items:center;gap:8px">
-              ${ic('alert-triangle', 20)}
-              <span>Regulatory Risks & Sanctions</span>
-              <span class="pill" style="font-size:12px;font-weight:600">${risks.length}</span>
-            </h1>
-            <p>Supervisory sanctions, financial penalty exposures, and operational control coverage</p>
-          </div>
-          ${
-            gapCount > 0
-              ? `<div class="gov-alert-badge" title="Risks with open compliance gaps requiring mitigation">
-                  ${ic('alert-triangle', 13)}
-                  <span>${gapCount} risks with open compliance gaps</span>
-                </div>`
-              : `<div class="gov-ok-badge">
-                  ${ic('check-circle', 13)}
-                  <span>All risks covered</span>
-                </div>`
-          }
-        </header>
-
-        <!-- Search & Filter Controls -->
-        <div class="gov-controls">
-          <div class="gov-search-bar">
-            <div class="inwrap" style="flex:1">
-              ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="rskQ" placeholder="Search risks by code, title or supervisory authority (e.g. RSK-ALG, FIN-FSA, penalty)..." value="${esc(u.rskQ || '')}">
-              ${u.rskQ ? `<button class="pillbtn" data-a="set" data-k="rskQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
-            </div>
-          </div>
-
-          <div class="gov-filters-row">
-            <div class="gov-filter-pills">
-              <button class="finlex-filter-pill ${filter === 'all' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="all">All (${risks.length})</button>
-              <button class="finlex-filter-pill ${filter === 'OPEN_GAPS' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="OPEN_GAPS">
-                Open Gaps (${gapCount})
-              </button>
-              <button class="finlex-filter-pill ${filter === 'CRITICAL' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="CRITICAL">
-                Critical (${criticalCount})
-              </button>
-              <button class="finlex-filter-pill ${filter === 'HIGH' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="HIGH">High Risk</button>
-              <button class="finlex-filter-pill ${filter === 'MEDIUM' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="MEDIUM">Medium Risk</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Table View -->
+  return `<div class="page wide">
+    <div class="ph">
+      <div>
+        <h1>Regulatory Risks & Sanctions</h1>
+        <p>Supervisory sanctions, financial penalty exposures, and operational control coverage</p>
+      </div>
+      <div class="acts">
         ${
-          filtered.length === 0
-            ? `<div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
-                ${ic('search-x', 32)}
-                <h3 style="margin:12px 0 4px;font-size:16px">No matching risks found</h3>
-                <p class="muted" style="margin:0 0 16px;font-size:13px">No risks matched the search query or active filter.</p>
-                <button class="btn btn-sm btn-ghost" data-a="set" data-k="rskFilter" data-v="all">${ic('refresh-cw', 13)} Reset filters</button>
+          gapCount > 0
+            ? `<div class="gov-alert-badge" title="Risks with open compliance gaps requiring mitigation">
+                ${ic('alert-triangle', 13)}
+                <span>${gapCount} open gaps</span>
               </div>`
-            : renderRisksTable(filtered)
+            : `<div class="gov-ok-badge">
+                ${ic('check-circle', 13)}
+                <span>All risks mitigated</span>
+              </div>`
         }
-
       </div>
     </div>
+
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><span class="k">Regulatory Risks</span><span class="v">${risks.length}</span><span class="d">${criticalCount + highCount} high or critical</span></div>
+      <div class="stat"><span class="k">Open Gaps</span><span class="v" style="${gapCount ? 'color:var(--amber)' : ''}">${gapCount}</span><span class="d">${gapCount ? 'requiring mitigation' : 'all gaps closed'}</span></div>
+      <div class="stat"><span class="k">Critical Severity</span><span class="v" style="${criticalCount ? 'color:var(--red)' : ''}">${criticalCount}</span><span class="d">supervisory sanctions</span></div>
+      <div class="stat"><span class="k">Avg Exposure</span><span class="v">${avgExposure}/100</span><span class="d">aggregate risk index</span></div>
+    </div>
+
+    <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div class="inwrap" style="flex:1;max-width:400px">
+        ${ic('search', 13)}
+        <input class="input search-sm" id="rsk-q" data-in="rskQ" placeholder="Search risks by code, title, authority or penalty..." value="${esc(u.rskQ || '')}" aria-label="Search risks">
+        ${u.rskQ ? `<button class="pillbtn" data-a="set" data-k="rskQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+      </div>
+      <div class="seg" role="tablist">
+        <button class="${filter === 'all' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="all">All (${risks.length})</button>
+        <button class="${filter === 'OPEN_GAPS' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="OPEN_GAPS">Open Gaps (${gapCount})</button>
+        <button class="${filter === 'CRITICAL' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="CRITICAL">Critical (${criticalCount})</button>
+        <button class="${filter === 'HIGH' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="HIGH">High Risk</button>
+        <button class="${filter === 'MEDIUM' ? 'on' : ''}" data-a="set" data-k="rskFilter" data-v="MEDIUM">Medium</button>
+      </div>
+    </div>
+
+    ${body}
   </div>`;
 }
 
 function renderRisksTable(risks) {
-  return `<div class="gov-table-wrap">
-    <table class="gov-table">
+  return `<table class="gov-table">
       <thead>
         <tr>
           <th style="width:340px">Risk & Code</th>
           <th>Supervisory Authority</th>
           <th>Severity</th>
-          <th>Exposure</th>
+          <th style="width:160px">Exposure</th>
           <th>Gap Status</th>
           <th>Linked Statutes</th>
           <th style="text-align:right">Controls</th>
@@ -144,9 +132,9 @@ function renderRisksTable(risks) {
               </span>
             </td>
             <td>
-              <div style="display:flex;align-items:center;gap:6px">
-                <span class="mono" style="font-size:12px;font-weight:600">${expScore}/100</span>
-                <span class="muted" style="font-size:11px">(${esc(r.likelihood)})</span>
+              <div class="row" style="gap:8px;min-width:130px">
+                ${progBar(expScore, expScore > 60 ? 'red' : expScore > 35 ? 'amber' : 'green')}
+                <span class="mono" style="font-size:11.5px;font-weight:600;width:48px">${expScore}/100</span>
               </div>
             </td>
             <td>
@@ -176,6 +164,5 @@ function renderRisksTable(risks) {
           })
           .join('')}
       </tbody>
-    </table>
-  </div>`;
+    </table>`;
 }

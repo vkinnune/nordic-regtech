@@ -14,8 +14,10 @@ import {
   controlsForSection,
   impactedControlsForSection,
   risksForSection,
+  allPolicies,
+  allControls,
 } from '../core/store.js';
-import { stIcon } from '../ui/helpers.js';
+import { empty, stIcon } from '../ui/helpers.js';
 
 export function pageRegulations() {
   const u = S.ui;
@@ -57,63 +59,57 @@ function renderRegulationsLibrary(u) {
     return true;
   });
 
-  return `<div class="page flush">
-    <div class="finlex-lib-wrap">
-      <div class="finlex-lib-inner">
+  const totalSections = allActs.reduce((sum, a) => sum + allSectionsOf(a).length, 0);
+  const totalPoliciesCount = allPolicies().length;
+  const totalControlsCount = allControls().length;
 
-        <!-- Top Header: Super simple & uncluttered -->
-        <header class="finlex-lib-head">
-          <div class="finlex-lib-title-box">
-            <h1 style="display:flex;align-items:center;gap:8px">
-              ${ic('scale', 20)}
-              <span>Regulations</span>
-            </h1>
-            <p>Nordic financial statutory library and EU directives (${allActs.length})</p>
-          </div>
-          <div class="seg" role="tablist">
-            <button class="${layout !== 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="grid" title="Cards view">${ic('layout-grid', 14)} Cards</button>
-            <button class="${layout === 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="list" title="List view">${ic('list', 14)} List</button>
-          </div>
-        </header>
+  let body;
+  if (!allActs.length) {
+    body = `<div class="panel">${empty('scale', 'No regulations found', 'No statutory regulations in the library.')}</div>`;
+  } else if (!filtered.length) {
+    body = `<div class="panel">${empty('search-x', 'No matching regulations found', `No regulations match "${esc(libQ)}".`, `<button class="btn btn-secondary btn-sm" data-a="clearRegLibFilters">Clear filters</button>`)}</div>`;
+  } else if (layout === 'list') {
+    body = `<div class="panel" style="overflow-x:auto">${renderRegulationsList(filtered)}</div>`;
+  } else {
+    body = renderRegulationsGrid(filtered);
+  }
 
-        <!-- Search & Jurisdiction Controls -->
-        <div class="finlex-lib-controls">
-          <div class="finlex-lib-search-bar">
-            <div class="inwrap" style="flex:1">
-              ${ic('search', 14)}
-              <input class="input" style="height:36px;font-size:13.5px" data-in="regLibQ" placeholder="Search regulations by title, code, or topic (e.g. 747/2012, SFS 2004:46, DORA, AI)..." value="${esc(u.regLibQ || '')}">
-              ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
-            </div>
-          </div>
-
-          <div class="finlex-lib-filters-row">
-            <div class="finlex-lib-filter-pills">
-              <button class="finlex-filter-pill ${juris === 'all' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="all">All (${allActs.length})</button>
-              <button class="finlex-filter-pill ${juris === 'fi' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="fi">Finland</button>
-              <button class="finlex-filter-pill ${juris === 'se' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="se">Sweden</button>
-              <button class="finlex-filter-pill ${juris === 'eu' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="eu">European Union</button>
-            </div>
-          </div>
+  return `<div class="page wide">
+    <div class="ph">
+      <div>
+        <h1>Regulations Library</h1>
+        <p>Nordic financial statutory library and EU directives</p>
+      </div>
+      <div class="acts">
+        <div class="seg" role="tablist">
+          <button class="${layout !== 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="grid" title="Cards view">${ic('layout-grid', 14)} Cards</button>
+          <button class="${layout === 'list' ? 'on' : ''}" data-a="setRegLibLayout" data-layout="list" title="List view">${ic('list', 14)} List</button>
         </div>
-
-        <!-- Result Views -->
-        ${
-          filtered.length === 0
-            ? `
-          <div class="empty" style="padding:48px 24px;border:1px dashed var(--border);border-radius:6px;background:var(--surface)">
-            ${ic('search-x', 32)}
-            <h3 style="margin:12px 0 4px;font-size:16px">No matching regulations found</h3>
-            <p class="muted" style="margin:0 0 16px;font-size:13px">No regulations found matching "${esc(libQ)}".</p>
-            <button class="btn btn-sm btn-ghost" data-a="clearRegLibFilters">${ic('refresh-cw', 13)} Reset filters</button>
-          </div>
-        `
-            : layout === 'list'
-              ? renderRegulationsList(filtered)
-              : renderRegulationsGrid(filtered)
-        }
-
       </div>
     </div>
+
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><span class="k">Statutes</span><span class="v">${allActs.length}</span><span class="d">Nordic & EU directives</span></div>
+      <div class="stat"><span class="k">Statutory Sections</span><span class="v">${totalSections}</span><span class="d">indexed legal provisions</span></div>
+      <div class="stat"><span class="k">Governing Policies</span><span class="v">${totalPoliciesCount}</span><span class="d">linked compliance standards</span></div>
+      <div class="stat"><span class="k">Enforcing Controls</span><span class="v">${totalControlsCount}</span><span class="d">operational safeguards</span></div>
+    </div>
+
+    <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div class="inwrap" style="flex:1;max-width:400px">
+        ${ic('search', 13)}
+        <input class="input search-sm" id="reg-lib-q" data-in="regLibQ" placeholder="Search regulations by title, code, or topic (e.g. 747/2012, DORA)..." value="${esc(u.regLibQ || '')}" aria-label="Search regulations">
+        ${u.regLibQ ? `<button class="pillbtn" data-a="clearRegLibQ" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
+      </div>
+      <div class="seg" role="tablist">
+        <button class="${juris === 'all' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="all">All (${allActs.length})</button>
+        <button class="${juris === 'fi' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="fi">Finland</button>
+        <button class="${juris === 'se' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="se">Sweden</button>
+        <button class="${juris === 'eu' ? 'on' : ''}" data-a="setRegLibJuris" data-juris="eu">European Union</button>
+      </div>
+    </div>
+
+    ${body}
   </div>`;
 }
 
@@ -158,8 +154,7 @@ function renderRegulationsGrid(acts) {
 }
 
 function renderRegulationsList(acts) {
-  return `<div class="finlex-lib-table-wrap">
-    <table class="finlex-lib-table">
+  return `<table class="finlex-lib-table">
       <thead>
         <tr>
           <th style="width:300px">Regulation</th>
@@ -188,8 +183,7 @@ function renderRegulationsList(acts) {
           })
           .join('')}
       </tbody>
-    </table>
-  </div>`;
+    </table>`;
 }
 
 /* ============================================================
