@@ -21,6 +21,7 @@ import {
   visibleProjects,
   control,
   policy,
+  feedItem,
   findSectionAndRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
@@ -1327,6 +1328,95 @@ A.signOffPolicy = el => {
     save();
     render();
   }
+};
+
+/* ---------- regulatory monitoring feed ---------- */
+A.openFeedDrawer = el => {
+  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.feedDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  delete S.ui.drawer;
+  delete S.ui.govDrawer;
+  S.ui.feedDrawer = el.dataset.id;
+  S.ui.drawerFull = false;
+  fxSet({ drawer: true });
+  render();
+};
+
+A.closeFeedDrawer = () => {
+  delete S.ui.feedDrawer;
+  render();
+};
+
+A.ackFeedItem = el => {
+  const f = feedItem(el.dataset.id);
+  if (f) {
+    f.status = 'ACKNOWLEDGED';
+    f.acknowledgedAt = Date.now();
+    f.acknowledgedBy = D().me;
+    logAct('updated', null, `Acknowledged regulatory update: ${f.title}`);
+    toast('Regulatory update marked as assessed.');
+    save();
+    render();
+  }
+};
+
+A.createTaskFromFeed = el => {
+  const f = feedItem(el.dataset.id);
+  if (!f) return;
+  f.status = 'IN_MITIGATION';
+  const authKey = f.authorityId ? f.authorityId.toUpperCase() : 'HORIZON';
+  dispatchGovTask({
+    key: `F-${authKey}`,
+    title: `Mitigate: ${f.title}`,
+    desc:
+      `Regulatory Horizon Monitoring update from ${f.authority} (${f.relativeTime}):\n\n` +
+      `Statute: ${f.statuteRef}\n` +
+      `Impact Score: ${f.score}/5 (${f.category})\n\n` +
+      `Executive Summary:\n${f.summary}\n\n` +
+      `Action Required:\n${f.plainEnglish?.actionRequired || ''}`,
+    project: 'p5',
+    labels: ['Compliance', f.category === 'AMENDMENT' ? 'Statutory' : 'Supervisory'],
+    logMessage: `Created mitigation task from regulatory feed: ${f.title}`,
+    toastMessage: `Mitigation task created for ${f.statuteRef}.`,
+  });
+};
+
+A.openStatuteSection = el => {
+  const regId = el.dataset.id;
+  const secId = el.dataset.sec;
+  S.ui.regView = 'reader';
+  S.ui.regSel = regId;
+  S.ui.regSecSel = secId;
+  delete S.ui.feedDrawer;
+  go('regulations', { id: regId, sec: secId });
+};
+
+A.setFeedJuris = el => {
+  S.ui.feedJuris = el.dataset.v;
+  render();
+};
+
+A.setFeedScore = el => {
+  S.ui.feedScore = el.dataset.v;
+  render();
+};
+
+A.setFeedCat = el => {
+  S.ui.feedCat = el.dataset.v;
+  render();
+};
+
+A.setFeedAuth = el => {
+  S.ui.feedAuth = el.dataset.v;
+  render();
+};
+
+A.clearFeedFilters = () => {
+  delete S.ui.feedQ;
+  delete S.ui.feedJuris;
+  delete S.ui.feedScore;
+  delete S.ui.feedCat;
+  delete S.ui.feedAuth;
+  render();
 };
 
 function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage, onBeforeCommit }) {

@@ -282,3 +282,18 @@ export function riskExposureScore(r) {
 export function regulationOfSection(secId) {
   return findSectionAndRegulation(secId)?.regulation || null;
 }
+
+/* ---------- regulatory monitoring feed ---------- */
+export { FEED_ITEMS, FEED_CATEGORIES, FEED_AUTHORITIES } from '../data/feed.js';
+import { FEED_ITEMS } from '../data/feed.js';
+
+export function allFeedItems() {
+  if (!D().feed || !D().feed.length) {
+    D().feed = FEED_ITEMS.map(f => ({ ...f }));
+  }
+  return D().feed;
+}
+
+export function feedItem(id) {
+  return allFeedItems().find(f => f.id === id) || null;
+}
