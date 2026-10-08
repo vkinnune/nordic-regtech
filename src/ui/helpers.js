@@ -3,6 +3,7 @@ import { TODAY, diffD, esc, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { LB, PR, PSTAT, ST } from '../core/constants.js';
 import { D, mem, pColor } from '../core/store.js';
+import { FEED_CATEGORIES, FEED_AUTHORITIES } from '../data/feed.js';
 
 export function av(id, cls = '', tip = true) {
   const m = mem(id);
@@ -152,4 +153,36 @@ export function formatSecBadge(secId) {
     }
   }
   return secId;
+}
+
+export function feedScoreClass(score) {
+  if (score >= 5) return 'feed-score-5';
+  if (score >= 4) return 'feed-score-4';
+  if (score >= 3) return 'feed-score-3';
+  if (score >= 2) return 'feed-score-2';
+  return 'feed-score-1';
+}
+
+export function feedScoreLabel(score) {
+  if (score >= 5) return 'CRITICAL IMPACT';
+  if (score >= 4) return 'HIGH IMPACT';
+  if (score >= 3) return 'MODERATE IMPACT';
+  if (score >= 2) return 'LOW IMPACT';
+  return 'INFORMATIONAL';
+}
+
+export function getFeedCat(catKey) {
+  return FEED_CATEGORIES[catKey] || { id: catKey, label: catKey, icon: 'newspaper' };
+}
+
+export function getFeedAuth(authKey, defaultAuth = '') {
+  return (
+    FEED_AUTHORITIES[authKey] || {
+      id: authKey,
+      label: defaultAuth || authKey,
+      short: defaultAuth || authKey,
+      flag: '🌐',
+      jur: 'EU',
+    }
+  );
 }

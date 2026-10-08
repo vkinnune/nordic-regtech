@@ -22,10 +22,24 @@ import {
   riskExposureScore,
   regulationOfSection,
   feedItem,
-  FEED_CATEGORIES,
-  FEED_AUTHORITIES,
 } from '../core/store.js';
-import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
+import {
+  FT,
+  av,
+  diffBadge,
+  diffTokenHtml,
+  filePrev,
+  fileType,
+  fmtComment,
+  lbl,
+  progBar,
+  formatSecBadge,
+  feedScoreClass,
+  feedScoreLabel,
+  getFeedCat,
+  getFeedAuth,
+} from '../ui/helpers.js';
+
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
 import { modalHtml } from './modals.js';
@@ -540,10 +554,10 @@ export function feedDrawerHtml(feedId) {
   const u = S.ui;
   if (!item) return '';
 
-  const catMeta = FEED_CATEGORIES[item.category] || { label: item.category, icon: 'newspaper', c: 'var(--blue)' };
-  const authMeta = FEED_AUTHORITIES[item.authorityId] || { flag: '🌐', short: item.authority };
-  const scoreClass = item.score >= 5 ? 'feed-score-5' : item.score >= 4 ? 'feed-score-4' : 'feed-score-3';
-  const scoreLabel = item.score >= 5 ? 'CRITICAL IMPACT' : item.score >= 4 ? 'HIGH IMPACT' : 'MODERATE IMPACT';
+  const catMeta = getFeedCat(item.category);
+  const authMeta = getFeedAuth(item.authorityId, item.authority);
+  const scoreClass = feedScoreClass(item.score);
+  const scoreLabel = feedScoreLabel(item.score);
 
   const linkedPolicies = (item.policyIds || []).map(policy).filter(Boolean);
   const linkedControls = (item.controlIds || []).map(control).filter(Boolean);
@@ -568,7 +582,7 @@ export function feedDrawerHtml(feedId) {
       <div class="feed-drawer-meta">
         <span class="feed-auth-pill">
           <span>${authMeta.flag}</span>
-          <b>${esc(item.authority)}</b>
+          <b>${esc(authMeta.short || item.authority)}</b>
         </span>
         <span class="muted mono" style="font-size:11.5px">·</span>
         <span class="pill mono" style="font-size:10.5px">${esc(item.jurisdiction)}</span>
@@ -620,11 +634,12 @@ export function feedDrawerHtml(feedId) {
             </div>
             <div class="muted" style="font-size:11.5px;margin-top:2px">Direct statutory provision indexed in Nordic RegTech library</div>
           </div>
-          <button class="btn btn-sm btn-secondary" data-a="openStatuteSection" data-id="${item.statuteId}" data-sec="${item.statuteSec}">
+          <button class="btn btn-sm btn-secondary" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}">
             ${ic('book-open', 13)} Open in reader ➔
           </button>
         </div>
       </div>
+
 
       <!-- Governance Matrix Linkages -->
       <div class="dsec" style="margin-top:20px">
@@ -701,9 +716,15 @@ export function feedDrawerHtml(feedId) {
       <!-- Action Footer -->
       <div class="dsec" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--divider)">
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          <button class="btn btn-primary" data-a="createTaskFromFeed" data-id="${item.id}">
-            ${ic('plus', 14)} Create Mitigation Task
-          </button>
+          ${
+            item.taskId
+              ? `<button class="btn btn-primary" data-a="editTask" data-id="${item.taskId}">
+                  ${ic('check', 14)} View Mitigation Task (${esc(item.taskId)})
+                </button>`
+              : `<button class="btn btn-primary" data-a="createTaskFromFeed" data-id="${item.id}">
+                  ${ic('plus', 14)} Create Mitigation Task
+                </button>`
+          }
           ${
             item.status !== 'ACKNOWLEDGED'
               ? `<button class="btn btn-secondary" data-a="ackFeedItem" data-id="${item.id}">

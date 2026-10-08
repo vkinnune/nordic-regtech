@@ -138,6 +138,18 @@
   border: 1px solid var(--border);
 }
 
+.feed-score-2 {
+  background: var(--surface-1);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.feed-score-1 {
+  background: var(--surface-1);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+
 /* Card Body */
 .feed-cat-pill {
   font-size: 10.5px;

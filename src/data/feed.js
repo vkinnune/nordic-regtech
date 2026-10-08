@@ -1,29 +1,29 @@
 /* ---------- REGULATORY MONITORING FEED DATA (Horizon Tracking & Supervisory Stream) ---------- */
 
 export const FEED_CATEGORIES = {
-  AMENDMENT: { id: 'AMENDMENT', label: 'Statutory Amendment', icon: 'file-diff', c: 'var(--amber)' },
-  CIRCULAR: { id: 'CIRCULAR', label: 'Supervisory Circular', icon: 'bell', c: 'var(--blue)' },
-  ENFORCEMENT: { id: 'ENFORCEMENT', label: 'Enforcement & Sanction', icon: 'alert-triangle', c: 'var(--red)' },
-  TECHNICAL_STANDARD: { id: 'TECHNICAL_STANDARD', label: 'Technical Standard / RTS', icon: 'binary', c: 'var(--violet)' },
-  CONSULTATION: { id: 'CONSULTATION', label: 'Consultation Paper', icon: 'message-square', c: 'var(--teal)' },
+  AMENDMENT: { id: 'AMENDMENT', label: 'Statutory Amendment', icon: 'file-diff' },
+  CIRCULAR: { id: 'CIRCULAR', label: 'Supervisory Circular', icon: 'bell' },
+  ENFORCEMENT: { id: 'ENFORCEMENT', label: 'Enforcement & Sanction', icon: 'alert-triangle' },
+  TECHNICAL_STANDARD: { id: 'TECHNICAL_STANDARD', label: 'Technical Standard / RTS', icon: 'binary' },
+  CONSULTATION: { id: 'CONSULTATION', label: 'Consultation Paper', icon: 'message-square' },
 };
 
 export const FEED_AUTHORITIES = {
-  fi: { id: 'fi', label: 'Finansinspektionen', short: 'FI', flag: '🇸🇪', icon: 'landmark', jur: 'SE' },
-  riksdagen: { id: 'riksdagen', label: 'Sveriges Riksdag', short: 'Riksdagen', flag: '🇸🇪', icon: 'scale', jur: 'SE' },
-  fiva: { id: 'fiva', label: 'FIN-FSA (Finanssivalvonta)', short: 'FIN-FSA', flag: '🇫🇮', icon: 'shield-check', jur: 'FI' },
+  fi: { id: 'fi', label: 'Finansinspektionen (Swedish FSA)', short: 'FI', flag: '🇸🇪', icon: 'landmark', jur: 'SE' },
+  riksdagen: { id: 'riksdagen', label: 'Swedish Parliament (Riksdagen)', short: 'Riksdagen', flag: '🇸🇪', icon: 'scale', jur: 'SE' },
+  fiva: { id: 'fiva', label: 'FIN-FSA (Financial Supervisory Authority)', short: 'FIN-FSA', flag: '🇫🇮', icon: 'shield-check', jur: 'FI' },
   eba: { id: 'eba', label: 'European Banking Authority', short: 'EBA', flag: '🇪🇺', icon: 'building-2', jur: 'EU' },
-  esma: { id: 'esma', label: 'ESMA', short: 'ESMA', flag: '🇪🇺', icon: 'activity', jur: 'EU' },
-  konsumentverket: { id: 'konsumentverket', label: 'Konsumentverket', short: 'KO', flag: '🇸🇪', icon: 'shopping-bag', jur: 'SE' },
-  imy: { id: 'imy', label: 'IMY (Integritetsskyddsmyndigheten)', short: 'IMY', flag: '🇸🇪', icon: 'lock', jur: 'SE' },
-  traficom: { id: 'traficom', label: 'Traficom NCSC-FI', short: 'NCSC-FI', flag: '🇫🇮', icon: 'radio', jur: 'FI' },
+  esma: { id: 'esma', label: 'European Securities and Markets Authority', short: 'ESMA', flag: '🇪🇺', icon: 'activity', jur: 'EU' },
+  konsumentverket: { id: 'konsumentverket', label: 'Swedish Consumer Agency', short: 'SCA', flag: '🇸🇪', icon: 'shopping-bag', jur: 'SE' },
+  imy: { id: 'imy', label: 'Swedish Privacy Authority (IMY)', short: 'IMY', flag: '🇸🇪', icon: 'lock', jur: 'SE' },
+  traficom: { id: 'traficom', label: 'Traficom NCSC-FI (Cyber Security Centre)', short: 'NCSC-FI', flag: '🇫🇮', icon: 'radio', jur: 'FI' },
 };
 
 export const FEED_ITEMS = [
   {
     id: 'feed-sfs-2026-916',
     title: 'Riksdagen Enacts SFS 2026:916: Mandatory Algorithmic Trading Risk Controls & Automated Latency Audits',
-    originalTitle: 'Lag (2026:916) om ändring i lagen (2004:46) om värdepappersfonder',
+    originalTitle: 'SFS 2026:916 Statutory Amendment (Algorithmic Trading & AI Risk Controls)',
     authority: 'Sveriges Riksdag',
     authorityId: 'riksdagen',
     jurisdiction: 'SE',
@@ -54,7 +54,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-fi-dora-2026-01',
     title: 'Finansinspektionen Circular: Mandatory FFFS Filing for DORA ICT Incident Registers & Third-Party Audit Rights',
-    originalTitle: 'Föreskrifter och allmänna råd om informationsregister och incidentrapportering enligt DORA',
+    originalTitle: 'FFFS Supervisory Regulations on DORA Information Registers & Incident Reporting',
     authority: 'Finansinspektionen',
     authorityId: 'fi',
     jurisdiction: 'SE',
@@ -63,7 +63,7 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-23T14:30:00Z',
     relativeTime: 'Yesterday',
     statuteId: 'reg-dora',
-    statuteSec: 'dora-5-1',
+    statuteSec: 'dora-art-28',
     statuteRef: 'Regulation (EU) 2022/2554 Art. 28',
     summary:
       'Finansinspektionen announces the launch of its supervisory portal for DORA information registers. All Swedish banks, fund managers, and investment firms must submit standardized XML registers of critical ICT third-party vendors by Q3 2026.',
@@ -84,7 +84,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-fi-sanction-aml-01',
     title: 'Finansinspektionen Sanction: SEK 35M Penalty Fee for Flawed Real-Time Transaction Monitoring & Alert Backlogs',
-    originalTitle: 'Sanktionsbeslut avseende brister i åtgärder mot penningtvätt och transaktionsgranskning',
+    originalTitle: 'Supervisory Sanction Decision on AML Transaction Monitoring & Alert Backlogs',
     authority: 'Finansinspektionen',
     authorityId: 'fi',
     jurisdiction: 'SE',
@@ -93,8 +93,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-21T10:00:00Z',
     relativeTime: '3 days ago',
     statuteId: 'reg-aml',
-    statuteSec: 'aml-3-1',
-    statuteRef: 'SFS 2017:630 3 kap. 1 §',
+    statuteSec: 'aml-2-1',
+    statuteRef: 'SFS 2017:630 2 kap. 1 §',
     summary:
       'Finansinspektionen has issued a formal warning and an administrative fine of 35 million SEK against a Nordic credit institution for systemic delays in investigating automated AML alerts and backlogs exceeding 30 days.',
     plainEnglish: {
@@ -115,7 +115,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-fiva-edd-2026',
     title: 'FIN-FSA Supervisory Circular 02/2026: Enhanced Due Diligence for High-Risk Beneficial Ownership Holding Structures',
-    originalTitle: 'Valvottavatiedote 02/2026: Tehostettu tuntemisvelvollisuus monimutkaisissa omistusrakenteissa',
+    originalTitle: 'Supervisory Circular 02/2026 on Enhanced Due Diligence in Complex Ownership Structures',
     authority: 'FIN-FSA (Finanssivalvonta)',
     authorityId: 'fiva',
     jurisdiction: 'FI',
@@ -124,8 +124,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-19T08:00:00Z',
     relativeTime: '5 days ago',
     statuteId: 'reg-aml',
-    statuteSec: 'aml-3-1',
-    statuteRef: 'Laki rahanpesun estämisestä (444/2017) 3 luku',
+    statuteSec: 'aml-3-4',
+    statuteRef: 'SFS 2017:630 3 kap. 4 § (EDD & PEP)',
     summary:
       'The Finnish Financial Supervisory Authority (FIN-FSA) instructs supervised entities to apply mandatory forensic source-of-wealth verifications for private wealth accounts held through multi-tier nominee or trust structures.',
     plainEnglish: {
@@ -145,7 +145,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-eba-rts-dora-01',
     title: 'EBA Final Draft RTS on ICT Business Continuity & Major Incident Classification Thresholds',
-    originalTitle: 'Joint Regulatory Technical Standards on incident reporting under Regulation (EU) 2022/2554',
+    originalTitle: 'Joint ESAs Regulatory Technical Standards on Major Incident Reporting Classification',
     authority: 'European Banking Authority',
     authorityId: 'eba',
     jurisdiction: 'EU',
@@ -154,8 +154,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-17T11:00:00Z',
     relativeTime: '1 week ago',
     statuteId: 'reg-dora',
-    statuteSec: 'dora-9-1',
-    statuteRef: 'Regulation (EU) 2022/2554 Art. 18-20',
+    statuteSec: 'dora-art-17',
+    statuteRef: 'Regulation (EU) 2022/2554 Art. 17',
     summary:
       'Joint Committee of the European Supervisory Authorities (EBA, ESMA, EIOPA) publishes final technical standards defining quantitative impact thresholds for classifying major ICT incidents under DORA.',
     plainEnglish: {
@@ -175,7 +175,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-esma-greenwashing-01',
     title: 'ESMA Supervisory Briefing: Fund Naming Rules & ESG Greenwashing Prevention Guidelines',
-    originalTitle: 'Guidelines on funds’ names using ESG or sustainability-related terms (ESMA34-472-440)',
+    originalTitle: 'Supervisory Briefing on Fund Naming & Sustainability-Related Disclosures',
     authority: 'ESMA',
     authorityId: 'esma',
     jurisdiction: 'EU',
@@ -184,8 +184,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-15T09:30:00Z',
     relativeTime: '9 days ago',
     statuteId: 'reg-sfdr',
-    statuteSec: 'sfs-1-1',
-    statuteRef: 'Regulation (EU) 2019/2088 (SFDR) Art. 8 & 9',
+    statuteSec: 'sfdr-art-9',
+    statuteRef: 'Regulation (EU) 2019/2088 (SFDR) Art. 9',
     summary:
       'ESMA issues final supervisory guidance enforcing an 80% minimum investment threshold in sustainable activities for any fund using "ESG", "Green", "Impact", or "Transition" in its marketing name.',
     plainEnglish: {
@@ -205,7 +205,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-konsumentverket-credit-01',
     title: 'Konsumentverket Injunction: Deficient Affordability & KALP Calculation in Consumer Credit Underwriting',
-    originalTitle: 'Föreläggande och sanktionsvarning avseende bristande kreditprövningar och KALP-kalkyler',
+    originalTitle: 'Supervisory Injunction on Creditworthiness Assessments & Affordability Calculations',
     authority: 'Konsumentverket',
     authorityId: 'konsumentverket',
     jurisdiction: 'SE',
@@ -213,9 +213,9 @@ export const FEED_ITEMS = [
     score: 4,
     publishedAt: '2026-03-12T13:00:00Z',
     relativeTime: '12 days ago',
-    statuteId: 'sfs-2010-1846',
-    statuteSec: 'sfs-1-1',
-    statuteRef: 'Konsumentkreditlagen (SFS 2010:1846 12 §)',
+    statuteId: 'reg-sfs-2004-46',
+    statuteSec: 'sfs-1-2',
+    statuteRef: 'SFS 2004:46 1 kap. 2 § (Conduct & Licensing)',
     summary:
       'The Swedish Consumer Agency (Konsumentverket) has issued formal injunctions and penalty warnings against credit providers for failing to independently verify living costs (KALP) and debt-to-income ratios.',
     plainEnglish: {
@@ -234,7 +234,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-ncsc-fi-ddos-01',
     title: 'Traficom NCSC-FI Threat Bulletin: Coordinated Cyber Attacks on Nordic Banking Core DNS & Open Banking APIs',
-    originalTitle: 'Kyberturvallisuuskeskuksen varoitus 01/2026: Palvelunestohyökkäykset finanssialan kriittisiin järjestelmiin',
+    originalTitle: 'Threat Bulletin 01/2026 on Distributed Denial-of-Service Attacks Against Financial Infrastructure',
     authority: 'Traficom NCSC-FI',
     authorityId: 'traficom',
     jurisdiction: 'FI',
@@ -243,8 +243,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-10T16:45:00Z',
     relativeTime: '2 weeks ago',
     statuteId: 'reg-dora',
-    statuteSec: 'dora-5-1',
-    statuteRef: 'NIS2 Directive / Kyberturvallisuuslaki',
+    statuteSec: 'dora-art-26',
+    statuteRef: 'Regulation (EU) 2022/2554 Art. 26 (TLPT & Resilience)',
     summary:
       'The National Cyber Security Centre Finland (NCSC-FI) warns of volumetric DDoS campaigns utilizing encrypted HTTPS floods targeting authoritative financial DNS infrastructure and payment gateways across Finland and Sweden.',
     plainEnglish: {
@@ -263,7 +263,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-imy-biometrics-01',
     title: 'IMY Precedent Decision: Keystroke Dynamics & Behavioral Biometrics Require Explicit Consent in Retail Banking',
-    originalTitle: 'Tillsynsbeslut om beteendebiometriska uppgifter för bedrägeribekämpning',
+    originalTitle: 'Supervisory Decision on Behavioral Biometrics & Fraud Detection Data Processing',
     authority: 'IMY (Integritetsskyddsmyndigheten)',
     authorityId: 'imy',
     jurisdiction: 'SE',
@@ -272,8 +272,8 @@ export const FEED_ITEMS = [
     publishedAt: '2026-03-08T09:15:00Z',
     relativeTime: '2 weeks ago',
     statuteId: 'reg-sfs-2004-46',
-    statuteSec: 'sfs-1-1',
-    statuteRef: 'Regulation (EU) 2016/679 (GDPR) Art. 9',
+    statuteSec: 'sfs-1-100',
+    statuteRef: 'SFS 2004:46 1 kap. 100 § (Automated Systems)',
     summary:
       'The Swedish Authority for Privacy Protection (IMY) rules that continuous behavioral biometrics (keystroke timing, device tilt) used for fraud detection constitute special category biometric data.',
     plainEnglish: {
@@ -293,17 +293,17 @@ export const FEED_ITEMS = [
   {
     id: 'feed-eba-nsfr-consultation',
     title: 'EBA Consultation: Technical Standards on Accelerated Digital Deposit Runs in Net Stable Funding Ratio (NSFR)',
-    originalTitle: 'Consultation Paper on RTS on liquidity coverage and net stable funding requirements',
+    originalTitle: 'Consultation Paper on Net Stable Funding & Digital Deposit Run Scenarios',
     authority: 'European Banking Authority',
     authorityId: 'eba',
     jurisdiction: 'EU',
     category: 'CONSULTATION',
-    score: 3,
+    score: 2,
     publishedAt: '2026-03-05T14:00:00Z',
     relativeTime: '3 weeks ago',
     statuteId: 'reg-finlex-747-2012',
     statuteSec: 'finlex-1-1',
-    statuteRef: 'Regulation (EU) 575/2013 (CRR) Art. 428',
+    statuteRef: 'Investment Services Act (747/2012) 1 §',
     summary:
       'The EBA launches public consultation on revisions to liquidity outflow assumptions, reflecting higher speed of digital deposit flight driven by social media and mobile banking apps.',
     plainEnglish: {
@@ -322,7 +322,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-fi-mifid-execution',
     title: 'Finansinspektionen Thematic Review: Execution Quality & Order Routing Disclosures in Nordic Wealth Management',
-    originalTitle: 'Rapport: Tematisk granskning av bästa orderutförande och mäklartilldelning',
+    originalTitle: 'Supervisory Thematic Review on Best Execution & Order Routing',
     authority: 'Finansinspektionen',
     authorityId: 'fi',
     jurisdiction: 'SE',
@@ -330,9 +330,9 @@ export const FEED_ITEMS = [
     score: 3,
     publishedAt: '2026-03-01T10:30:00Z',
     relativeTime: '3 weeks ago',
-    statuteId: 'reg-sfs-2004-46',
-    statuteSec: 'sfs-1-2',
-    statuteRef: 'SFS 2007:528 8 kap. / FFFS 2017:2',
+    statuteId: 'reg-mifid',
+    statuteSec: 'mifid-art-27',
+    statuteRef: 'Directive 2014/65/EU Art. 27 (Best Execution)',
     summary:
       'Finansinspektionen releases findings from its horizontal thematic inspection of best execution governance across Nordic wealth managers, warning against over-reliance on single broker execution channels.',
     plainEnglish: {
@@ -352,7 +352,7 @@ export const FEED_ITEMS = [
   {
     id: 'feed-fiva-outsourcing-audit',
     title: 'FIN-FSA Thematic Review: Subcontracting Chains & Sub-Outsourcing Oversight in Fund Administration',
-    originalTitle: 'Valvottavatiedote: Rahastoyhtiöiden ulkoistamisjärjestelyt ja alihankintaketjujen hallinta',
+    originalTitle: 'Supervisory Thematic Review on Fund Management Outsourcing & Subcontracting Chains',
     authority: 'FIN-FSA (Finanssivalvonta)',
     authorityId: 'fiva',
     jurisdiction: 'FI',
@@ -360,9 +360,9 @@ export const FEED_ITEMS = [
     score: 4,
     publishedAt: '2026-02-25T11:00:00Z',
     relativeTime: '1 month ago',
-    statuteId: 'reg-finlex-747-2012',
-    statuteSec: 'finlex-1-8',
-    statuteRef: 'Sijoituspalvelulaki (747/2012) 7 luku 12 §',
+    statuteId: 'reg-aifm',
+    statuteSec: 'aifm-13-1',
+    statuteRef: 'FFFS 2013:9 13 kap. 1 § (Outsourcing & Valuation)',
     summary:
       'FIN-FSA notes significant control gaps in fund management companies outsourcing fund accounting and transfer agency services, highlighting lack of oversight over 4th-party IT subcontractors.',
     plainEnglish: {
@@ -376,6 +376,34 @@ export const FEED_ITEMS = [
     riskIds: ['rsk-dora-01'],
     sourceUrl: 'https://www.finanssivalvonta.fi/tiedotteet-ja-julkaisut/valvottavatiedotteet/2026/ulkoistamisen-hallinta-rahastoyhtioissa/',
     tags: ['FIN-FSA', 'Outsourcing', 'Fund Management', 'Subcontracting', 'Finland'],
+    status: 'UNREVIEWED',
+  },
+  {
+    id: 'feed-esma-taxonomy',
+    title: 'ESMA Issues Technical Briefing: Annual Update to ESEF Reporting Taxonomy & XBRL Validation Suite',
+    originalTitle: 'Technical Briefing: ESEF Reporting Taxonomy 2026 Conformance Suite',
+    authority: 'European Securities and Markets Authority',
+    authorityId: 'esma',
+    jurisdiction: 'EU',
+    category: 'TECHNICAL_STANDARD',
+    score: 1,
+    publishedAt: '2026-02-15T09:00:00Z',
+    relativeTime: '1 month ago',
+    statuteId: 'reg-mifid',
+    statuteSec: 'mifid-art-27',
+    statuteRef: 'Directive 2014/65/EU Art. 27 (Regulatory Technical Standards)',
+    summary:
+      'ESMA releases technical conformance update for annual European Single Electronic Format (ESEF) reporting filings, introducing minor schema validation fixes for digital financial statements.',
+    plainEnglish: {
+      whyItMatters: 'Technical schema updates ensure corporate annual reports pass automated filing gateways without validation warnings.',
+      beforeAfter: 'Previous 2025 XML schemas will be phased out for FY2026 filings in favor of standardized XBRL tag rules.',
+      actionRequired: 'Ensure financial reporting software vendor updates XBRL taxonomy schemas prior to annual audit sign-off.',
+    },
+    policyIds: ['pol-alg-01'],
+    controlIds: ['ctl-alg-02'],
+    riskIds: ['rsk-alg-01'],
+    sourceUrl: 'https://www.esma.europa.eu/press-news/esma-news/esma-publishes-2026-esef-taxonomy-update',
+    tags: ['ESMA', 'ESEF', 'XBRL', 'Financial Reporting', 'Technical Standard', 'EU'],
     status: 'UNREVIEWED',
   },
 ];

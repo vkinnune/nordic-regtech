@@ -1239,6 +1239,7 @@ A.openRegInReader = el => {
   }
   S.ui.regView = 'reader';
   delete S.ui.govDrawer;
+  delete S.ui.feedDrawer;
   fxSet({ route: true, tabs: true });
   render();
 };
@@ -1290,8 +1291,9 @@ IN.regLibQ = el => {
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
-  if ((!S.ui.drawer && !S.ui.govDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.feedDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   delete S.ui.drawer;
+  delete S.ui.feedDrawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
   fxSet({ drawer: true });
@@ -1362,10 +1364,16 @@ A.ackFeedItem = el => {
 A.createTaskFromFeed = el => {
   const f = feedItem(el.dataset.id);
   if (!f) return;
+  if (f.taskId && task(f.taskId)) {
+    A.editTask({ dataset: { id: f.taskId } });
+    return;
+  }
   f.status = 'IN_MITIGATION';
+  const linkedPolicy = f.policyIds?.[0] ? policy(f.policyIds[0]) : null;
+  const projectId = linkedPolicy?.projectId || (f.statuteId === 'reg-dora' ? 'p1' : f.statuteId === 'reg-aml' ? 'p4' : 'p5');
   const authKey = f.authorityId ? f.authorityId.toUpperCase() : 'HORIZON';
-  dispatchGovTask({
-    key: `F-${authKey}`,
+  const newId = dispatchGovTask({
+    key: `F-${authKey}-${Math.floor(Date.now() % 1000)}`,
     title: `Mitigate: ${f.title}`,
     desc:
       `Regulatory Horizon Monitoring update from ${f.authority} (${f.relativeTime}):\n\n` +
@@ -1373,41 +1381,13 @@ A.createTaskFromFeed = el => {
       `Impact Score: ${f.score}/5 (${f.category})\n\n` +
       `Executive Summary:\n${f.summary}\n\n` +
       `Action Required:\n${f.plainEnglish?.actionRequired || ''}`,
-    project: 'p5',
+    project: projectId,
     labels: ['Compliance', f.category === 'AMENDMENT' ? 'Statutory' : 'Supervisory'],
     logMessage: `Created mitigation task from regulatory feed: ${f.title}`,
     toastMessage: `Mitigation task created for ${f.statuteRef}.`,
   });
-};
-
-A.openStatuteSection = el => {
-  const regId = el.dataset.id;
-  const secId = el.dataset.sec;
-  S.ui.regView = 'reader';
-  S.ui.regSel = regId;
-  S.ui.regSecSel = secId;
-  delete S.ui.feedDrawer;
-  go('regulations', { id: regId, sec: secId });
-};
-
-A.setFeedJuris = el => {
-  S.ui.feedJuris = el.dataset.v;
-  render();
-};
-
-A.setFeedScore = el => {
-  S.ui.feedScore = el.dataset.v;
-  render();
-};
-
-A.setFeedCat = el => {
-  S.ui.feedCat = el.dataset.v;
-  render();
-};
-
-A.setFeedAuth = el => {
-  S.ui.feedAuth = el.dataset.v;
-  render();
+  f.taskId = newId;
+  save();
 };
 
 A.clearFeedFilters = () => {
@@ -1434,8 +1414,9 @@ function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastM
   if (onBeforeCommit) onBeforeCommit(newId);
   if (logMessage) logAct('created', newTask, logMessage);
   toast(toastMessage || `Update task ${newTask.key} created.`);
-  S.ui.drawer = newId;
   delete S.ui.govDrawer;
+  delete S.ui.feedDrawer;
+  S.ui.drawer = newId;
   save();
   render();
   return newId;
@@ -1490,6 +1471,21 @@ A.linkControlPick = el => {
     save();
   }
   closePop();
+  render();
+};
+
+IN.feedQ = el => {
+  S.ui.feedQ = el.value;
+  render();
+};
+
+IN.feedCat = el => {
+  S.ui.feedCat = el.value;
+  render();
+};
+
+IN.feedAuth = el => {
+  S.ui.feedAuth = el.value;
   render();
 };
 

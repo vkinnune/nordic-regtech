@@ -44,7 +44,8 @@ test('Regulatory Feed Actions: drawer, task creation, and filtering', () => {
   assert.ok(actionsJs.includes('A.closeFeedDrawer'), 'actions.js must define A.closeFeedDrawer');
   assert.ok(actionsJs.includes('A.createTaskFromFeed'), 'actions.js must define A.createTaskFromFeed');
   assert.ok(actionsJs.includes('A.ackFeedItem'), 'actions.js must define A.ackFeedItem');
-  assert.ok(actionsJs.includes('A.setFeedJuris'), 'actions.js must define A.setFeedJuris');
+  assert.ok(actionsJs.includes('A.clearFeedFilters'), 'actions.js must define A.clearFeedFilters');
+  assert.ok(actionsJs.includes('f.taskId = newId'), 'actions.js must associate created mitigation task with feed item');
 });
 
 test('Regulatory Feed Styling: dedicated css and import in index.css', () => {
@@ -55,4 +56,29 @@ test('Regulatory Feed Styling: dedicated css and import in index.css', () => {
   assert.ok(feedCss.includes('.feed-grid'), 'feed.css must define .feed-grid');
   assert.ok(feedCss.includes('.feed-card'), 'feed.css must define .feed-card');
   assert.ok(feedCss.includes('.feed-score-5'), 'feed.css must define .feed-score-5');
+});
+
+test('Regulatory Feed Review Standards: input handlers, helpers, and escape handling', () => {
+  const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
+  const keyboardJs = fs.readFileSync(path.join(ROOT, 'src/actions/keyboard.js'), 'utf-8');
+  const feedJs = fs.readFileSync(path.join(ROOT, 'src/data/feed.js'), 'utf-8');
+  const helpersJs = fs.readFileSync(path.join(ROOT, 'src/ui/helpers.js'), 'utf-8');
+
+  // Input handlers registered
+  assert.ok(actionsJs.includes('IN.feedQ'), 'actions.js must register IN.feedQ');
+  assert.ok(actionsJs.includes('IN.feedCat'), 'actions.js must register IN.feedCat');
+  assert.ok(actionsJs.includes('IN.feedAuth'), 'actions.js must register IN.feedAuth');
+
+  // Keyboard Escape handler dismisses feedDrawer
+  assert.ok(keyboardJs.includes('A.closeFeedDrawer()'), 'keyboard.js must dismiss S.ui.feedDrawer via A.closeFeedDrawer() on Escape');
+
+  // Shared score helpers exported from UI layer (layer separation)
+  assert.ok(helpersJs.includes('export function feedScoreClass'), 'helpers.js must export feedScoreClass');
+  assert.ok(helpersJs.includes('export function feedScoreLabel'), 'helpers.js must export feedScoreLabel');
+  assert.ok(helpersJs.includes('export function getFeedCat'), 'helpers.js must export getFeedCat');
+  assert.ok(helpersJs.includes('export function getFeedAuth'), 'helpers.js must export getFeedAuth');
+
+  // Data layer must remain pure (no presentation functions)
+  assert.ok(!feedJs.includes('export function feedScoreClass'), 'feed.js must not export presentation helpers');
+  assert.ok(!feedJs.includes('export function feedScoreLabel'), 'feed.js must not export presentation helpers');
 });
