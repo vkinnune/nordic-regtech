@@ -1,3 +1,5 @@
 dist
 node_modules
 package-lock.json
+pipeline
+src/data/swedish_regulations.json

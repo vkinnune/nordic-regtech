@@ -16,6 +16,7 @@ import {
   risksForSection,
   allPolicies,
   allControls,
+  isControlImpacted,
 } from '../core/store.js';
 import { empty, stIcon } from '../ui/helpers.js';
 
@@ -454,14 +455,15 @@ function renderSectionGovernanceStrip(s) {
           )
           .join('')}
         ${ctls
-          .map(
-            c => `
-          <button class="finlex-gov-chip ${c.status === 'DEFICIENT' ? 'alert' : ''}" data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Open control ${esc(c.code)}: ${esc(c.title)}">
-            ${c.status === 'DEFICIENT' ? ic('alert-triangle', 11) : ic('check', 11)}
+          .map(c => {
+            const impacted = isControlImpacted(c);
+            return `
+          <button class="finlex-gov-chip ${impacted ? 'alert' : ''}" data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Open control ${esc(c.code)}: ${esc(c.title)}">
+            ${impacted ? ic('alert-triangle', 11) : ic('check', 11)}
             <span class="mono">${esc(c.code)}</span>
           </button>
-        `,
-          )
+        `;
+          })
           .join('')}
         ${rsks
           .map(

@@ -1304,7 +1304,7 @@ A.signOffPolicy = el => {
   }
 };
 
-function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage }) {
+function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage, onBeforeCommit }) {
   const newId = uid('t');
   const newTask = {
     id: newId,
@@ -1321,6 +1321,7 @@ function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastM
     labels: labels || ['Compliance'],
   };
   D().tasks.unshift(newTask);
+  if (onBeforeCommit) onBeforeCommit(newId);
   logAct('created', newTask, logMessage);
   toast(toastMessage || `Update task ${newTask.key} created.`);
   S.ui.drawer = newId;
@@ -1335,30 +1336,34 @@ A.createMitigationTask = el => {
   const secId = el.dataset.sec;
   const pId = c?.policyId ? policy(c.policyId)?.projectId || 'p5' : 'p5';
   const ctlKey = c ? c.code.replace(/^CTL-/, '') : 'REG';
-  const newId = dispatchGovTask({
+  dispatchGovTask({
     key: `CTL-${ctlKey}`,
     title: c ? `Update control ${c.code} for statutory amendment` : `Statutory amendment implementation task`,
     desc: c ? `Regulatory change requirement for control: ${c.amendmentAlert || c.specification}` : `Requirement assessment for section ${secId}`,
     project: pId,
     labels: ['Compliance', 'Regulatory Amendment'],
     logMessage: `Created mitigation task for ${c ? c.code : secId}`,
+    onBeforeCommit: newId => {
+      if (c) c.taskId = newId;
+    },
   });
-  if (c) c.taskId = newId;
 };
 
 A.createPolicyUpdateTask = el => {
   const p = policy(el.dataset.id);
   const secId = el.dataset.sec;
   const polKey = p ? p.code.replace(/^POL-/, '') : 'GOV';
-  const newId = dispatchGovTask({
+  dispatchGovTask({
     key: `POL-${polKey}`,
     title: p ? `Update policy ${p.code} (${p.title})` : `Update policy documentation`,
     desc: `Policy review and update following statutory amendment (${secId || ''}).`,
     project: p?.projectId || 'p5',
     labels: ['Compliance', 'Policy'],
     logMessage: `Created policy update task for ${p ? p.code : secId}`,
+    onBeforeCommit: newId => {
+      if (p) p.taskId = newId;
+    },
   });
-  if (p) p.taskId = newId;
 };
 
 A.linkControlPick = el => {

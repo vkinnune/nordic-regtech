@@ -3,45 +3,6 @@
    Calm, Scandinavian design system with high contrast.
    ============================================================ */
 
-.gov-page-wrap {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  background: var(--surface);
-}
-
-.gov-page-inner {
-  padding: var(--gutter) var(--gutter) 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Header */
-.gov-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-}
-
-.gov-title-box h1 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.gov-title-box p {
-  font-size: 13px;
-  color: var(--text-2);
-  margin: 4px 0 0;
-}
-
 .gov-alert-badge {
   display: flex;
   align-items: center;
@@ -66,42 +27,6 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--text-2);
-}
-
-/* Controls */
-.gov-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.gov-search-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.gov-filters-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.gov-filter-pills {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-/* Table */
-.gov-table-wrap {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--surface);
 }
 
 .gov-table {

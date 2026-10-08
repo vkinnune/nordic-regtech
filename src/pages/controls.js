@@ -1,7 +1,7 @@
 /* ---------- CONTROLS MATRIX (Operational Controls & Safeguards) ---------- */
 import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, allControls, policy } from '../core/store.js';
+import { S, allControls, policy, isControlImpacted } from '../core/store.js';
 import { empty, formatSecBadge } from '../ui/helpers.js';
 
 export function pageControls() {
@@ -11,8 +11,8 @@ export function pageControls() {
 
   const controls = allControls();
   const filtered = controls.filter(c => {
-    if (filter === 'DEFICIENT' && c.status !== 'DEFICIENT') return false;
-    if (filter === 'EFFECTIVE' && c.status !== 'EFFECTIVE') return false;
+    if (filter === 'DEFICIENT' && !isControlImpacted(c)) return false;
+    if (filter === 'EFFECTIVE' && isControlImpacted(c)) return false;
     if (filter === 'AUTOMATED' && c.type !== 'AUTOMATED') return false;
     if (filter === 'MANUAL' && c.type !== 'MANUAL') return false;
 
@@ -31,8 +31,8 @@ export function pageControls() {
     return true;
   });
 
-  const deficientCount = controls.filter(c => c.status === 'DEFICIENT').length;
-  const effectiveCount = controls.filter(c => c.status === 'EFFECTIVE').length;
+  const deficientCount = controls.filter(isControlImpacted).length;
+  const effectiveCount = controls.filter(c => !isControlImpacted(c)).length;
   const automatedCount = controls.filter(c => c.type === 'AUTOMATED').length;
   const automatedPct = Math.round((automatedCount / Math.max(controls.length, 1)) * 100);
   const distinctRisks = new Set(controls.flatMap(c => c.riskIds || [])).size;

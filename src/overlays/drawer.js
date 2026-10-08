@@ -258,6 +258,25 @@ export function diffViewerHtml(diff) {
 }
 
 /* ---------------- GOVERNANCE DRAWER (Policies, Controls, Risks) ---------------- */
+const GOV_TYPE_META = {
+  policy: { name: 'Policy', icon: 'file-text' },
+  control: { name: 'Control', icon: 'shield-check' },
+  risk: { name: 'Regulatory Risk', icon: 'alert-triangle' },
+};
+
+function renderControlRow(c) {
+  return `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+    <div>
+      <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
+      <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
+      <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
+    </div>
+    <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
+      ${ic('shield-check', 12)} Open control ➔
+    </button>
+  </div>`;
+}
+
 export function govDrawerHtml(gov) {
   const { type, id } = gov;
   const u = S.ui;
@@ -268,8 +287,9 @@ export function govDrawerHtml(gov) {
 
   if (!item) return '';
 
-  const typeName = type === 'policy' ? 'Policy' : type === 'control' ? 'Control' : 'Regulatory Risk';
-  const typeIcon = type === 'policy' ? 'file-text' : type === 'control' ? 'shield-check' : 'alert-triangle';
+  const meta = GOV_TYPE_META[type] || { name: 'Governance Entity', icon: 'shield' };
+  const typeName = meta.name;
+  const typeIcon = meta.icon;
 
   return `<aside class="drawer ${u.drawerFull ? 'full' : ''} ${u.fx.drawer ? 'enter' : ''}" role="dialog" aria-modal="${u.drawerFull}" aria-labelledby="gov-d-h" tabindex="-1">
     <div class="drawer-h">
@@ -289,13 +309,18 @@ export function govDrawerHtml(gov) {
               <div style="flex:1">
                 <div style="font-weight:700;font-size:12.5px">Regulatory amendment impact: ${esc(item.impactedByAmendment)}</div>
                 <div style="font-size:12px;margin-top:2px">${esc(item.amendmentAlert || '')}</div>
-                <div style="margin-top:8px;display:flex;gap:8px">
+                <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
                   ${
                     item.status === 'DEFICIENT'
                       ? `<button class="btn btn-sm btn-primary" data-a="resolveGap" data-id="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('check-circle', 12)} Mark effective</button>`
                       : `<span class="pill mono" style="font-size:11px">${ic('check', 11)} Signed off as effective</span>`
                   }
                   <button class="btn btn-sm btn-ghost" data-a="createMitigationTask" data-ctl="${item.id}" style="font-size:11.5px;padding:3px 8px">${ic('plus', 12)} Create update task</button>
+                  ${
+                    item.statuteSections && item.statuteSections.length
+                      ? `<button class="btn btn-sm btn-ghost" data-a="pop" data-pop="linkControl" data-sec="${item.statuteSections[0]}" style="font-size:11.5px;padding:3px 8px">${ic('link', 12)} Link existing control</button>`
+                      : ''
+                  }
                 </div>
               </div>
             </div>`
@@ -369,6 +394,36 @@ export function govDrawerHtml(gov) {
           : ''
       }
 
+      <!-- Linked Target Risks (for Policies) -->
+      ${
+        type === 'policy'
+          ? (() => {
+              const rsks = (item.riskIds || []).map(risk).filter(Boolean);
+              if (!rsks.length) return '';
+              return `<div class="dsec" style="margin-top:20px">
+                <div class="dsec-h"><h3>Target Regulatory Risks (${rsks.length})</h3></div>
+                <div class="col" style="gap:6px">
+                  ${rsks
+                    .map(
+                      r => `
+                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
+                      <div>
+                        <span class="mono" style="font-weight:700;font-size:12px">${esc(r.code)}</span>
+                        <span style="font-size:12px;margin-left:6px">${esc(r.title)}</span>
+                        <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(r.severity)}</span>
+                      </div>
+                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="risk" data-id="${r.id}" style="padding:2px 7px;font-size:11.5px">
+                        ${ic('alert-triangle', 12)} Open risk ➔
+                      </button>
+                    </div>`,
+                    )
+                    .join('')}
+                </div>
+              </div>`;
+            })()
+          : ''
+      }
+
       <!-- Linked Operational Controls (for Policies & Risks) -->
       ${
         type === 'policy'
@@ -378,21 +433,7 @@ export function govDrawerHtml(gov) {
               return `<div class="dsec" style="margin-top:20px">
                 <div class="dsec-h"><h3>Operational Controls (${ctls.length})</h3></div>
                 <div class="col" style="gap:6px">
-                  ${ctls
-                    .map(
-                      c => `
-                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
-                      <div>
-                        <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
-                        <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
-                        <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
-                      </div>
-                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
-                        ${ic('shield-check', 12)} Open control ➔
-                      </button>
-                    </div>`,
-                    )
-                    .join('')}
+                  ${ctls.map(renderControlRow).join('')}
                 </div>
               </div>`;
             })()
@@ -407,21 +448,7 @@ export function govDrawerHtml(gov) {
               return `<div class="dsec" style="margin-top:20px">
                 <div class="dsec-h"><h3>Enforcing Controls (${ctls.length})</h3></div>
                 <div class="col" style="gap:6px">
-                  ${ctls
-                    .map(
-                      c => `
-                    <div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
-                      <div>
-                        <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
-                        <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
-                        <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
-                      </div>
-                      <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
-                        ${ic('shield-check', 12)} Open control ➔
-                      </button>
-                    </div>`,
-                    )
-                    .join('')}
+                  ${ctls.map(renderControlRow).join('')}
                 </div>
               </div>`;
             })()

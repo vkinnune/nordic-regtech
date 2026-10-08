@@ -180,7 +180,18 @@ export function sectionOf(secId) {
 
 export function isSectionAmended(sec) {
   if (!sec) return false;
-  return sec.status === 'MODIFIED' || sec.status === 'ADDED' || !!sec.amendingAct;
+  return sec.status === 'MODIFIED' || sec.status === 'ADDED';
+}
+
+export function isControlImpacted(c) {
+  if (!c) return false;
+  if (c.status === 'DEFICIENT') return true;
+  if (c.impactedByAmendment && !c.signedOffAt) return true;
+  const sections = c.statuteSections || [];
+  return sections.some(secId => {
+    const sec = sectionOf(secId);
+    return isSectionAmended(sec) && !c.signedOffAt;
+  });
 }
 
 export function policiesForSection(secId) {
@@ -202,9 +213,7 @@ export function risksForSection(secId) {
 }
 
 export function impactedControlsForSection(secId) {
-  const sec = sectionOf(secId);
-  const amended = isSectionAmended(sec);
-  return controlsForSection(secId).filter(c => c.status === 'DEFICIENT' || c.impactedByAmendment || (amended && !c.signedOffAt));
+  return controlsForSection(secId).filter(isControlImpacted);
 }
 
 export function riskControls(r) {
@@ -216,7 +225,7 @@ export function riskControls(r) {
 export function riskGapStatus(r) {
   const ctls = riskControls(r);
   if (!ctls.length) return r.gapStatus || 'AT_RISK';
-  const hasGaps = ctls.some(c => c.status === 'DEFICIENT' || c.impactedByAmendment);
+  const hasGaps = ctls.some(isControlImpacted);
   return hasGaps ? 'OPEN_GAPS' : 'COVERED';
 }
 
