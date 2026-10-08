@@ -574,7 +574,7 @@ function renderRegulationsReader(u) {
 
         <!-- TOC Hierarchical Tree -->
         <div class="finlex-toc-tree" data-keep="finlex-tree">
-          ${renderFinlexTree(curAct, chapters, activeSecId, q)}
+          ${!allSecs.length ? `<div style="padding:16px;font-size:12px;color:var(--text-3);text-align:center">No chapters indexed</div>` : renderFinlexTree(curAct, chapters, activeSecId, q)}
         </div>
       </aside>
 
@@ -612,7 +612,17 @@ function renderRegulationsReader(u) {
 
           <!-- Statutory Sections Stream -->
           <div class="finlex-sections-stream">
-            ${renderFinlexSections(chapters, activeSecId, showPlain, q)}
+            ${
+              !allSecs.length
+                ? `<div class="panel" style="margin-top:20px;padding:36px 24px;text-align:center">
+                    <div style="max-width:500px;margin:0 auto">
+                      <div style="font-size:14px;font-weight:600;margin-bottom:8px">No section provisions indexed for this rule</div>
+                      <p class="faint" style="font-size:13px;line-height:1.5;margin-bottom:16px">${esc(curAct.summary || 'This regulation is registered in the supervisory database without individual section breakdowns.')}</p>
+                      <button class="btn btn-secondary btn-sm" data-a="setRegView" data-view="library">${ic('arrow-left', 13)} Back to Regulations</button>
+                    </div>
+                  </div>`
+                : renderFinlexSections(chapters, activeSecId, showPlain, q)
+            }
           </div>
         </div>
       </main>

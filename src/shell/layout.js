@@ -2,7 +2,7 @@
 import { MOD, TODAY, diffD, esc, parse } from '../core/utils.js';
 import { ic, wsLogo } from '../core/icons.js';
 import { PSTAT } from '../core/constants.js';
-import { D, S, allTasks, mem, pColor, proj, team, teamsList, visibleProjects } from '../core/store.js';
+import { D, S, allTasks, mem, pColor, proj, team, teamsList, visibleProjects, regulation } from '../core/store.js';
 import { av } from '../ui/helpers.js';
 import { ROUTE_NAMES } from './render.js';
 import { skeleton } from './skeletons.js';
@@ -199,6 +199,16 @@ export function crumbs() {
     out.push(c(team(u.params.id)?.name || 'Team', '', true));
   } else if (r === 'settings') {
     out.push(c('Settings', '', true));
+  } else if (r === 'regulations') {
+    if (u.regView === 'reader') {
+      const curAct = regulation(u.regSel || 'reg-finlex-747-2012');
+      out.push(c('Regulations', 'data-a="setRegView" data-view="library"'));
+      if (curAct) {
+        out.push(c(curAct.shortTitle || curAct.code, '', true));
+      }
+    } else {
+      out.push(c('Regulations', '', true));
+    }
   } else out.push(c(ROUTE_NAMES[r] || 'Not found', '', true));
   return out.join('<span class="sep">/</span>');
 }
