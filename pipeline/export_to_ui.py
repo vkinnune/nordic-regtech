@@ -82,12 +82,12 @@ def export():
         # If doc has preamble or no chapters, ensure a chapter exists for the preamble
         if not chapters_list and data.get("preamble"):
             chapters_list.append({
-                "number": "Säädösteksti",
+                "number": "Statutory text",
                 "title": "",
                 "sections": [{
                     "id": f"{doc_id}-preamble",
                     "number": "1 §",
-                    "heading": "Voimaantulo ja soveltaminen",
+                    "heading": "Provisions & Application",
                     "text": data.get("preamble"),
                     "crossRefs": [],
                     "status": "UNCHANGED"
