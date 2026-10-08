@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "pipeline:export": "python3 pipeline/export_to_ui.py",
+    "pipeline:test": "cd pipeline && uv run pytest"
   },
   "engines": {
     "node": ">=18"

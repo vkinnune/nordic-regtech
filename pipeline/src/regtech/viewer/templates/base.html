@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}regtech{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex gap-4 items-center">
+      <a href="/" class="font-semibold text-slate-800">regtech</a>
+      <form action="/search" class="flex-1">
+        <input name="q" value="{{ query | default('') }}" aria-label="Search"
+               placeholder="Search section text, titles and headings (penningtvätt, tvätt*)"
+               class="w-full border border-slate-300 rounded px-3 py-1.5 text-sm">
+      </form>
+    </div>
+  </header>
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    function openTarget() {
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (!target) return;
+      for (let d = target.closest("details"); d; d = d.parentElement.closest("details")) d.open = true;
+      target.scrollIntoView();
+    }
+    addEventListener("hashchange", openTarget);
+    addEventListener("DOMContentLoaded", openTarget);
+  </script>
+</body>
+</html>

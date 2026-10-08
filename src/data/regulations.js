@@ -1,6 +1,7 @@
 /* ---------- STATUTORY REGULATIONS DATA MODEL ---------- */
+import swedishRegs from './swedish_regulations.json';
 
-export const REGULATIONS = [
+const BASE_REGULATIONS = [
   {
     id: 'reg-finlex-747-2012',
     code: '747/2012',
@@ -759,6 +760,8 @@ This Act does not apply to the State Treasury, European Central Bank, Bank of Fi
     ],
   },
 ];
+
+export const REGULATIONS = [...BASE_REGULATIONS, ...swedishRegs];
 
 export function allRegulations() {
   return REGULATIONS;

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Search: {{ query }}{% endblock %}
+{% block content %}
+<h1 class="text-lg font-semibold mb-4">Results for “{{ query }}” <span class="text-slate-500 font-normal">{{ hits | length }}</span></h1>
+<ul class="space-y-3">
+  {% for hit in hits %}
+  <li class="bg-white border border-slate-200 rounded px-3 py-2">
+    <a href="/doc/{{ hit.document_id }}{% if hit.chunk_id %}#{{ hit.chunk_id }}{% endif %}"
+       class="text-blue-700 hover:underline font-medium">{{ hit.label }}</a>
+    <p class="text-sm mt-1 [&_mark]:bg-yellow-200">{{ hit.snippet | snippet }}</p>
+  </li>
+  {% else %}
+  <li class="text-slate-500">No matches.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

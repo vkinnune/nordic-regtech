@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{% for heading, documents in [("Acts and Ordinances (SFS)", sfs), ("FI regulations (FFFS)", fffs)] %}
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-2">{{ heading }} <span class="text-slate-500 font-normal">{{ documents | length }}</span></h2>
+  {% if documents %}
+  <ul class="bg-white border border-slate-200 rounded divide-y divide-slate-100">
+    {% for d in documents %}
+    <li class="px-3 py-2">
+      <a href="/doc/{{ d.id }}" class="text-blue-700 hover:underline font-medium">{{ d.identifier }}</a>
+      <span class="ml-2">{{ d.title }}</span>
+      {% if d.amends %}<span class="ml-2 text-xs text-slate-500">amends {{ d.amends }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-slate-500 text-sm">None stored yet.</p>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}
