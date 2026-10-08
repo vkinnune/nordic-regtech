@@ -297,21 +297,15 @@
   border-color: var(--border-strong);
   color: var(--text);
 }
-.finlex-attach-chip.pdf {
-  border-color: rgba(239, 68, 68, 0.35);
-  color: var(--text);
-}
-.finlex-attach-chip.pdf:hover {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.6);
-}
+.finlex-attach-chip.pdf,
 .finlex-attach-chip.memo {
-  border-color: rgba(59, 130, 246, 0.35);
+  border-color: var(--border);
   color: var(--text);
 }
+.finlex-attach-chip.pdf:hover,
 .finlex-attach-chip.memo:hover {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.6);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
 }
 
 /* Delegated Authority Strip */
@@ -600,8 +594,8 @@
 }
 
 .finlex-para.is-guidance {
-  border-left: 3px solid var(--amber, #f59e0b);
-  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid var(--amber);
+  background: var(--amber-soft);
   padding: 8px 14px;
   border-radius: 0 4px 4px 0;
 }
@@ -617,9 +611,9 @@
   margin-bottom: 6px;
 }
 .finlex-rule-badge.guidance {
-  background: var(--amber-soft, #fef3c7);
-  color: var(--amber, #b45309);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid var(--border);
 }
 .finlex-rule-badge.binding {
   background: var(--surface-3);
@@ -679,9 +673,9 @@
   border-radius: 3px;
 }
 .finlex-tag-badge.upcoming {
-  background: rgba(139, 92, 246, 0.12);
-  color: #8b5cf6;
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border-strong);
 }
 .finlex-tag-badge.past {
   background: var(--surface-3);
@@ -844,9 +838,9 @@
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .finlex-tier-badge.eu {
-  background: color-mix(in srgb, var(--blue, #3b82f6) 12%, var(--surface));
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--blue, #3b82f6) 30%, transparent);
+  background: var(--surface-3);
+  color: var(--text-2);
+  border-color: var(--border);
 }
 
 .finlex-domain-badge {
@@ -864,9 +858,9 @@
   font-weight: 600;
   padding: 1px 7px;
   border-radius: var(--r-full);
-  background: color-mix(in srgb, var(--green, #10b981) 12%, var(--surface));
-  color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--green, #10b981) 30%, transparent);
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
   display: inline-flex;
   align-items: center;
   gap: 4px;

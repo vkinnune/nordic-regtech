@@ -134,22 +134,18 @@ const SEC_BADGE_PREFIXES = [
   { prefix: 'aml-', format: p => `AML 444/2017 ${p.join(':')} §` },
 ];
 
+function formatNordicSecId(secId, prefix, label) {
+  const rest = secId.slice(prefix.length);
+  const [statute, ...parts] = rest.split('_');
+  const statuteFormatted = statute.replace('-', ':');
+  const chapSec = parts.map(p => p.replace('k', '').replace('p', '')).join(':');
+  return `${label} ${statuteFormatted} ${chapSec ? chapSec + ' §' : ''}`.trim();
+}
+
 export function formatSecBadge(secId) {
   if (!secId) return '';
-  if (secId.startsWith('riksdagen_sfs-')) {
-    const rest = secId.replace('riksdagen_sfs-', '');
-    const [statute, ...parts] = rest.split('_');
-    const statuteFormatted = statute.replace('-', ':');
-    const chapSec = parts.map(p => p.replace('k', '').replace('p', '')).join(':');
-    return `SFS ${statuteFormatted} ${chapSec ? chapSec + ' §' : ''}`.trim();
-  }
-  if (secId.startsWith('fi_fffs_fffs-')) {
-    const rest = secId.replace('fi_fffs_fffs-', '');
-    const [statute, ...parts] = rest.split('_');
-    const statuteFormatted = statute.replace('-', ':');
-    const chapSec = parts.map(p => p.replace('k', '').replace('p', '')).join(':');
-    return `FFFS ${statuteFormatted} ${chapSec ? chapSec + ' §' : ''}`.trim();
-  }
+  if (secId.startsWith('riksdagen_sfs-')) return formatNordicSecId(secId, 'riksdagen_sfs-', 'SFS');
+  if (secId.startsWith('fi_fffs_fffs-')) return formatNordicSecId(secId, 'fi_fffs_fffs-', 'FFFS');
   for (const { prefix, format } of SEC_BADGE_PREFIXES) {
     if (secId.startsWith(prefix)) {
       return format(secId.slice(prefix.length).split('-'));

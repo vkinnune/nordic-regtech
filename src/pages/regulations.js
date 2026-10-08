@@ -314,7 +314,12 @@ function renderRegulationsReader(u) {
           <!-- Act Document Header -->
           <header class="finlex-doc-head">
             <div class="finlex-doc-act-no">
-              ${esc(curAct.jurisdiction)} · ${esc(curAct.code)}${curAct.type ? ` · ${esc(curAct.type.replace('_', ' '))}` : ''}
+              <span>${esc(curAct.jurisdiction)} · ${esc(curAct.code)}${curAct.type ? ` · ${esc(curAct.type.replace('_', ' '))}` : ''}</span>
+              ${
+                curAct.ruleType === 'guidance' || (curAct.title && /allmänna råd/i.test(curAct.title))
+                  ? `<span class="finlex-rule-badge guidance">General Guidance</span>`
+                  : `<span class="finlex-rule-badge binding">Binding Rule</span>`
+              }
             </div>
             <h1 class="finlex-doc-title">${esc(curAct.shortTitle || curAct.title)}</h1>
             ${
@@ -480,13 +485,17 @@ function renderRegulationsReader(u) {
           <div class="finlex-sections-stream">
             ${
               !allSecs.length
-                ? `<div class="panel" style="margin-top:20px;padding:36px 24px;text-align:center">
-                    <div style="max-width:500px;margin:0 auto">
-                      <div style="font-size:14px;font-weight:600;margin-bottom:8px">No section provisions indexed for this rule</div>
-                      <p class="faint" style="font-size:13px;line-height:1.5;margin-bottom:16px">${esc(curAct.summary || 'This regulation is registered in the supervisory database without individual section breakdowns.')}</p>
-                      <button class="btn btn-secondary btn-sm" data-a="setRegView" data-view="library">${ic('arrow-left', 13)} Back to Regulations</button>
-                    </div>
-                  </div>`
+                ? curAct.preamble
+                  ? `<div class="finlex-unsectioned-doc" style="padding:16px 0">
+                      <div class="panel" style="padding:24px;line-height:1.6;font-size:13.5px;white-space:pre-wrap;background:var(--surface)">${esc(curAct.preamble)}</div>
+                    </div>`
+                  : `<div class="panel" style="margin-top:20px;padding:36px 24px;text-align:center">
+                      <div style="max-width:500px;margin:0 auto">
+                        <div style="font-size:14px;font-weight:600;margin-bottom:8px">No section provisions indexed for this rule</div>
+                        <p class="faint" style="font-size:13px;line-height:1.5;margin-bottom:16px">${esc(curAct.summary || 'This regulation is registered in the supervisory database without individual section breakdowns.')}</p>
+                        <button class="btn btn-secondary btn-sm" data-a="setRegView" data-view="library">${ic('arrow-left', 13)} Back to Regulations</button>
+                      </div>
+                    </div>`
                 : renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs)
             }
           </div>
@@ -620,7 +629,7 @@ function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
             .map(p => {
               const pGuidance = p.ruleType === 'guidance';
               return `<div class="finlex-para ${pGuidance ? 'is-guidance' : ''}">
-                ${isFffs ? `<span class="finlex-rule-badge ${pGuidance ? 'guidance' : 'binding'}">${pGuidance ? 'Allmänna råd · comply or explain' : 'Binding rule'}</span>` : ''}
+                ${isFffs ? `<span class="finlex-rule-badge ${pGuidance ? 'guidance' : 'binding'}">${pGuidance ? 'General Guidance · comply or explain' : 'Binding rule'}</span>` : ''}
                 ${p.text ? `<p class="finlex-para-text">${esc(p.text)}</p>` : ''}
                 ${
                   p.points && p.points.length

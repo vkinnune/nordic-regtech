@@ -216,6 +216,11 @@ export function afterRender() {
   const pal = $('#pal-in');
   if (pal && document.activeElement !== pal && !S.ui.pop) pal.focus();
   if ((S.ui.route === 'project' && S.ui.params.tab === 'timeline') || S.ui.route === 'timeline') tlAfter();
+  if (S.ui.pendingScrollSec) {
+    const targetEl = document.getElementById(`sec-${S.ui.pendingScrollSec}`);
+    if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    delete S.ui.pendingScrollSec;
+  }
 }
 /* Headline numbers count up once when a dashboard is entered. */
 export function countUp() {

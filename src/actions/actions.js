@@ -1231,20 +1231,15 @@ A.openRegInReader = el => {
   }
   if (targetSecId) {
     S.ui.regSec = targetSecId;
+    S.ui.pendingScrollSec = targetSecId;
   } else {
     delete S.ui.regSec;
+    delete S.ui.pendingScrollSec;
   }
   S.ui.regView = 'reader';
   delete S.ui.govDrawer;
   fxSet({ route: true, tabs: true });
   render();
-
-  if (targetSecId) {
-    setTimeout(() => {
-      const targetEl = document.getElementById(`sec-${targetSecId}`);
-      if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 60);
-  }
 };
 A.setRegView = el => {
   S.ui.regView = el.dataset.view || 'library';
@@ -1260,31 +1255,14 @@ A.clearRegLibFilters = () => {
   v.filters = [];
   v.q = '';
   S.ui.regLibQ = '';
-  S.ui.regLibJuris = 'all';
-  S.ui.regLibDomain = 'all';
-  S.ui.regLibTier = 'all';
-  S.ui.regLibAuth = 'all';
-  S.ui.regLibGov = 'all';
-  S.ui.regLibStatus = 'all';
-  S.ui.regLibEra = 'all';
-  S.ui.regLibSort = 'relevance';
   S.ui.pop = null;
-  fxSet({ tabs: true });
-  render();
-};
-A.removeRegLibFilter = el => {
-  const k = el.dataset.k;
-  if (!k) return;
-  if (k === 'regLibQ') S.ui.regLibQ = '';
-  else if (k === 'regLibJuris') S.ui.regLibJuris = 'all';
-  else if (k === 'regLibSort') S.ui.regLibSort = 'relevance';
-  else S.ui[k] = 'all';
   fxSet({ tabs: true });
   render();
 };
 
 A.selectSec = el => {
   S.ui.regSec = el.dataset.id;
+  S.ui.pendingScrollSec = el.dataset.id;
   render();
 };
 A.toggleRegPlain = () => {
@@ -1302,41 +1280,6 @@ IN.regQ = el => {
 
 IN.regLibQ = el => {
   S.ui.regLibQ = el.value;
-  render();
-};
-IN.regLibDomain = el => {
-  S.ui.regLibDomain = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibTier = el => {
-  S.ui.regLibTier = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibAuth = el => {
-  S.ui.regLibAuth = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibGov = el => {
-  S.ui.regLibGov = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibStatus = el => {
-  S.ui.regLibStatus = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibEra = el => {
-  S.ui.regLibEra = el.value;
-  fxSet({ tabs: true });
-  render();
-};
-IN.regLibSort = el => {
-  S.ui.regLibSort = el.value;
-  fxSet({ tabs: true });
   render();
 };
 

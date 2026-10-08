@@ -172,13 +172,23 @@ def export():
             # Check rule type and paragraphs
             paras = sec.get("paragraphs", [])
             has_guidance = any(p.get("rule_type") == "guidance" for p in paras)
+            has_binding = any(p.get("rule_type") in ("binding_rule", "binding", None) for p in paras)
+
+            if has_guidance and has_binding:
+                sec_rule_type = "mixed"
+            elif has_guidance:
+                sec_rule_type = "guidance"
+            elif has_binding:
+                sec_rule_type = "binding_rule"
+            else:
+                sec_rule_type = None
 
             sec_data = {
                 "id": sec_id,
                 "number": sec_num,
                 "heading": sec.get("heading") or "",
                 "text": sec.get("full_text") or sec.get("text") or "",
-                "ruleType": "guidance" if has_guidance else ("binding_rule" if paras else None),
+                "ruleType": sec_rule_type,
                 "crossRefs": sec_refs,
                 "status": "UNCHANGED",
             }
