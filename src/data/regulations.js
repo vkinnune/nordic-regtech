@@ -49,6 +49,61 @@ export function regulation(id) {
   return null;
 }
 
+export const FRAMEWORK_MAPPINGS = [
+  {
+    pattern: /dora|2022\/2554/i,
+    target: { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k6_p2a', view: 'reader' },
+  },
+  {
+    pattern: /aml|penningtvatt|money laundering|2017:630/i,
+    target: { regId: 'sfs-2017-630', secId: 'riksdagen_sfs-2017-630_k3_p1', view: 'reader' },
+  },
+  {
+    pattern: /mar|market abuse|2016:1306|marknadsmissbruk/i,
+    target: { regId: 'sfs-2016-1306', secId: 'riksdagen_sfs-2016-1306_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /mifid|mifir|2007:528|vardepappersmarknad|investment services/i,
+    target: { regId: 'sfs-2007-528', secId: 'riksdagen_sfs-2007-528_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /ucits|2004:46|vardepappersfonder|investeringsfond/i,
+    target: { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /\baif\b|aifm|2013:561/i,
+    target: { regId: 'sfs-2013-561', secId: 'riksdagen_sfs-2013-561_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /2004:297|bank- och finansiering|kreditinstitut|\bcrd\b|\bcrr\b|kapitaltackning|consumer credit|konsumentkredit/i,
+    target: { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /2014:968/i,
+    target: { regId: 'sfs-2014-968', secId: 'riksdagen_sfs-2014-968_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /payment|psd2|2010:751|betaltjanst/i,
+    target: { regId: 'sfs-2010-751', secId: 'riksdagen_sfs-2010-751_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /solvens|solvency|2010:2043|forsakringsrorelse/i,
+    target: { regId: 'sfs-2010-2043', secId: 'riksdagen_sfs-2010-2043_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /idd|2018:1219|forsakringsdistribution/i,
+    target: { regId: 'sfs-2018-1219', secId: 'riksdagen_sfs-2018-1219_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /iorp|2019:742|tjanstepension/i,
+    target: { regId: 'sfs-2019-742', secId: 'riksdagen_sfs-2019-742_k1_p1', view: 'reader' },
+  },
+  {
+    pattern: /sfdr|2019\/2088|taxonomy|greenwashing|sustainability|hallbarhet/i,
+    target: { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' },
+  },
+];
+
 export function resolveFrameworkToRegulation(fw) {
   if (!fw) return null;
   const f = String(fw).toLowerCase().trim();
@@ -57,71 +112,12 @@ export function resolveFrameworkToRegulation(fw) {
   const direct = regulation(fw);
   if (direct) return { regId: direct.id, view: 'reader' };
 
-  // DORA (Digital Operational Resilience Act) -> transposed via SFS 2004:297 6 kap. 2 a §
-  if (f.includes('dora') || f.includes('2022/2554')) {
-    return { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k6_p2a', view: 'reader' };
+  for (const m of FRAMEWORK_MAPPINGS) {
+    if (m.pattern.test(f)) {
+      return { ...m.target };
+    }
   }
-  // AML / Anti-Money Laundering -> Swedish AML Act SFS 2017:630 3 kap. 1 §
-  if (f.includes('aml') || f.includes('penningtvatt') || f.includes('money laundering') || f.includes('2017:630')) {
-    return { regId: 'sfs-2017-630', secId: 'riksdagen_sfs-2017-630_k3_p1', view: 'reader' };
-  }
-  // Market Abuse / MAR -> Swedish Market Abuse Penal Act SFS 2016:1306 1 kap. 1 §
-  if (f.includes('mar') || f.includes('market abuse') || f.includes('2016:1306') || f.includes('marknadsmissbruk')) {
-    return { regId: 'sfs-2016-1306', secId: 'riksdagen_sfs-2016-1306_k1_p1', view: 'reader' };
-  }
-  // MiFID / Securities Market / Investment Services -> Swedish Securities Market Act SFS 2007:528 1 kap. 1 §
-  if (f.includes('mifid') || f.includes('mifir') || f.includes('2007:528') || f.includes('vardepappersmarknad') || f.includes('investment services')) {
-    return { regId: 'sfs-2007-528', secId: 'riksdagen_sfs-2007-528_k1_p1', view: 'reader' };
-  }
-  // Funds / UCITS -> Swedish Investment Funds Act SFS 2004:46 1 kap. 1 §
-  if (f.includes('ucits') || f.includes('2004:46') || f.includes('vardepappersfonder') || f.includes('investeringsfond')) {
-    return { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' };
-  }
-  // AIFMD -> Alternative Investment Fund Managers Act SFS 2013:561 1 kap. 1 §
-  if (f.includes('aif') || f.includes('2013:561')) {
-    return { regId: 'sfs-2013-561', secId: 'riksdagen_sfs-2013-561_k1_p1', view: 'reader' };
-  }
-  // Banking / Credit Institutions / CRD / CRR / Capital Requirements
-  if (
-    f.includes('2004:297') ||
-    f.includes('bank- och finansiering') ||
-    f.includes('kreditinstitut') ||
-    f.includes('crd') ||
-    f.includes('crr') ||
-    f.includes('kapitaltackning') ||
-    f.includes('consumer credit') ||
-    f.includes('konsumentkredit')
-  ) {
-    return { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k1_p1', view: 'reader' };
-  }
-  if (f.includes('2014:968')) {
-    return { regId: 'sfs-2014-968', secId: 'riksdagen_sfs-2014-968_k1_p1', view: 'reader' };
-  }
-  // Payment Services / PSD2
-  if (f.includes('payment') || f.includes('psd2') || f.includes('2010:751') || f.includes('betaltjanst')) {
-    return { regId: 'sfs-2010-751', secId: 'riksdagen_sfs-2010-751_k1_p1', view: 'reader' };
-  }
-  // Insurance / Solvency II / IDD
-  if (f.includes('solvens') || f.includes('solvency') || f.includes('2010:2043') || f.includes('forsakringsrorelse')) {
-    return { regId: 'sfs-2010-2043', secId: 'riksdagen_sfs-2010-2043_k1_p1', view: 'reader' };
-  }
-  if (f.includes('idd') || f.includes('2018:1219') || f.includes('forsakringsdistribution')) {
-    return { regId: 'sfs-2018-1219', secId: 'riksdagen_sfs-2018-1219_k1_p1', view: 'reader' };
-  }
-  if (f.includes('iorp') || f.includes('2019:742') || f.includes('tjanstepension')) {
-    return { regId: 'sfs-2019-742', secId: 'riksdagen_sfs-2019-742_k1_p1', view: 'reader' };
-  }
-  // SFDR / Sustainability / ESG / Taxonomy -> SFS 2004:46 1 kap. 1 §
-  if (
-    f.includes('sfdr') ||
-    f.includes('2019/2088') ||
-    f.includes('taxonomy') ||
-    f.includes('greenwashing') ||
-    f.includes('sustainability') ||
-    f.includes('hallbarhet')
-  ) {
-    return { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' };
-  }
+
   // FFFS regulation code matching (e.g. "FFFS 2014:12" or "FFFS 2019:21")
   const fffsMatch = f.match(/fffs\s*(\d{4}):(\d+)/i);
   if (fffsMatch) {

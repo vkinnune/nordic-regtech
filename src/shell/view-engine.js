@@ -114,9 +114,6 @@ export function viewOf(key) {
       colW: {},
       showDone: true,
     };
-  if (key === 'regulations' && S.views[key].filters) {
-    S.views[key].filters = S.views[key].filters.filter(f => f.f !== 'jurisdiction');
-  }
   return S.views[key];
 }
 export function matchF(t, f) {
@@ -288,14 +285,10 @@ export function matchRegFilter(item, f) {
   return f.op === 'not' ? !hit : hit;
 }
 
-export function applyRegView(decorated, v, juris = 'all') {
+export function applyRegView(decorated, v, auth = 'all') {
   let out = decorated;
-  if (juris && juris !== 'all') {
-    out = out.filter(item => {
-      if (juris === 'fi') return item.regAuth === 'fi';
-      if (juris === 'riksdagen') return item.regAuth === 'riksdagen';
-      return true;
-    });
+  if (auth && auth !== 'all') {
+    out = out.filter(item => item.regAuth === auth);
   }
   if (v.filters && v.filters.length) {
     const activeFilters = v.filters.filter(f => f.f !== 'jurisdiction');
@@ -343,7 +336,7 @@ export function sortRegulations(items, s = { f: 'relevance', dir: 1 }) {
         let sc = 0;
         if (item.linkedControlsCount > 0 || item.linkedPoliciesCount > 0) sc += 10000;
         if (item.hasAmended) sc += 2000;
-        if (item.regTier === 'act' || item.regTier === 'eu') sc += 1000;
+        if (item.regTier === 'act') sc += 1000;
         else if (item.regTier === 'ordinance') sc += 400;
         if (!item.isRepeal) sc += 200;
         sc += item.year;

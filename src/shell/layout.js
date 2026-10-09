@@ -108,7 +108,7 @@ export function renderSidebar() {
       ${u.collapsed ? `<button class="sitem" data-a="toggleSide" data-tip="Expand sidebar" data-tip-pos="right" aria-label="Expand sidebar">${ic('panel-left', 16)}</button>` : ''}
       ${sItem('home', 'Home', 'house')}
       ${sItem('inbox', 'Inbox', 'inbox', { ct: unreadInbox || '', dot: true })}
-      ${sItem('mytasks', 'My Tasks', 'circle-check', { ct: myOpen || '' })}
+      ${sItem('mytasks', 'Assigned', 'circle-check', { ct: myOpen || '' })}
       ${sItem('favorites', 'Favorites', 'star')}
       ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">

@@ -175,14 +175,27 @@ test('Regulations UI & View Engine: Swedish authority segmentation and ZERO Finn
   assert.ok(regPageJs.includes('Swedish acts & FFFS circulars'), 'Must have Swedish acts metric label');
   assert.ok(regPageJs.includes('Finansinspektionen (${fffsCount})'), 'Must have Finansinspektionen segment tab');
   assert.ok(regPageJs.includes('Riksdagen Acts (${sfsCount})'), 'Must have Riksdagen Acts segment tab');
+  assert.ok(regPageJs.includes('data-k="regLibAuth"'), 'Must use regLibAuth data-k attribute on segment buttons');
   assert.ok(!regPageJs.includes('>Finland</button>'), 'Must not have Finland segment button');
   assert.ok(!regPageJs.includes('>European Union</button>'), 'Must not have European Union segment button');
 
   // Verify view-engine has no legacy jurisdiction field in REG_FIELDS
   assert.ok(!viewEngineJs.includes('jurisdiction: {'), 'view-engine.js must not define jurisdiction in REG_FIELDS');
-  assert.ok(viewEngineJs.includes("f.f !== 'jurisdiction'"), 'view-engine.js must sanitize legacy jurisdiction filters in viewOf');
+  assert.ok(viewEngineJs.includes("f.f !== 'jurisdiction'"), 'view-engine.js must sanitize legacy jurisdiction filters');
 
   // Verify store version bump and cache sanitization
   assert.ok(storeJs.includes("STORE_KEY = 'regtech.studio.v8'"), 'store.js must be bumped to v8');
   assert.ok(storeJs.includes('regtech.studio.v7'), 'store.js must purge legacy v7 cache');
+
+  // Verify English naming and single-word sidemenu label standards
+  const constantsJs = fs.readFileSync(path.join(ROOT, 'src/core/constants.js'), 'utf-8');
+  const layoutJs = fs.readFileSync(path.join(ROOT, 'src/shell/layout.js'), 'utf-8');
+  const renderJs = fs.readFileSync(path.join(ROOT, 'src/shell/render.js'), 'utf-8');
+  const regJs = fs.readFileSync(path.join(ROOT, 'src/data/regulations.js'), 'utf-8');
+
+  assert.ok(constantsJs.includes("name: 'Swedish Parliament'"), 'constants.js must use Swedish Parliament');
+  assert.ok(!constantsJs.includes("'Sveriges Riksdag'"), 'constants.js must not contain Sveriges Riksdag');
+  assert.ok(layoutJs.includes("sItem('mytasks', 'Assigned'"), 'layout.js must use single-word Assigned label');
+  assert.ok(renderJs.includes("mytasks: 'Assigned'"), 'render.js must use single-word Assigned label');
+  assert.ok(regJs.includes('export const FRAMEWORK_MAPPINGS'), 'regulations.js must export FRAMEWORK_MAPPINGS');
 });

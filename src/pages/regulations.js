@@ -42,7 +42,7 @@ export function pageRegulations() {
    ============================================================ */
 function renderRegulationsLibrary(u) {
   const v = viewOf('regulations');
-  const juris = u.regLibJuris || 'all'; // 'all', 'fi', 'se', 'eu'
+  const auth = u.regLibAuth || u.regLibJuris || 'all'; // 'all', 'fi', 'riksdagen'
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
   const policies = allPolicies();
@@ -90,7 +90,7 @@ function renderRegulationsLibrary(u) {
     };
   });
 
-  const filtered = applyRegView(decorated, v, juris);
+  const filtered = applyRegView(decorated, v, auth);
 
   let body;
   if (!allActs.length) {
@@ -108,8 +108,8 @@ function renderRegulationsLibrary(u) {
     body = renderRegulationsGrid(filtered);
   }
 
-  const fffsCount = allActs.filter(r => (r.authority || '').toLowerCase().includes('finansinspektionen') || (r.code && r.code.startsWith('FFFS'))).length;
-  const sfsCount = allActs.filter(r => (r.authority || '').toLowerCase().includes('riksdagen') || (r.code && r.code.startsWith('SFS'))).length;
+  const fffsCount = allActs.filter(r => getRegulationAuthority(r) === 'fi').length;
+  const sfsCount = allActs.filter(r => getRegulationAuthority(r) === 'riksdagen').length;
 
   const extra = `<div class="seg" role="tablist">
     <button class="${layout !== 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="grid" title="Cards view">${ic('layout-grid', 13)}<span class="hide-m">Cards</span></button>
@@ -117,9 +117,9 @@ function renderRegulationsLibrary(u) {
   </div>`;
 
   const right = `<div class="seg" role="tablist">
-    <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="all">All (${allActs.length})</button>
-    <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finansinspektionen (${fffsCount})</button>
-    <button class="${juris === 'riksdagen' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="riksdagen">Riksdagen Acts (${sfsCount})</button>
+    <button class="${auth === 'all' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="all">All (${allActs.length})</button>
+    <button class="${auth === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="fi">Finansinspektionen (${fffsCount})</button>
+    <button class="${auth === 'riksdagen' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="riksdagen">Riksdagen Acts (${sfsCount})</button>
   </div>`;
 
   return `<div class="page wide">

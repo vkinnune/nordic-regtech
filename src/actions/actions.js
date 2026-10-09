@@ -1273,14 +1273,11 @@ A.openRegFromFramework = el => {
     }
     S.ui.regView = 'reader';
   } else {
-    // Open library view filtered by domain or search query
+    // Open library view filtered by search query
     S.ui.regView = 'library';
-    if (!S.ui.regFilter) S.ui.regFilter = {};
-    if (res.domain) {
-      S.ui.regFilter.domain = res.domain;
-    }
     if (res.query) {
-      S.ui.regSearch = res.query;
+      viewOf('regulations').q = res.query;
+      S.ui.regLibQ = res.query;
     }
     delete S.ui.regSec;
     delete S.ui.pendingScrollSec;
@@ -1290,7 +1287,6 @@ A.openRegFromFramework = el => {
   fxSet({ route: true, tabs: true });
   render();
 };
-A.openFrameworkReg = A.openRegFromFramework;
 A.setRegView = el => {
   S.ui.regView = el.dataset.view || 'library';
   fxSet({ route: true, tabs: true });

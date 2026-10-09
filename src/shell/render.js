@@ -15,7 +15,7 @@ import { renderAuth } from '../pages/auth.js';
 export const ROUTE_NAMES = {
   home: 'Home',
   inbox: 'Inbox',
-  mytasks: 'My Tasks',
+  mytasks: 'Assigned',
   favorites: 'Favorites',
   notifications: 'Notifications',
   search: 'Search',

@@ -22,7 +22,7 @@ export const LABELS = [
   { id: 'risk', name: 'Risk & Liquidity', c: 'var(--amber)' },
   { id: 'sfs528', name: 'SFS 2007:528', c: 'var(--teal)' },
   { id: 'fi', name: 'Finansinspektionen', c: 'var(--orange)' },
-  { id: 'riksdagen', name: 'Sveriges Riksdag', c: 'var(--indigo)' },
+  { id: 'riksdagen', name: 'Swedish Parliament', c: 'var(--indigo)' },
 ];
 export const LB = Object.fromEntries(LABELS.map(l => [l.id, l]));
 export const PSTAT = {
