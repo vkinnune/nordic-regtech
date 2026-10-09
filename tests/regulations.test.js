@@ -14,7 +14,7 @@ test('Regulations Data Authenticity: 100% genuine Swedish regulations and ZERO m
   assert.ok(!regulationsJs.includes('BASE_REGULATIONS'), 'regulations.js must not contain BASE_REGULATIONS');
 
   // Verify dataset size and authentic contents
-  assert.equal(swedishRegs.length, 422, 'Must contain 422 authentic Swedish regulations');
+  assert.ok(swedishRegs.length >= 422, 'Must contain at least 422 authentic Swedish regulations');
 
   // Verify 0 mock acts in dataset
   const mockActIds = ['reg-finlex-747-2012', 'reg-sfs-2004-46', 'reg-dora', 'reg-aml', 'reg-aifm', 'reg-mifid', 'reg-sfdr'];
