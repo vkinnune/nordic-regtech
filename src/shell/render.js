@@ -20,7 +20,7 @@ export const ROUTE_NAMES = {
   notifications: 'Notifications',
   search: 'Search',
   overview: 'Overview',
-  feed: 'Regulatory Feed',
+  feed: 'Feed',
   regulations: 'Regulations',
   policies: 'Policies',
   controls: 'Controls',

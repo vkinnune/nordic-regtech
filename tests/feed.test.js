@@ -27,14 +27,14 @@ test('Regulatory Feed Shell & Router: navigation and route registration', () => 
   const renderJs = fs.readFileSync(path.join(ROOT, 'src/shell/render.js'), 'utf-8');
 
   // Route registration
-  assert.ok(renderJs.includes("feed: 'Regulatory Feed'"), 'render.js must register feed route name');
+  assert.ok(renderJs.includes("feed: 'Feed'"), 'render.js must register feed route name');
   assert.ok(renderJs.includes("feed: 'newspaper'") || renderJs.includes("feed: 'rss'"), 'render.js must register feed route icon');
 
   // Page handler
   assert.ok(layoutJs.includes('feed: pageFeed'), 'layout.js must map feed route to pageFeed');
 
   // Sidebar item
-  assert.ok(layoutJs.includes("sItem('feed', 'Regulatory Feed'"), 'layout.js sidebar must contain Regulatory Feed item');
+  assert.ok(layoutJs.includes("sItem('feed', 'Feed'"), 'layout.js sidebar must contain Feed item');
 });
 
 test('Regulatory Feed Actions: drawer, task creation, and filtering', () => {

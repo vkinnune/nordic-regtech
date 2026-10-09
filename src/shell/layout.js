@@ -112,8 +112,8 @@ export function renderSidebar() {
       ${sItem('favorites', 'Favorites', 'star')}
       ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">
-        <div class="sgroup-h">Regulations & Governance</div>
-        ${sItem('feed', 'Regulatory Feed', 'newspaper')}
+        <div class="sgroup-h">Governance</div>
+        ${sItem('feed', 'Feed', 'newspaper')}
         ${sItem('regulations', 'Regulations', 'scale')}
         ${sItem('policies', 'Policies', 'file-text')}
         ${sItem('controls', 'Controls', 'shield-check')}
