@@ -8,14 +8,6 @@ import {
   allRegulations,
   allSectionsOf,
   regulation,
-  policiesForSection,
-  controlsForSection,
-  risksForSection,
-  allPolicies,
-  allControls,
-  allRisks,
-  isControlImpacted,
-  isPolicyImpacted,
   isSectionAmended,
   getRegulationYear,
   getRegulationDomain,
@@ -45,18 +37,10 @@ function renderRegulationsLibrary(u) {
   const auth = u.regLibAuth || 'all'; // 'all', 'fi', 'riksdagen'
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
-  const policies = allPolicies();
-  const controls = allControls();
-  const risks = allRisks();
-
-  const polSecSet = new Set(policies.flatMap(p => p.statuteSections || []));
-  const ctlSecSet = new Set(controls.flatMap(c => c.statuteSections || []));
-  const rskSecSet = new Set(risks.flatMap(r => r.statuteSections || []));
-
   const allActs = allRegulations();
   const totalSections = allActs.reduce((sum, a) => sum + allSectionsOf(a).length, 0);
-  const totalPoliciesCount = policies.length;
-  const totalControlsCount = controls.length;
+  const fffsCount = allActs.filter(r => getRegulationAuthority(r) === 'fi').length;
+  const sfsCount = allActs.filter(r => getRegulationAuthority(r) === 'riksdagen').length;
 
   // Decorate all acts with precomputed metadata for fast multi-dimensional evaluation
   const decorated = allActs.map(r => {
@@ -66,12 +50,7 @@ function renderRegulationsLibrary(u) {
     const regTier = getRegulationTier(r);
     const regAuth = getRegulationAuthority(r);
     const isRepeal = isRegulationRepeal(r);
-    const hasLinkedPolicies = secs.some(s => polSecSet.has(s.id));
-    const hasLinkedControls = secs.some(s => ctlSecSet.has(s.id));
-    const hasLinkedRisks = secs.some(s => rskSecSet.has(s.id));
     const hasAmended = secs.some(isSectionAmended);
-    const linkedControlsCount = secs.reduce((acc, s) => acc + controlsForSection(s.id).length, 0);
-    const linkedPoliciesCount = secs.reduce((acc, s) => acc + policiesForSection(s.id).length, 0);
 
     return {
       r,
@@ -81,12 +60,7 @@ function renderRegulationsLibrary(u) {
       regTier,
       regAuth,
       isRepeal,
-      hasLinkedPolicies,
-      hasLinkedControls,
-      hasLinkedRisks,
       hasAmended,
-      linkedControlsCount,
-      linkedPoliciesCount,
     };
   });
 
@@ -107,9 +81,6 @@ function renderRegulationsLibrary(u) {
   } else {
     body = renderRegulationsGrid(filtered);
   }
-
-  const fffsCount = allActs.filter(r => getRegulationAuthority(r) === 'fi').length;
-  const sfsCount = allActs.filter(r => getRegulationAuthority(r) === 'riksdagen').length;
 
   const extra = `<div class="seg" role="tablist">
     <button class="${layout !== 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="grid" title="Cards view">${ic('layout-grid', 13)}<span class="hide-m">Cards</span></button>
@@ -133,8 +104,8 @@ function renderRegulationsLibrary(u) {
     <div class="stats" style="margin-bottom:16px">
       <div class="stat"><span class="k">Statutes</span><span class="v">${allActs.length}</span><span class="d">Swedish acts & FFFS circulars</span></div>
       <div class="stat"><span class="k">Statutory Sections</span><span class="v">${totalSections}</span><span class="d">indexed legal provisions</span></div>
-      <div class="stat"><span class="k">Governing Policies</span><span class="v">${totalPoliciesCount}</span><span class="d">linked compliance standards</span></div>
-      <div class="stat"><span class="k">Enforcing Controls</span><span class="v">${totalControlsCount}</span><span class="d">operational safeguards</span></div>
+      <div class="stat"><span class="k">Acts & Ordinances</span><span class="v">${sfsCount}</span><span class="d">Parliamentary SFS statutes</span></div>
+      <div class="stat"><span class="k">Supervisory Rules</span><span class="v">${fffsCount}</span><span class="d">Finansinspektionen FFFS circulars</span></div>
     </div>
 
     ${viewToolbar('regulations', {
@@ -152,7 +123,7 @@ function renderRegulationsGrid(decoratedActs) {
   return `<div class="finlex-lib-grid">
     ${decoratedActs
       .map(item => {
-        const { r, secs, year, regDomain, regTier, isRepeal, hasAmended, linkedControlsCount, linkedPoliciesCount } = item;
+        const { r, secs, year, regDomain, regTier, isRepeal, hasAmended } = item;
         const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
         const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
         const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
@@ -184,8 +155,6 @@ function renderRegulationsGrid(decoratedActs) {
           <span>${secs.length} sections</span>
           ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
           ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber);border-color:var(--amber)">Amended</span>` : ''}
-          ${linkedControlsCount ? `<span class="finlex-gov-badge" title="${linkedControlsCount} linked controls">${ic('shield-check', 11)} ${linkedControlsCount} ${linkedControlsCount === 1 ? 'control' : 'controls'}</span>` : ''}
-          ${linkedPoliciesCount ? `<span class="finlex-gov-badge" title="${linkedPoliciesCount} linked policies">${ic('file-text', 11)} ${linkedPoliciesCount} ${linkedPoliciesCount === 1 ? 'policy' : 'policies'}</span>` : ''}
         </div>
 
         ${
@@ -215,14 +184,14 @@ function renderRegulationsList(decoratedActs) {
           <th>Legal Tier</th>
           <th>Authority</th>
           <th>In Force</th>
-          <th>Governance</th>
+          <th>Status</th>
           <th>Sections</th>
         </tr>
       </thead>
       <tbody>
         ${decoratedActs
           .map(item => {
-            const { r, secs, year, regDomain, regTier, isRepeal, hasAmended, linkedControlsCount, linkedPoliciesCount } = item;
+            const { r, secs, year, regDomain, regTier, isRepeal, hasAmended } = item;
             const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
             const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
             const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
@@ -241,11 +210,8 @@ function renderRegulationsList(decoratedActs) {
             <td><span class="mono faint" style="font-size:11.5px">${year || esc(r.inForce || 'In force')}</span></td>
             <td>
               <div class="row" style="gap:4px;align-items:center">
-                ${linkedControlsCount ? `<span class="finlex-gov-badge">${ic('shield-check', 11)} ${linkedControlsCount}</span>` : ''}
-                ${linkedPoliciesCount ? `<span class="finlex-gov-badge">${ic('file-text', 11)} ${linkedPoliciesCount}</span>` : ''}
                 ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber)">Amended</span>` : ''}
-                ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
-                ${!linkedControlsCount && !linkedPoliciesCount && !hasAmended && !isRepeal ? `<span class="faint" style="font-size:12px">—</span>` : ''}
+                ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : `<span class="pill" style="font-size:10px;background:var(--surface-3);color:var(--text-2)">In force</span>`}
               </div>
             </td>
             <td><span style="font-size:12px">${secs.length}</span></td>
@@ -682,9 +648,6 @@ function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
         : `<div class="finlex-body">${formatFinlexBody(textToShow, s.status)}</div>`
     }
 
-    <!-- GOVERNANCE & CONTROLS STRIP -->
-    ${renderSectionGovernanceStrip(s)}
-
     <!-- OUTGOING CITATIONS -->
     ${
       s.crossRefs && s.crossRefs.length
@@ -734,57 +697,6 @@ function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
         : ''
     }
   </article>`;
-}
-
-function renderSectionGovernanceStrip(s) {
-  const pols = policiesForSection(s.id);
-  const ctls = controlsForSection(s.id);
-  const rsks = risksForSection(s.id);
-
-  if (!pols.length && !ctls.length && !rsks.length && s.status !== 'MODIFIED' && s.status !== 'ADDED') return '';
-
-  return `<div class="finlex-gov-strip">
-    <div class="finlex-gov-row">
-      <span class="finlex-gov-label">${ic('shield', 12)} Governance & Controls:</span>
-      <div class="finlex-gov-chips">
-        ${pols
-          .map(
-            p => `
-          <button class="finlex-gov-chip ${isPolicyImpacted(p) ? 'alert' : ''}" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" title="Open policy ${esc(p.code)}: ${esc(p.title)}">
-            ${ic('file-text', 11)}
-            <span class="mono">${esc(p.code)}</span>
-          </button>
-        `,
-          )
-          .join('')}
-        ${ctls
-          .map(c => {
-            const impacted = isControlImpacted(c);
-            return `
-          <button class="finlex-gov-chip ${impacted ? 'alert' : ''}" data-a="openGovDrawer" data-type="control" data-id="${c.id}" title="Open control ${esc(c.code)}: ${esc(c.title)}">
-            ${impacted ? ic('alert-triangle', 11) : ic('check', 11)}
-            <span class="mono">${esc(c.code)}</span>
-          </button>
-        `;
-          })
-          .join('')}
-        ${rsks
-          .map(
-            r => `
-          <button class="finlex-gov-chip" data-a="openGovDrawer" data-type="risk" data-id="${r.id}" title="Regulatory risk: ${esc(r.title)}">
-            ${ic('alert-octagon', 11)}
-            <span class="mono">${esc(r.code)}</span>
-          </button>
-        `,
-          )
-          .join('')}
-        <button class="finlex-gov-chip faint" data-a="pop" data-pop="linkControl" data-sec="${s.id}" title="Link control">
-          ${ic('plus', 11)}
-          <span>Link</span>
-        </button>
-      </div>
-    </div>
-  </div>`;
 }
 
 function formatFinlexBody(rawText, status) {

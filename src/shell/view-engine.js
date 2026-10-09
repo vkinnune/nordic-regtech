@@ -14,7 +14,6 @@ import {
   REGULATION_DOMAINS,
   REGULATION_TIERS,
   REGULATION_AUTHORITIES,
-  REGULATION_GOV_SCOPES,
   REGULATION_STATUSES,
   REGULATION_ERAS,
 } from '../core/store.js';
@@ -86,11 +85,6 @@ export const REG_FIELDS = {
     icon: 'landmark',
     opts: () => REGULATION_AUTHORITIES.filter(a => a.id !== 'all').map(a => ({ id: a.id, name: a.label })),
   },
-  gov: {
-    name: 'Governance',
-    icon: 'shield-check',
-    opts: () => REGULATION_GOV_SCOPES.filter(g => g.id !== 'all').map(g => ({ id: g.id, name: g.label })),
-  },
   status: {
     name: 'Status',
     icon: 'file-check',
@@ -114,6 +108,10 @@ export function viewOf(key) {
       colW: {},
       showDone: true,
     };
+  // Sanitize legacy filters
+  if (S.views[key].filters) {
+    S.views[key].filters = S.views[key].filters.filter(f => f.f !== 'jurisdiction' && f.f !== 'gov');
+  }
   return S.views[key];
 }
 export function matchF(t, f) {
@@ -259,18 +257,11 @@ export function matchRegFilter(item, f) {
     hit = f.v.includes(item.regTier);
   } else if (f.f === 'authority') {
     hit = f.v.includes(item.regAuth);
-  } else if (f.f === 'gov') {
-    hit = f.v.some(val => {
-      if (val === 'controls') return item.hasLinkedControls;
-      if (val === 'policies') return item.hasLinkedPolicies;
-      if (val === 'any_gov') return item.hasLinkedControls || item.hasLinkedPolicies || item.hasLinkedRisks;
-      if (val === 'amended') return item.hasAmended;
-      return false;
-    });
   } else if (f.f === 'status') {
     hit = f.v.some(val => {
       if (val === 'substantive') return !item.isRepeal;
       if (val === 'repeal') return item.isRepeal;
+      if (val === 'amended') return item.hasAmended;
       return false;
     });
   } else if (f.f === 'era') {
@@ -291,7 +282,7 @@ export function applyRegView(decorated, v, auth = 'all') {
     out = out.filter(item => item.regAuth === auth);
   }
   if (v.filters && v.filters.length) {
-    const activeFilters = v.filters.filter(f => f.f !== 'jurisdiction');
+    const activeFilters = v.filters.filter(f => f.f !== 'jurisdiction' && f.f !== 'gov');
     if (activeFilters.length) {
       out = out.filter(item => activeFilters.every(f => matchRegFilter(item, f)));
     }
@@ -334,7 +325,6 @@ export function sortRegulations(items, s = { f: 'relevance', dir: 1 }) {
       // relevance
       const score = item => {
         let sc = 0;
-        if (item.linkedControlsCount > 0 || item.linkedPoliciesCount > 0) sc += 10000;
         if (item.hasAmended) sc += 2000;
         if (item.regTier === 'act') sc += 1000;
         else if (item.regTier === 'ordinance') sc += 400;

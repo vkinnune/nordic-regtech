@@ -228,3 +228,36 @@ test('Complete Purge of rss-mapper-poc: strictly 100% regtech Swedish law datase
   assert.ok(!seedJs.includes("'Penningtvätt'"), 'seed.js must not contain Swedish search terms');
   assert.ok(!regPageJs.includes('regLibJuris'), 'regulations.js must not contain obsolete regLibJuris fallback');
 });
+
+test('Regulations Feature: Zero mock controls or policies in header, cards, list, or reader', () => {
+  const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
+  const viewEngineJs = fs.readFileSync(path.join(ROOT, 'src/shell/view-engine.js'), 'utf-8');
+  const regJs = fs.readFileSync(path.join(ROOT, 'src/data/regulations.js'), 'utf-8');
+  const storeJs = fs.readFileSync(path.join(ROOT, 'src/core/store.js'), 'utf-8');
+
+  // Must not have mock stats in header
+  assert.ok(!regPageJs.includes('Governing Policies'), 'regulations.js must not display Governing Policies stat');
+  assert.ok(!regPageJs.includes('Enforcing Controls'), 'regulations.js must not display Enforcing Controls stat');
+  assert.ok(!regPageJs.includes('linked compliance standards'), 'regulations.js must not display linked compliance standards');
+  assert.ok(!regPageJs.includes('operational safeguards'), 'regulations.js must not display operational safeguards');
+
+  // Must have authentic statutory breakdown
+  assert.ok(regPageJs.includes('Acts & Ordinances'), 'regulations.js must display Acts & Ordinances metric');
+  assert.ok(regPageJs.includes('Supervisory Rules'), 'regulations.js must display Supervisory Rules metric');
+
+  // Must not decorate cards or table with mock governance badges
+  assert.ok(!regPageJs.includes('finlex-gov-badge'), 'regulations.js must not render finlex-gov-badge');
+  assert.ok(!regPageJs.includes('linkedControlsCount'), 'regulations.js must not reference linkedControlsCount');
+  assert.ok(!regPageJs.includes('linkedPoliciesCount'), 'regulations.js must not reference linkedPoliciesCount');
+
+  // Must not render section governance strip in reader
+  assert.ok(!regPageJs.includes('renderSectionGovernanceStrip'), 'regulations.js must not call or define renderSectionGovernanceStrip');
+  assert.ok(!regPageJs.includes('finlex-gov-strip'), 'regulations.js must not render finlex-gov-strip');
+
+  // Must not have mock sort boost or gov filter
+  assert.ok(!viewEngineJs.includes('item.linkedControlsCount'), 'view-engine.js must not boost linkedControlsCount');
+  assert.ok(!viewEngineJs.includes('REGULATION_GOV_SCOPES'), 'view-engine.js must not reference REGULATION_GOV_SCOPES');
+  assert.ok(!storeJs.includes('REGULATION_GOV_SCOPES'), 'store.js must not export REGULATION_GOV_SCOPES');
+  assert.ok(!regJs.includes('REGULATION_GOV_SCOPES'), 'regulations.js must not define REGULATION_GOV_SCOPES');
+  assert.ok(regJs.includes("label: 'Relevance'"), 'regulations.js must use clean Relevance sort label');
+});

@@ -175,17 +175,10 @@ export const REGULATION_AUTHORITIES = [
   { id: 'riksdagen', label: 'Riksdagen / Parliament' },
 ];
 
-export const REGULATION_GOV_SCOPES = [
-  { id: 'all', label: 'All Governance Scopes' },
-  { id: 'controls', label: 'With Linked Controls' },
-  { id: 'policies', label: 'With Linked Policies' },
-  { id: 'any_gov', label: 'Any Governance Links' },
-  { id: 'amended', label: 'Amended / Needs Review' },
-];
-
 export const REGULATION_STATUSES = [
   { id: 'all', label: 'All Rules' },
   { id: 'substantive', label: 'Substantive Rules Only' },
+  { id: 'amended', label: 'Amended Statutes' },
   { id: 'repeal', label: 'Repeal Notices Only' },
 ];
 
@@ -198,7 +191,7 @@ export const REGULATION_ERAS = [
 ];
 
 export const REGULATION_SORTS = [
-  { id: 'relevance', label: 'Relevance & Governance' },
+  { id: 'relevance', label: 'Relevance' },
   { id: 'year_desc', label: 'Year: Newest First' },
   { id: 'year_asc', label: 'Year: Oldest First' },
   { id: 'title_asc', label: 'Title & Code (A–Z)' },
