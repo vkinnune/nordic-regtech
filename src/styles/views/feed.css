@@ -40,8 +40,8 @@
 /* Feed Cards Grid */
 .feed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
   margin-top: 4px;
 }
 
@@ -57,15 +57,15 @@
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 16px 18px;
   transition:
     border-color 0.15s ease,
-    box-shadow 0.15s ease;
+    background 0.15s ease;
 }
 
 .feed-card:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface-2);
 }
 
 /* Card Header */
@@ -74,38 +74,52 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  font-size: 12px;
 }
 
-.feed-card-auth {
+.feed-card-source {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 6px;
+  color: var(--text-2);
+}
+
+.feed-flag {
+  font-size: 13px;
+}
+
+.feed-auth-name {
+  font-weight: 600;
   color: var(--text);
+  font-size: 12px;
 }
 
-.feed-jur-pill {
-  font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 3px;
-  letter-spacing: 0.04em;
-}
-
-.feed-card-time {
-  font-size: 11.5px;
+.feed-sep {
   color: var(--text-3);
+  font-size: 11px;
+}
+
+.feed-time {
+  color: var(--text-3);
+  font-size: 11.5px;
+}
+
+.feed-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Impact Score Badges */
 .feed-score-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   padding: 2px 7px;
   border-radius: 4px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   font-family: var(--font-mono);
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -129,7 +143,7 @@
 .feed-score-4 {
   background: var(--surface-2);
   color: var(--text);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
 }
 
 .feed-score-3 {
@@ -140,7 +154,7 @@
 
 .feed-score-2 {
   background: var(--surface-1);
-  color: var(--text-2);
+  color: var(--text-3);
   border: 1px solid var(--border);
 }
 
@@ -151,20 +165,72 @@
 }
 
 /* Card Body */
+.feed-card-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin: 0 0 8px;
+  cursor: pointer;
+}
+
+.feed-card-title:hover {
+  text-decoration: underline;
+}
+
+.feed-card-summary {
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Context / Metadata Line */
+.feed-card-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
 .feed-cat-pill {
   font-size: 10.5px;
   padding: 2px 6px;
   color: var(--text-2);
+  background: var(--surface-2);
+}
+
+.feed-statute-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 7px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.1s ease;
+}
+
+.feed-statute-pill:hover {
+  border-color: var(--border-strong);
 }
 
 .feed-fw-pill {
   font-size: 10px;
-  padding: 1px 5px;
+  padding: 2px 6px;
   background: var(--surface-2);
   color: var(--text-2);
   border: 1px solid var(--border);
   border-radius: 3px;
-  max-width: 170px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -184,98 +250,36 @@
   border-color: var(--blue);
 }
 
-.feed-card-title {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.4;
-  margin: 0 0 4px;
-  cursor: pointer;
-}
-
-.feed-card-title:hover {
-  text-decoration: underline;
-}
-
-.feed-card-orig {
-  font-size: 11.5px;
-  color: var(--text-3);
-  font-style: italic;
-  margin-bottom: 8px;
-  line-height: 1.35;
-}
-
-.feed-card-summary {
-  font-size: 12.5px;
-  color: var(--text-2);
-  line-height: 1.5;
-  margin: 0 0 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.feed-card-why {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--text);
-  background: var(--surface-2);
-  border-left: 3px solid var(--border-strong);
-  border-radius: 0 4px 4px 0;
-  padding: 7px 10px;
-  margin-bottom: 12px;
-}
-
-.feed-card-statute {
-  margin-bottom: 10px;
-}
-
-.feed-statute-btn {
-  display: inline-flex;
+/* Card Footer */
+.feed-card-footer {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text);
-  cursor: pointer;
-  transition:
-    background 0.1s ease,
-    border-color 0.1s ease;
-}
-
-.feed-statute-btn:hover {
-  background: var(--surface-3);
-  border-color: var(--border-strong);
-}
-
-.feed-card-gov-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.feed-card-gov-chips .pill {
-  font-size: 10.5px;
-  padding: 2px 6px;
-}
-
-/* Card Actions */
-.feed-card-actions {
-  display: flex;
-  gap: 6px;
+  justify-content: space-between;
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid var(--divider);
 }
 
-.feed-card-actions .btn {
+.feed-inspect-btn {
+  font-size: 11.5px;
+  padding: 3px 6px;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-inspect-btn:hover {
+  color: var(--text);
+}
+
+.feed-card-acts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.feed-card-acts .btn {
   font-size: 11.5px;
   padding: 3px 8px;
 }

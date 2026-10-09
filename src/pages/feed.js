@@ -154,10 +154,10 @@ export function pageFeed() {
     </div>
 
     <!-- Toolbar -->
-    <div class="row feed-toolbar" style="margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <div class="inwrap" style="flex:1;min-width:240px;max-width:340px">
+    <div class="row feed-toolbar" style="margin-bottom:14px;flex-wrap:wrap;gap:8px;align-items:center">
+      <div class="inwrap" style="flex:1;min-width:240px;max-width:320px">
         ${ic('search', 13)}
-        <input class="input search-sm" id="feed-q" data-in="feedQ" placeholder="Search updates, authorities, statutes or tags..." value="${esc(u.feedQ || '')}" aria-label="Search regulatory feed">
+        <input class="input search-sm" id="feed-q" data-in="feedQ" placeholder="Search updates, authorities, statutes..." value="${esc(u.feedQ || '')}" aria-label="Search regulatory feed">
         ${u.feedQ ? `<button class="pillbtn" data-a="set" data-k="feedQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
       </div>
 
@@ -169,14 +169,15 @@ export function pageFeed() {
         <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="feedJuris" data-v="eu">🇪🇺 EU (${euCount})</button>
       </div>
 
-      <!-- Impact Score Filter -->
-      <div class="seg" role="tablist">
-        <button class="${scoreFilter === 'all' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="all">All Scores</button>
-        <button class="${scoreFilter === '5' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="5">Critical (5)</button>
-        <button class="${scoreFilter === '4' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="4">High (4+)</button>
-        <button class="${scoreFilter === '3' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="3">Moderate (3+)</button>
-        <button class="${scoreFilter === '2' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="2">Low (2+)</button>
-        <button class="${scoreFilter === '1' ? 'on' : ''}" data-a="set" data-k="feedScore" data-v="1">Info (1+)</button>
+      <!-- Impact Score Filter Select -->
+      <div class="row" style="gap:4px;align-items:center">
+        <select class="input input-sm" data-in="feedScore" style="width:auto;padding:3px 8px;font-size:12px;font-weight:500" aria-label="Filter by impact score">
+          <option value="all" ${scoreFilter === 'all' ? 'selected' : ''}>All Scores</option>
+          <option value="5" ${scoreFilter === '5' ? 'selected' : ''}>Critical (5)</option>
+          <option value="4" ${scoreFilter === '4' ? 'selected' : ''}>High (4+)</option>
+          <option value="3" ${scoreFilter === '3' ? 'selected' : ''}>Moderate (3+)</option>
+          <option value="2" ${scoreFilter === '2' ? 'selected' : ''}>Low (2+)</option>
+        </select>
       </div>
 
       <!-- Category Filter Select -->
@@ -213,7 +214,7 @@ export function pageFeed() {
             <span class="faint mono" style="font-size:11px;margin-right:2px">Active filters:</span>
             ${q ? `<span class="feed-chip">Query: "${esc(q)}" <button data-a="set" data-k="feedQ" data-v="">${ic('x', 11)}</button></span>` : ''}
             ${juris !== 'all' ? `<span class="feed-chip">Jurisdiction: ${esc(juris.toUpperCase())} <button data-a="set" data-k="feedJuris" data-v="all">${ic('x', 11)}</button></span>` : ''}
-            ${scoreFilter !== 'all' ? `<span class="feed-chip">Score: ${esc(scoreFilter)}+ <button data-a="set" data-k="feedScore" data-v="all">${ic('x', 11)}</button></span>` : ''}
+            ${scoreFilter !== 'all' ? `<span class="feed-chip">Score: ${scoreFilter === '5' ? 'Critical (5)' : scoreFilter + '+'} <button data-a="set" data-k="feedScore" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${catFilter !== 'all' ? `<span class="feed-chip">Category: ${esc(FEED_CATEGORIES[catFilter]?.label || catFilter)} <button data-a="set" data-k="feedCat" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${authFilter !== 'all' ? `<span class="feed-chip">Authority: ${esc(FEED_AUTHORITIES[authFilter]?.short || authFilter)} <button data-a="set" data-k="feedAuth" data-v="all">${ic('x', 11)}</button></span>` : ''}
             <button class="btn btn-ghost btn-xs" data-a="clearFeedFilters" style="font-size:11px;padding:2px 6px">Clear all</button>
@@ -239,128 +240,71 @@ function renderFeedCard(item) {
   const catMeta = getFeedCat(item.category);
   const authMeta = getFeedAuth(item.authorityId, item.authority);
   const scoreClass = feedScoreClass(item.score);
+  const primaryFramework = item.frameworks && item.frameworks.length ? item.frameworks[0] : null;
 
-  return `<div class="feed-card" data-id="${item.id}">
-    <!-- Card Header -->
-    <div class="feed-card-header">
-      <div class="row" style="gap:6px;align-items:center">
-        <span class="feed-card-auth">
-          <span>${authMeta.flag}</span>
-          <b>${esc(authMeta.short || item.authority)}</b>
+  return `<article class="feed-card" data-id="${item.id}">
+    <header class="feed-card-header">
+      <div class="feed-card-source">
+        <span>${authMeta.flag}</span>
+        <span class="feed-auth-name">${esc(authMeta.short || item.authority)}</span>
+        <span class="feed-sep">·</span>
+        <time class="feed-time">${esc(item.relativeTime)}</time>
+      </div>
+
+      <div class="feed-card-status">
+        ${item.status === 'ACKNOWLEDGED' ? `<span class="pill mono feed-status-ack">${ic('check', 10)} Assessed</span>` : ''}
+        ${item.status === 'IN_MITIGATION' ? `<span class="pill mono feed-status-mit">${ic('clock', 10)} In Mitigation</span>` : ''}
+        <span class="feed-score-badge ${scoreClass}" title="${esc(feedScoreLabel(item.score))} (${item.score}/5)">
+          ${item.score}/5
         </span>
-        <span class="pill mono feed-jur-pill">${esc(item.jurisdiction)}</span>
-        <span class="faint" style="font-size:11.5px">·</span>
-        <span class="feed-card-time">${esc(item.relativeTime)}</span>
       </div>
+    </header>
 
-      <div class="feed-score-badge ${scoreClass}" title="${esc(feedScoreLabel(item.score))} (${item.score}/5)">
-        ${ic('zap', 11)}
-        <span>${item.score}/5</span>
-      </div>
-    </div>
-
-    <!-- Category Pill & Status -->
-    <div style="margin-bottom:8px">
-      <span class="pill mono feed-cat-pill">
-        ${ic(catMeta.icon, 11)} ${esc(catMeta.label)}
-      </span>
-      ${item.status === 'ACKNOWLEDGED' ? `<span class="pill mono feed-status-ack">${ic('check', 10)} Assessed</span>` : ''}
-      ${item.status === 'IN_MITIGATION' ? `<span class="pill mono feed-status-mit">${ic('clock', 10)} In Mitigation</span>` : ''}
-    </div>
-
-    <!-- Compliance Frameworks (AI extraction) -->
-    ${
-      item.frameworks && item.frameworks.length
-        ? `<div class="row" style="gap:4px;margin-bottom:8px;flex-wrap:wrap">
-            ${item.frameworks
-              .slice(0, 3)
-              .map(fw => `<span class="pill mono feed-fw-pill" title="Compliance Framework: ${esc(fw)}">${esc(fw)}</span>`)
-              .join('')}
-            ${item.frameworks.length > 3 ? `<span class="faint mono" style="font-size:10px;align-self:center">+${item.frameworks.length - 3}</span>` : ''}
-          </div>`
-        : ''
-    }
-
-    <!-- Card Title -->
-    <h3 class="feed-card-title" data-a="openFeedDrawer" data-id="${item.id}">
+    <h3 class="feed-card-title" data-a="openFeedDrawer" data-id="${item.id}" title="Click to inspect regulatory analysis">
       ${esc(item.title)}
     </h3>
 
-    ${item.originalTitle ? `<div class="feed-card-orig">${esc(item.originalTitle)}</div>` : ''}
-
-    <!-- Supervised Entities / Market Participants -->
-    ${
-      item.vendors && item.vendors.length
-        ? `<div class="row" style="gap:4px;font-size:11.5px;color:var(--text-2);margin-bottom:8px;align-items:center">
-            ${ic('building-2', 11)}
-            <span class="trunc" style="max-width:320px" title="Entities involved: ${esc(item.vendors.join(', '))}">${esc(item.vendors.slice(0, 3).join(', '))}${item.vendors.length > 3 ? ` +${item.vendors.length - 3}` : ''}</span>
-          </div>`
-        : ''
-    }
-
-    <!-- Summary -->
     <p class="feed-card-summary">
       ${esc(item.summary)}
     </p>
 
-    <!-- Executive Breakdown -->
-    ${
-      item.plainEnglish?.whyItMatters
-        ? `<div class="feed-card-why">
-            <b>Why it matters:</b> ${esc(item.plainEnglish.whyItMatters)}
-          </div>`
-        : ''
-    }
-    ${
-      item.plainEnglish?.actionRequired
-        ? `<div style="margin-top:6px;font-size:11.5px;color:var(--text-2);background:var(--surface-2);padding:6px 10px;border-radius:4px;border:1px solid var(--border)">
-            <b>Action:</b> ${esc(item.plainEnglish.actionRequired)}
-          </div>`
-        : ''
-    }
-
-    <!-- Statutory Citation Badge -->
-    <div class="feed-card-statute" style="margin-top:10px">
-      <button class="feed-statute-btn" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" title="Open statutory provision in reader">
-        ${ic('scale', 12)}
-        <span>${esc(item.statuteRef)}</span>
-        ${ic('arrow-right', 11, 'faint')}
-      </button>
-    </div>
-
-    <!-- Governance Matrix Linkages -->
-    <div class="feed-card-gov-chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:8px">
-      ${(item.policyIds || []).map(pid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="policy" data-id="${pid}" style="font-size:10.5px;padding:2px 6px" title="Inspect policy ${pid.toUpperCase()} in matrix">${ic('file-text', 10)} ${esc(pid.toUpperCase())}</button>`).join('')}
-      ${(item.controlIds || []).map(cid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${cid}" style="font-size:10.5px;padding:2px 6px" title="Inspect control ${cid.toUpperCase()} in matrix">${ic('shield-check', 10)} ${esc(cid.toUpperCase())}</button>`).join('')}
-      ${(item.riskIds || []).map(rid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="risk" data-id="${rid}" style="font-size:10.5px;padding:2px 6px" title="Inspect risk ${rid.toUpperCase()} in matrix">${ic('alert-triangle', 10)} ${esc(rid.toUpperCase())}</button>`).join('')}
-    </div>
-
-    <!-- Card Actions Footer -->
-    <div class="feed-card-actions" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-      <button class="btn btn-sm btn-ghost" data-a="openFeedDrawer" data-id="${item.id}">
-        ${ic('info', 12)} Inspect
-      </button>
-      <button class="btn btn-sm btn-secondary" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}">
-        ${ic('book-open', 12)} Read Act
-      </button>
+    <div class="feed-card-context">
+      <span class="pill mono feed-cat-pill">${esc(catMeta.label)}</span>
       ${
-        item.taskId
-          ? `<button class="btn btn-sm btn-primary" data-a="editTask" data-id="${item.taskId}" title="Open mitigation task">
-              ${ic('check', 12)} Task Linked
-            </button>`
-          : `<button class="btn btn-sm btn-primary" data-a="createTaskFromFeed" data-id="${item.id}" title="Create mitigation task in workspace">
-              ${ic('plus', 12)} Mitigate
-            </button>`
-      }
-      ${
-        item.status !== 'ACKNOWLEDGED'
-          ? `<button class="btn btn-sm btn-ghost" data-a="ackFeedItem" data-id="${item.id}" title="Mark as assessed" style="margin-left:auto">
-              ${ic('check', 11)} Assess
+        item.statuteRef
+          ? `<button class="pill mono feed-statute-pill" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" title="Jump to ${esc(item.statuteRef)} in regulation reader">
+              ${ic('scale', 11)} ${esc(item.statuteRef)}
             </button>`
           : ''
       }
+      ${primaryFramework ? `<span class="pill mono feed-fw-pill" title="Compliance Framework: ${esc(primaryFramework)}">${esc(primaryFramework)}</span>` : ''}
     </div>
-  </div>`;
+
+    <footer class="feed-card-footer">
+      <button class="btn btn-sm btn-ghost feed-inspect-btn" data-a="openFeedDrawer" data-id="${item.id}">
+        Inspect analysis ${ic('arrow-right', 12)}
+      </button>
+
+      <div class="feed-card-acts">
+        ${
+          item.taskId
+            ? `<button class="btn btn-sm btn-ghost feed-task-btn" data-a="editTask" data-id="${item.taskId}" title="Open mitigation task #${item.taskId}">
+                ${ic('check', 11)} Task linked
+              </button>`
+            : `<button class="btn btn-sm btn-secondary feed-mit-btn" data-a="createTaskFromFeed" data-id="${item.id}" title="Create mitigation task in workspace">
+                ${ic('plus', 11)} Mitigate
+              </button>`
+        }
+        ${
+          item.status !== 'ACKNOWLEDGED'
+            ? `<button class="btn btn-sm btn-ghost feed-ack-btn" data-a="ackFeedItem" data-id="${item.id}" title="Mark as assessed by compliance">
+                ${ic('check', 11)}
+              </button>`
+            : ''
+        }
+      </div>
+    </footer>
+  </article>`;
 }
 
 /* ============================================================
@@ -371,12 +315,11 @@ function renderFeedList(items) {
     <thead>
       <tr>
         <th style="width:70px">Impact</th>
-        <th style="width:130px">Authority</th>
-        <th>Regulatory Event & Executive Synopsis</th>
+        <th style="width:140px">Authority</th>
+        <th>Regulatory Event & Synopsis</th>
         <th style="width:140px">Category</th>
-        <th style="width:160px">Statutory Provision</th>
-        <th style="width:160px">Governance Matrix</th>
-        <th style="width:90px">Published</th>
+        <th style="width:160px">Statute</th>
+        <th style="width:100px">Published</th>
         <th style="width:130px;text-align:right">Actions</th>
       </tr>
     </thead>
@@ -390,20 +333,19 @@ function renderFeedList(items) {
           return `<tr>
             <td>
               <span class="feed-score-badge ${scoreClass}" style="padding:2px 6px" title="${esc(feedScoreLabel(item.score))} (${item.score}/5)">
-                ${ic('zap', 11)} ${item.score}/5
+                ${item.score}/5
               </span>
             </td>
             <td>
-              <div class="row" style="gap:4px">
+              <div class="row" style="gap:5px;align-items:center">
                 <span>${authMeta.flag}</span>
                 <span style="font-weight:600;font-size:12px">${esc(authMeta.short || item.authority)}</span>
                 <span class="pill mono feed-jur-pill" style="font-size:9.5px">${esc(item.jurisdiction)}</span>
               </div>
             </td>
             <td>
-              <div style="font-weight:600;font-size:13px;color:var(--text);line-height:1.35;cursor:pointer" data-a="openFeedDrawer" data-id="${item.id}">${esc(item.title)}</div>
-              <div class="faint trunc" style="font-size:11.5px;max-width:440px;margin-top:2px">${esc(item.summary)}</div>
-              ${item.plainEnglish?.actionRequired ? `<div class="faint" style="font-size:11px;margin-top:3px;color:var(--text-2)"><b>Action:</b> ${esc(item.plainEnglish.actionRequired)}</div>` : ''}
+              <div style="font-weight:600;font-size:13px;color:var(--text);line-height:1.35;cursor:pointer" data-a="openFeedDrawer" data-id="${item.id}" title="Inspect analysis">${esc(item.title)}</div>
+              <div class="faint trunc" style="font-size:12px;max-width:520px;margin-top:2px">${esc(item.summary)}</div>
             </td>
             <td>
               <span class="pill mono" style="font-size:11px">
@@ -416,23 +358,16 @@ function renderFeedList(items) {
               </button>
             </td>
             <td>
-              <div class="row" style="gap:3px;flex-wrap:wrap">
-                ${(item.policyIds || []).map(pid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="policy" data-id="${pid}" style="padding:2px 5px;font-size:10px" title="Inspect policy ${pid.toUpperCase()}">${ic('file-text', 10)} ${esc(pid.toUpperCase())}</button>`).join('')}
-                ${(item.controlIds || []).map(cid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${cid}" style="padding:2px 5px;font-size:10px" title="Inspect control ${cid.toUpperCase()}">${ic('shield-check', 10)} ${esc(cid.toUpperCase())}</button>`).join('')}
-                ${(item.riskIds || []).map(rid => `<button class="pill mono btn-ghost" data-a="openGovDrawer" data-type="risk" data-id="${rid}" style="padding:2px 5px;font-size:10px" title="Inspect risk ${rid.toUpperCase()}">${ic('alert-triangle', 10)} ${esc(rid.toUpperCase())}</button>`).join('')}
-              </div>
-            </td>
-            <td>
               <span class="muted" style="font-size:11.5px">${esc(item.relativeTime)}</span>
             </td>
             <td style="text-align:right">
               <div class="row" style="gap:4px;justify-content:flex-end">
-                <button class="btn btn-sm btn-ghost" data-a="openFeedDrawer" data-id="${item.id}" style="padding:2px 6px;font-size:11px" title="Inspect details">
+                <button class="btn btn-sm btn-ghost" data-a="openFeedDrawer" data-id="${item.id}" style="padding:2px 7px;font-size:11px" title="Inspect details">
                   Inspect
                 </button>
                 ${
                   item.taskId
-                    ? `<button class="btn btn-sm btn-primary" data-a="editTask" data-id="${item.taskId}" style="padding:2px 6px;font-size:11px" title="View linked mitigation task">
+                    ? `<button class="btn btn-sm btn-ghost" data-a="editTask" data-id="${item.taskId}" style="padding:2px 6px;font-size:11px" title="View linked mitigation task">
                         Task ✓
                       </button>`
                     : `<button class="btn btn-sm btn-secondary" data-a="createTaskFromFeed" data-id="${item.id}" style="padding:2px 6px;font-size:11px" title="Create mitigation task">

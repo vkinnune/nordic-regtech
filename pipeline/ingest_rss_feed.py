@@ -127,6 +127,47 @@ def synthesize_action(category: str, risks: List[str], frameworks: List[str]) ->
         return f"Validate electronic reporting schemas against updated {fw_text} technical standards and test submission pipelines."
     return f"Assess operational exposure to {r_text.lower()}, file internal compliance briefing, and document supervisory alignment."
 
+def calibrate_regulatory_score(raw_s: int, category: str, title: str, summary: str, frameworks: List[str], risks: List[str]) -> int:
+    blob = f"{title} {summary} {' '.join(frameworks)} {' '.join(risks)}".lower()
+
+    # Critical Impact (5): major enforcement fines, revocations, statutory acts enacted, emergency cyber bulletins
+    if any(k in blob for k in [
+        'penalty fee', '35m penalty', 'sek 35m', 'revocation', 'återkallad',
+        'critical vulnerability', 'zero-day', 'sfs 2026:916', 'kill switch',
+        'emergency order', 'sanktionsavgift', 'penningtvättsförseelse', 'marknadsmissbruk'
+    ]):
+        return 5
+    if category == 'ENFORCEMENT' and any(k in blob for k in ['warning', 'varning', 'fine', 'straff', 'föreläggande', 'sanktion']):
+        return 5 if raw_s >= 4 else 4
+    if category == 'AMENDMENT' and any(k in blob for k in ['mandatory', 'enacts', 'overhaul', 'parliament has enacted', 'rikspolisen', 'lag ']):
+        return 5 if raw_s >= 5 else 4
+
+    # Informational (1): speeches, consumer alerts, routine announcements, calendar
+    if any(k in blob for k in ['speech', 'tal av', 'seminarium', 'consumer', 'konsument', 'podcast', 'webbinarium', 'tips', 'kalender', 'öppettider', 'pressträff']):
+        return 1
+
+    # Low Impact (2): consultations, statistical reports, market surveys
+    if category == 'CONSULTATION':
+        return 2
+    if any(k in blob for k in ['survey', 'rapport', 'undersökning', 'statistik', 'publikation', 'årsredovisning', 'marknadsläge', 'stabilitetsrapport', 'memo', 'promemoria']):
+        return 2
+
+    # High Impact (4): technical standards, major circulars, binding rules
+    if category in ['TECHNICAL_STANDARD', 'AMENDMENT']:
+        return 4
+    if category == 'CIRCULAR' and any(k in blob for k in ['mandatory', 'strict', 'immediate', 'deadline', 'compliance obligation', 'föreskrift']):
+        return 4
+    if category == 'ENFORCEMENT':
+        return 4
+
+    # Moderate Impact (3) default
+    if category == 'CIRCULAR':
+        return 3
+    if raw_s >= 4:
+        return 3
+    return max(1, min(raw_s, 3))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Ingest articles from rss-mapper-poc into Nordic RegTech feed")
     parser.add_argument("--input", type=str, help="Path to articles.json from rss-mapper-poc")
@@ -208,7 +249,6 @@ def main():
                 len(x.get("risks", [])),
                 len(x.get("vendors", [])),
                 len(x.get("explanation", "")),
-                x.get("score", 0),
                 x.get("created_at", "")
             ),
             reverse=True
@@ -224,7 +264,7 @@ def main():
                     break
 
     # Guarantee all score tiers (especially 1, 2, 3) have healthy representation
-    for score_tier, min_count in [(1, 15), (2, 25), (3, 40)]:
+    for score_tier, min_count in [(1, 25), (2, 25), (3, 40)]:
         current_count = sum(1 for it in selected_raw if int(it.get("score", 0)) == score_tier)
         if current_count < min_count:
             needed = min_count - current_count
@@ -258,11 +298,7 @@ def main():
         title = raw.get("title", "").strip()
         summary = raw.get("summary", "").strip()
         explanation = raw.get("explanation", "").strip()
-        score = int(raw.get("score", 3))
-        if score < 1:
-            score = 1
-        if score > 5:
-            score = 5
+        raw_score = int(raw.get("score", 3))
 
         frameworks = [f.strip() for f in raw.get("frameworks", []) if f.strip()]
         vendors = [v.strip() for v in raw.get("vendors", []) if v.strip()]
@@ -272,7 +308,8 @@ def main():
         auth_meta = resolve_authority(source, link)
         auth_id, auth_label, auth_short, auth_flag, jur = auth_meta
 
-        category = resolve_category(title, summary, link, score)
+        category = resolve_category(title, summary, link, raw_score)
+        score = calibrate_regulatory_score(raw_score, category, title, summary, frameworks, risks)
         text_blob = f"{title} {summary} {' '.join(frameworks)} {' '.join(risks)} {link}"
         statute_id, statute_ref, statute_sec = resolve_statute(text_blob)
         policies, controls, risk_ids = resolve_governance_linkages(statute_id, category, text_blob)
@@ -318,10 +355,14 @@ def main():
         # Relative time
         relative_time = format_relative_time(created_at)
 
+        orig_title = raw.get("original_title") or (raw.get("title", "") if raw.get("language") in ["fi", "sv"] else None)
+        if orig_title and orig_title.strip().lower() == title.strip().lower():
+            orig_title = None
+
         feed_item = {
             "id": item_id,
             "title": title,
-            "originalTitle": raw.get("title", "") if raw.get("language") in ["fi", "sv"] else None,
+            "originalTitle": orig_title,
             "authority": auth_label,
             "authorityId": auth_id,
             "jurisdiction": jur,

@@ -164,11 +164,11 @@ export function feedScoreClass(score) {
 }
 
 export function feedScoreLabel(score) {
-  if (score >= 5) return 'CRITICAL IMPACT';
-  if (score >= 4) return 'HIGH IMPACT';
-  if (score >= 3) return 'MODERATE IMPACT';
-  if (score >= 2) return 'LOW IMPACT';
-  return 'INFORMATIONAL';
+  if (score >= 5) return 'Critical Impact';
+  if (score >= 4) return 'High Impact';
+  if (score >= 3) return 'Moderate Impact';
+  if (score >= 2) return 'Low Impact';
+  return 'Informational';
 }
 
 export function getFeedCat(catKey) {

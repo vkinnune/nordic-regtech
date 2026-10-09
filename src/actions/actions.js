@@ -1490,6 +1490,11 @@ IN.feedCat = el => {
   render();
 };
 
+IN.feedScore = el => {
+  S.ui.feedScore = el.value;
+  render();
+};
+
 IN.feedAuth = el => {
   S.ui.feedAuth = el.value;
   render();
