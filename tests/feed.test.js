@@ -117,22 +117,37 @@ test('Regulatory Feed Pipeline Connection & Data Integrity: FIN-FSA, anonymity, 
   const fivaItems = items.filter(i => i.authorityId === 'fiva' || i.authorityId === 'fin-fsa');
   assert.ok(fivaItems.length >= 15, `Must contain substantial real FIN-FSA items (found ${fivaItems.length})`);
 
-  // Verify Client Anonymity: NO real commercial banks in market participants
-  const forbiddenBanks = ['nordea', 'swedbank', 'seb', 'handelsbanken', 'klarna'];
+  // Verify Client Anonymity: NO real commercial banks in title, summary, or vendors
+  const forbiddenBanks = ['nordea', 'swedbank', 'seb', 'handelsbanken', 'klarna', 'aktia', 'danske'];
   for (const item of items) {
+    for (const b of forbiddenBanks) {
+      const re = new RegExp(`\\b${b}\\b`, 'i');
+      assert.ok(!re.test(item.title), `Found forbidden real bank "${b}" in title: "${item.title}" (item ${item.id})`);
+      assert.ok(!re.test(item.summary), `Found forbidden real bank "${b}" in summary: "${item.summary}" (item ${item.id})`);
+    }
     for (const v of item.vendors || []) {
       for (const b of forbiddenBanks) {
-        assert.ok(!v.toLowerCase().includes(b), `Found forbidden real bank "${b}" in vendor tag: "${v}" (item ${item.id})`);
+        const re = new RegExp(`\\b${b}\\b`, 'i');
+        assert.ok(!re.test(v), `Found forbidden real bank "${b}" in vendor tag: "${v}" (item ${item.id})`);
       }
     }
   }
 
-  // Verify 100% English Language standard across operational risks
+  // Verify 100% English Language standard across titles, summaries, and operational risks
   for (const item of items) {
+    assert.ok(!/[äöåÄÖÅ]/.test(item.title), `Found non-English characters in title: "${item.title}" (item ${item.id})`);
+    assert.ok(!/[äöåÄÖÅ]/.test(item.summary), `Found non-English characters in summary: "${item.summary}" (item ${item.id})`);
     for (const r of item.risks || []) {
-      assert.ok(!/[äöå]/.test(r), `Found non-English characters in risk: "${r}" (item ${item.id})`);
+      assert.ok(!/[äöåÄÖÅ]/.test(r), `Found non-English characters in risk: "${r}" (item ${item.id})`);
+    }
+    for (const v of item.vendors || []) {
+      assert.ok(!/[äöåÄÖÅ]/.test(v), `Found non-English characters in vendor: "${v}" (item ${item.id})`);
     }
   }
+
+  // Verify Score 1 (Informational) items exist in dataset
+  const score1Items = items.filter(i => i.score === 1);
+  assert.ok(score1Items.length >= 5, `Must have calibrated Score 1 (Informational) items (found ${score1Items.length})`);
 
   // Verify Governance Matrix Causality: 100% of policyIds, controlIds, and riskIds match real governance items
   const validPolicies = new Set(['pol-alg-01', 'pol-dora-01', 'pol-aml-01']);

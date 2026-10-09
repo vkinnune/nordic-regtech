@@ -145,12 +145,12 @@ export function pageFeed() {
       <div class="stat">
         <span class="k">Swedish Authorities</span>
         <span class="v">${seCount}</span>
-        <span class="d">FI, Riksdagen & SCA</span>
+        <span class="d">FI, Riksdagen & KO</span>
       </div>
       <div class="stat">
-        <span class="k">Finnish & EU Directives</span>
-        <span class="v">${fiCount + euCount}</span>
-        <span class="d">${fiCount} Finland · ${euCount} EU standards</span>
+        <span class="k">EU Directives & Cross-Border</span>
+        <span class="v">${euCount + fiCount}</span>
+        <span class="d">${euCount} EU · ${fiCount} FIN-FSA</span>
       </div>
     </div>
 

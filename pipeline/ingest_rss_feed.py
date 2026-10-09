@@ -81,7 +81,7 @@ class FeedItemModel(BaseModel):
 
 
 # ============================================================
-# Authority Rules & Detection (Sweden, Finland, EU)
+# Authority Rules & Domain-First Detection
 # ============================================================
 
 AUTHORITY_RULES: List[AuthorityRule] = [
@@ -111,18 +111,20 @@ def resolve_authority(source: str, link: str, title: str = "", summary: str = ""
     sum_low = summary.lower()
     v_low = [v.lower() for v in (vendors or [])]
 
-    # Special handling for FIN-FSA (Financial Supervisory Authority / Finanssivalvonta)
-    if "finanssivalvonta.fi" in l_low or "fiva.fi" in l_low:
-        return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
+    # Domain match takes strict precedence (prevents Swedish FI articles mentioning FIN-FSA from misattribution)
+    for rule in AUTHORITY_RULES:
+        if rule.domain_match in l_low or rule.domain_match in s_low:
+            return rule
+
+    # Special handling for STT Info press releases issued by Finanssivalvonta (FIN-FSA)
+    if "sttinfo" in s_low or "sttinfo" in l_low:
+        if any(k in t_low or k in sum_low or any(k in v for v in v_low) for k in ["finanssivalvonta", "fin-fsa", "fiva", "valvottavatiedotteet"]):
+            return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
+
+    # Vendor-based fallback for non-domain sources
     if any("finanssivalvonta" in v or "fin-fsa" in v for v in v_low):
         return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
-    if ("sttinfo" in s_low or "sttinfo" in l_low) and any(k in t_low or k in sum_low for k in ["finanssivalvonta", "fin-fsa", "finanssisektorin", "seuraamusmaksu", "kuluttajaluoton"]):
-        return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
 
-    combined = f"{s_low} {l_low}"
-    for rule in AUTHORITY_RULES:
-        if rule.domain_match in combined:
-            return rule
     return None
 
 
@@ -260,99 +262,482 @@ def resolve_governance_linkages(statute_id: str, text_blob: str) -> Tuple[List[s
 
 
 # ============================================================
-# Client Anonymity & English Translation Sanitization
+# Client Anonymity & Mock Entity Isolation Standard
+# (Strictly Nordic Sovereign Bank, Polaris Wealth, Aura Asset Management)
 # ============================================================
 
-ENTITY_ANONYMIZATION_MAP: Dict[str, str] = {
-    "nordea": "Nordic Sovereign Bank",
-    "swedbank": "Polaris Wealth",
-    "seb": "Aura Asset Management",
-    "skandinaviska enskilda banken": "Aura Asset Management",
-    "handelsbanken": "Nordic Sovereign Bank",
-    "svenska handelsbanken": "Nordic Sovereign Bank",
-    "danske bank": "Nordic Credit Institution",
-    "danske": "Nordic Credit Institution",
-    "op ryhmä": "Nordic Cooperative Banking Group",
-    "op osuuskunta": "Nordic Cooperative Banking Group",
-    "op-ryhmä": "Nordic Cooperative Banking Group",
-    "op": "Nordic Cooperative Banking Group",
-    "klarna": "Nordic Fintech Services",
-    "avanza": "Nordic Retail Investment Broker",
-    "nordnet": "Nordic Retail Investment Broker",
-    "collector": "Consumer Credit Institution",
-    "resurs": "Consumer Credit Institution",
-    "qliro": "Consumer Credit Institution",
-    "roble services": "Licensed Payment Intermediary",
-    "alami services": "Licensed Payment Intermediary",
-    "ermitage partners": "Nordic Investment Intermediary",
-    "meriaura invest": "Listed Market Issuer",
-    "bioretec": "Listed Market Issuer",
-    "orion": "Listed Market Issuer",
-    "bbs-bioactive bone substitutes": "Listed Market Issuer",
-    "valoe": "Listed Market Issuer",
-    "savcor technologies": "Listed Market Issuer",
-    "localbitcoins": "Digital Asset Intermediary",
-    # Public regulatory / judicial bodies normalized to clean English
-    "poliisi": "National Police Board",
-    "poliisihallitus": "National Police Board",
-    "verohallinto": "Finnish Tax Administration",
-    "skatteverket": "Swedish Tax Agency",
-    "valtiovarainministeriö": "Ministry of Finance",
-    "suomen pankki": "Bank of Finland",
-    "rahanpesun selvittelykeskus": "Financial Intelligence Unit (FIU)",
-    "helsingin hallinto-oikeus": "Helsinki Administrative Court",
-    "korkein hallinto-oikeus": "Supreme Administrative Court",
-    "förvaltningsrätten": "Administrative Court",
-    "oy suomen tietotoimisto": "Finnish News Agency (STT)",
-    "stt": "Finnish News Agency (STT)",
-    "kilpailu- ja kuluttajavirasto": "Finnish Competition and Consumer Authority (KKV)",
-    "kkv": "Finnish Competition and Consumer Authority (KKV)",
-}
+ENTITY_MOCK_MAP: List[Tuple[str, str]] = [
+    # Commercial Banks and Credit Institutions -> Nordic Sovereign Bank
+    (r"\bnordea(?:\s+hypotek(?:\s+ab)?)?", "Nordic Sovereign Bank"),
+    (r"\bnordea\s+bank(?:\s+abp)?\b", "Nordic Sovereign Bank"),
+    (r"\bhandelsbanken\b", "Nordic Sovereign Bank"),
+    (r"\bsvenska\s+handelsbanken\b", "Nordic Sovereign Bank"),
+    (r"\bdanske(?:\s+bank)?\b", "Nordic Sovereign Bank"),
+    (r"\bop(?:\s*-\s*ryhmä|\s+ryhmä|\s+osuuskunta)?\b", "Nordic Sovereign Bank"),
+    (r"\baktia(?:\s+pankki)?\b", "Nordic Sovereign Bank"),
+    (r"\balisa\s+pankki\b", "Nordic Sovereign Bank"),
+    (r"\bs-pankki\b", "Nordic Sovereign Bank"),
+    (r"\bsäästöpankki(?:ryhmä)?\b", "Nordic Sovereign Bank"),
+    (r"\bålandsbanken\b", "Nordic Sovereign Bank"),
+    (r"\bklarna(?:\s+bank(?:\s+ab)?)?\b", "Nordic Sovereign Bank"),
+    (r"\bcollector(?:\s+bank)?\b", "Nordic Sovereign Bank"),
+    (r"\bresurs(?:\s+bank)?\b", "Nordic Sovereign Bank"),
+    (r"\bqliro\b", "Nordic Sovereign Bank"),
+    (r"\bsantander(?:\s+consumer\s+bank)?\b", "Nordic Sovereign Bank"),
+    (r"\bstabelo\b", "Nordic Sovereign Bank"),
+    (r"\bhypoteekkiyhdistys\b", "Nordic Sovereign Bank"),
+    (r"\bambrion\s+finans(?:\s+ab)?\b", "Nordic Sovereign Bank"),
+    (r"\bluma\s+finans(?:\s+ab)?\b", "Nordic Sovereign Bank"),
+    (r"\bbillmate(?:\s+ab)?\b", "Nordic Sovereign Bank"),
+    (r"\bjsm\s+capital(?:\s+ab)?\b", "Nordic Sovereign Bank"),
+    (r"\broble\s+services(?:\s+oy)?\b", "Nordic Sovereign Bank"),
+    (r"\balami\s+services(?:\s+oy)?\b", "Nordic Sovereign Bank"),
+    (r"\blocalbitcoins\b", "Nordic Sovereign Bank"),
 
-RISK_TRANSLATIONS: List[Tuple[str, str]] = [
-    (r"regulatorisk efterlevnadsrisk för försäkringsföretag.*", "Regulatory compliance risk for insurance undertakings (Solvency II)"),
-    (r"rapporterings- och tidspunksrisk.*", "Regulatory reporting and timeline compliance risk"),
-    (r"operativ belastning vid övergång och anpassning.*", "Operational implementation and transition risk for new regulations"),
-    (r"tredjelandsreglering och gränsöverskridande.*", "Third-country regulation and cross-border operational risk"),
-    (r"tillsyns- och sanktionsexponering.*", "Supervisory sanction and enforcement exposure for regulatory non-compliance"),
-    (r"betalningsbedrägerier.*", "Payment fraud risk (account transfers, card transactions, e-money)"),
-    (r"autentiserings- och identitetsbedrägeri.*", "Authentication and identity fraud risk (SCA circumvention)"),
-    (r"operativ risk och it‑säkerhet hos betalningsleverantörer.*", "Operational and IT security risk for payment service providers"),
-    (r"rahanpesun ja terrorismin rahoittamisen riski.*", "Money laundering and terrorist financing risk (AML/CFT)"),
-    (r"seuraamusmaksu.*", "Administrative penalty and sanction risk"),
-    (r"hallinnollinen seuraamus.*", "Administrative sanction risk"),
-    (r"sanktionsavgift.*", "Administrative supervisory fine exposure"),
-    (r"bristande regelefterlevnad.*", "Regulatory compliance deficiency risk"),
-    (r"penningtvättsrisk.*", "Money laundering risk (AML)"),
+    # Private Wealth, Retail Brokers, Intermediaries -> Polaris Wealth
+    (r"\bswedbank(?:\s+ab)?\b", "Polaris Wealth"),
+    (r"\bavanza(?:\s+bank)?\b", "Polaris Wealth"),
+    (r"\bnordnet(?:\s+bank)?\b", "Polaris Wealth"),
+    (r"\bermitage\s+partners\b", "Polaris Wealth"),
+
+    # Asset Managers, Fund Management, Insurers, Issuers -> Aura Asset Management
+    (r"\bseb\b", "Aura Asset Management"),
+    (r"\bskandinaviska\s+enskilda\s+banken\b", "Aura Asset Management"),
+    (r"\bcoeli(?:\s+asset\s+management)?\b", "Aura Asset Management"),
+    (r"\beq\s+rahastoyhtiö\b", "Aura Asset Management"),
+    (r"\bdina\s+försäkring(?:ar)?\b", "Aura Asset Management"),
+    (r"\bskandia\b", "Aura Asset Management"),
+    (r"\bvaloe\b", "Aura Asset Management"),
+    (r"\bsavcor\s+technologies\b", "Aura Asset Management"),
+    (r"\bmeriaura\s+invest\b", "Aura Asset Management"),
+    (r"\bbioretec\b", "Aura Asset Management"),
+    (r"\borion\b", "Aura Asset Management"),
+    (r"\bbbs-bioactive\s+bone\s+substitutes\b", "Aura Asset Management"),
+
+    # Collective references to real banking tiers
+    (r"\b(?:de\s+fyra\s+storbankerna|tre\s+storbankerna|svenska\s+storbanker|suuret\s+pankit)\b", "major Nordic institutions"),
+    (r"\b(?:swedish\s+irk-banker|svenska\s+banker\s*\(tillsynskategori\s*1\s*och\s*2\))\b", "supervised Nordic banks"),
+]
+
+# Public supervisory / judicial bodies normalized to clean English
+PUBLIC_BODIES_MAP: List[Tuple[str, str]] = [
+    (r"\bfinansinspektionen(?:\s*\(fi\))?\b", "Swedish Financial Supervisory Authority (FI)"),
+    (r"\bsveriges\s+riksdag\b|\briksdagen\b", "Swedish Parliament (Sveriges Riksdag)"),
+    (r"\bsveriges\s+riksbank(?:\s*\(riksbanken\))?\b|\briksbanken\b", "Sveriges Riksbank (Central Bank)"),
+    (r"\bsveriges\s+regering\b|\bregeringskansliet(?:\s*\(swedish\s+government\))?\b", "Swedish Government Offices"),
+    (r"\bsveriges\s+domstolar\b|\bdomstolsverket\b", "Swedish Courts Administration"),
+    (r"\båklagarmyndigheten(?:\s*\(the\s+prosecutor\))?\b", "Swedish Prosecution Authority"),
+    (r"\bkonsumentverket(?:\s*\(swedish\s+consumer\s+agency\))?\b", "Swedish Consumer Agency"),
+    (r"\bkonsumentombudsmannen\b", "Swedish Consumer Ombudsman"),
+    (r"\bintegritetsskyddsmyndigheten\b|\bimy\b|\bdatainspektionen\b", "Swedish Privacy Authority (IMY)"),
+    (r"\btraficom(?:\s*\(liikenne-\s*ja\s*viestintävirasto\))?\b", "Traficom NCSC-FI (Cyber Security Centre)"),
+    (r"\btulli(?:\s*\(finnish\s+customs\))?\b", "Finnish Customs (Tulli)"),
+    (r"\btietosuojavaltuutetun\s+toimisto\b|\btietosuojavaltuutettu\b", "Office of the Data Protection Ombudsman"),
+    (r"\beduskunta\b", "Parliament of Finland (Eduskunta)"),
+    (r"\beuropaparlamentet\s+och\s+rådet\b", "European Parliament and Council"),
+    (r"\bsjöfartsverket(?:\s*\(swedish\s+maritime\s+administration\))?\b", "Swedish Maritime Administration"),
+    (r"\bspelinspektionen\b", "Swedish Gambling Authority"),
+    (r"\btransportstyrelsen\b", "Swedish Transport Agency"),
+    (r"\bvaltioneuvosto(?:\s*\(finnish\s+government\))?\b", "Finnish Government"),
+    (r"\bulosottolaitos(?:\s*\(enforcement\s+authority\))?\b", "National Enforcement Authority"),
+    (r"\bsisäministeriö(?:\s*\(ministry\s+of\s+the\s+interior\))?\b", "Ministry of the Interior"),
+    (r"\bsuojelupoliisi(?:\s*\(finnish\s+security\s+intelligence\s+service\))?\b", "Finnish Security Intelligence Service (Supo)"),
+    (r"\bsveriges\s+advokatsamfund\b", "Swedish Bar Association"),
+    (r"\bsveriges\s+konsumenter\b", "Swedish Consumers Association"),
+    (r"\bturvallisuus-\s*ja\s*kemikaalivirasto(?:\s*\(tukes\))?\b|\btukes\b", "Finnish Safety and Chemicals Agency (Tukes)"),
+    (r"\btilastokeskus(?:\s*\(statistics\s+finland\))?\b", "Statistics Finland"),
+    (r"\btyöeläkelaitokset(?:\s*\(pension\s+institutions\))?\b", "Occupational Pension Institutions"),
+    (r"\bulkoministeriö(?:\s*\(ministry\s+for\s+foreign\s+affairs.*?\))?\b", "Ministry for Foreign Affairs of Finland"),
+    (r"\bvaltiovarainministeriö(?:\s*\(ministry\s+of\s+finance\))?\b|\bvaltionvarainministeriö\b", "Ministry of Finance"),
+    (r"\bverohallinto\b", "Finnish Tax Administration"),
+    (r"\bskatteverket\b", "Swedish Tax Agency"),
+    (r"\bpoliisihallitus\b|\bpoliisi\b", "National Police Board"),
+    (r"\bpolisen\b", "Swedish Police Authority"),
+    (r"\bsocialstyrelsen\b", "National Board of Health and Welfare"),
+    (r"\bsametinget\b", "Sámi Parliament"),
+    (r"\barbetsmiljöverket\b", "Swedish Work Environment Authority"),
+    (r"\bfinanssiala\b", "Finance Finland"),
+    (r"\barvopaperimarkkinayhdistys\b", "Securities Market Association"),
+    (r"\bsuomen\s+pankki\b", "Bank of Finland"),
+    (r"\brahanpesun\s+selvittelykeskus\b", "Financial Intelligence Unit (FIU)"),
+    (r"\bhelsingin\s+hallinto-oikeus\b", "Helsinki Administrative Court"),
+    (r"\bkorkein\s+hallinto-oikeus\b", "Supreme Administrative Court"),
+    (r"\bförvaltningsrätten\b", "Administrative Court"),
+    (r"\boy\s+suomen\s+tietotoimisto\b|\bstt\b", "Finnish News Agency (STT)"),
+    (r"\bkilpailu-\s*ja\s*kuluttajavirasto\b|\bkkv\b", "Finnish Competition and Consumer Authority (KKV)"),
+    (r"\bfondbolag(?:\s*\(fund\s+management\s+companies\))?\b", "Fund Management Companies"),
+    (r"\bförvaltningsbolag\b", "Management Companies"),
+    (r"\bvärdepappersinstitut(?:\s*\(securities\s+institutions\))?\b", "Securities Institutions"),
+    (r"\bleverantörer\s+av\s+datarapporteringstjänster.*?\b", "Data Reporting Service Providers"),
+    (r"\bemittentinstitut(?:\s*\(issuer\s+institutions\))?\b", "Issuer Institutions"),
+    (r"\bsvenska\s+aktiebolag\b", "Swedish Limited Companies"),
 ]
 
 
+def sanitize_text(text: str) -> str:
+    """Sanitize any text string (title, summary, explanation) ensuring zero real bank names."""
+    if not text:
+        return ""
+    result = text
+    # Clean non-breaking spaces and soft hyphens
+    result = result.replace("\u00ad", "").replace("\u00a0", " ")
+
+    # Handle composite bank lists (e.g. Handelsbanken, Nordea, SEB, Swedbank)
+    result = re.sub(
+        r"\((?:Handelsbanken|Nordea|SEB|Swedbank)[^)]*\)",
+        "(Nordic Sovereign Bank, Polaris Wealth, Aura Asset Management)",
+        result,
+        flags=re.IGNORECASE
+    )
+
+    for pattern, replacement in ENTITY_MOCK_MAP:
+        result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+
+    for pattern, replacement in PUBLIC_BODIES_MAP:
+        result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+
+    return result
+
+
 def anonymize_entity(name: str) -> str:
-    cleaned = name.strip()
+    """Strictly maps vendor strings into one of the 3 mock entities or recognized English public bodies."""
+    cleaned = name.strip().replace("\u00ad", "").replace("\u00a0", " ")
     low = cleaned.lower()
-    for pattern, replacement in ENTITY_ANONYMIZATION_MAP.items():
-        if re.search(r"\b" + re.escape(pattern) + r"\b", low):
-            return replacement
-    # Clean up corporate suffixes to preserve mock entity isolation
-    if re.search(r"\b(oy|ab|oyj|bank)\b", low):
-        return "Nordic Market Participant"
-    return cleaned
 
-
-def translate_risk(risk_str: str) -> str:
-    cleaned = risk_str.strip()
-    low = cleaned.lower()
-    for pattern, replacement in RISK_TRANSLATIONS:
+    # Public authorities match
+    for pattern, replacement in PUBLIC_BODIES_MAP:
         if re.search(pattern, low):
             return replacement
-    # Fallback for remaining Finnish/Swedish words
-    if any(c in cleaned for c in ["ä", "ö", "å"]) or any(k in low for k in ["efterlevnad", "tillsyn", "sanktion", "rahanpesu"]):
-        return "Regulatory compliance and supervisory risk"
+
+    # Commercial entities match strictly into the 3 mock entities
+    for pattern, replacement in ENTITY_MOCK_MAP:
+        if re.search(pattern, low):
+            return replacement
+
+    # Fallback: if corporate suffix exists, map to Aura Asset Management
+    if re.search(r"\b(?:oy|ab|oyj|bank|abp|as|ltd|gmbh)\b", low):
+        return "Aura Asset Management"
+
+    # Clean any remaining non-English characters
+    if re.search(r"[äöåÄÖÅ]", cleaned):
+        return "Nordic Supervisory Participant"
+
     return cleaned
 
 
 # ============================================================
-# Classification & Calibration
+# 100% English Language Standard Translation Engine
+# ============================================================
+
+LOW_VALUE_NAVIGATION_TITLES = {
+    "nyheter", "nyheter & övrigt publicerat", "e-plikt", "fi-forum", "kalendarium",
+    "pressmeddelanden", "lediga jobb", "om webbplatsen", "kontakt", "sök",
+    "sök sanktioner", "remisser", "undersökningar lista", "avslutade undersökningar",
+    "tiedotteet", "uutiset", "tapahtumat", "yhteystiedot"
+}
+
+TITLE_MAP: Dict[str, str] = {
+    "agenda för en ny marknadstillsyn (2002:1)": "Agenda for Modern Market Supervision (2002:1)",
+    "ahosniemi: finanssialan kasvustrategian hyvät eväät jäävät torsoksi, ellei sääntelyä yksinkertaisteta ja järkevöitetä": "Industry Address: Financial Sector Growth Strategy Requires Regulatory Simplification and Burden Reduction",
+    "ahosniemi: kotitalouksien ja yritysten rahoitusta vaikeuttavan sääntelyn purkaminen sekä kotimaisten sijoitusrahastojen toimintaedellytysten vahvistaminen ovat hallitukselta vahvoja tekoja kasvun vauhdittamiseksi": "Executive Commentary: Dismantling Restrictive Lending Rules and Strengthening Domestic Investment Funds Drive Economic Growth",
+    "ambrion finans varnas för bristande kreditprövning": "Nordic Sovereign Bank Warned by Consumer Agency for Deficient Credit Assessments",
+    "anna seim i västervik:  goda förutsättningar att hantera den osäkra vägen framåt": "Riksbank Address: Favorable Conditions for Managing Macroeconomic Uncertainty",
+    "anna seim i västervik: goda förutsättningar att hantera den osäkra vägen framåt": "Riksbank Address: Favorable Conditions for Managing Macroeconomic Uncertainty",
+    "anmälda personuppgiftsincidenter 2022": "Annual Statistical Overview: Notified Personal Data Incidents 2022",
+    "anna seim: bra utgångsläge i en föränderlig omvärld": "Riksbank Deputy Governor Anna Seim: Strong Economic Foundation in an Uncertain Global Environment",
+    "anna seim: riksbanken är en av de mest transparenta centralbankerna": "Riksbank Deputy Governor Anna Seim: Riksbank Ranks Among the World's Most Transparent Central Banks",
+    "asuntorahoituksen sääntelyyn ehdotetaan lisää joustavuutta": "Regulatory Proposal Recommends Greater Flexibility in Residential Mortgage Lending Rules",
+    "autolla norjaan ja takaisin – muista tullimuodollisuudet": "Cross-Border Vehicle Transit to Norway: Essential Customs Procedures and Declaration Rules",
+    "baltic återkallar uppblåsbara flytvästar på grund av risk för punktering av luftblåsa": "Product Safety Recall: Inflatable Life Jackets Recalled Over Bladder Puncture Risks",
+    "barn och ungas rättigheter på digitala plattformar": "Supervisory Guidance: Protection of Minor Rights and Privacy on Digital Platforms",
+    "breman: ”att våga tänka annorlunda – om riksbankens penningpolitiska kommunikation”": "First Deputy Governor Breman: Daring to Think Differently — Communicating Monetary Policy",
+    "brottsbekämpande myndigheter": "Supervisory Guidance for Law Enforcement and Financial Crime Authorities",
+    "bättre verktyg för fi att motverka att det finansiella systemet missbrukas av kriminella": "Enhanced Supervisory Powers for FI to Combat Financial System Abuse by Criminals",
+    "coca-cola lovar ta bort vilseledande miljöpåståenden": "Consumer Agency Enforcement: Company Commits to Remove Misleading Environmental Claims",
+    "eduskunta kannattaa eu-lainsäädännön tavoitteita yritysten hallinnollisen taakan vähentämiseksi": "Parliament Endorses EU Legislative Initiatives to Reduce Corporate Administrative Burden",
+    "eu-viikkokirje: puhtaan teollisuuden valtiontukikehys, ehdotus avaruussäädöksestä": "EU Parliamentary Weekly Brief: Clean Industrial State Aid Framework and Space Law Proposals",
+    "eu:n jätesäädöspaketin täytäntöönpano": "Transposition of EU Waste Regulatory Package and Circular Economy Standards",
+    "eurooppalaiset pankit kestivät rankan stressitestin": "EBA Regulatory Stress Test Results: European Banks Demonstrate High Resilience Under Adverse Shocks",
+    "fi tillämpar riktlinjer för sund ersättningspolicy med vissa undantag": "Finansinspektionen Implements Guidelines on Sound Remuneration Policies with Specific Exceptions",
+    "finanssisektorin vakavaraisuus 31.3.2024: suomen finanssisektorin vakavaraisuus säilyi edelleen vahvana epävarmassa toimintaympäristössä": "FIN-FSA Solvency Review (Q1 2024): Financial Sector Capital Adequacy Remains Robust Amid Macro Uncertainty",
+    "finanssisektorin vakavaraisuus 30.9.2024: suomen finanssisektorin vakavaraisuus säilyi edelleen vahvana geopoliittisen epävarmuuden yhä lisääntyessä": "FIN-FSA Solvency Review (Q3 2024): Financial Sector Solvency Retains High Resilience Amid Heightened Geopolitical Risks",
+    "finanssivalvonnan teema-arvio: finanssisektorin organisaatiot käyttävät tekoälyä sisäisissä prosesseissaan, hyödyntäminen asiakasrajapinnassa lisääntyy": "FIN-FSA Thematic Review: Financial Institutions Deploy Artificial Intelligence in Core Operations and Customer Interfaces",
+    "finnish customs (tulli) mukana puolustusvoimain lippujuhlan päivässä kuopiossa 4.6.2025": "Customs Event Notice: Inter-Agency Participation in National Flag Day Celebrations",
+    "framtida transaktionsrapportering kommer kräva legal entity identifier-kod (lei)": "Mandatory Legal Entity Identifier (LEI) Code Required for MiFIR Transaction Reporting",
+    "fyra prioriteringar för stärkt konsumentskydd": "Four Strategic Supervisory Priorities for Enhanced Consumer Protection in Retail Finance",
+    "förslag till ändrade regler om årsredovisning och rapportering för kreditinstitut och värdepappersbolag": "Proposed Amendments to Financial Statement Reporting Rules for Credit Institutions and Investment Firms",
+    "helsingin taksiliikenteessä havaittiin useita puutteita": "Transport Authority Enforcement Sweep Identifies Compliance Deficiencies in Taxi Operations",
+    "huhtikuun markkinamyllerrys vaihtui toukokuussa kurssinousuun – rahaa virtasi erityisesti osake- ja yhdistelmärahastoihin": "Market Rebound Follows April Volatility: Strong Inflows Recorded in Equity and Multi-Asset Funds",
+    "imo-kokouksessa tehtiin historiallisten kasvihuonekaasupäästöjen vähentämistoimien lisäksi päätös myös koillis-atlantin rikki- ja typpioksidien sekä partikkeleiden rajoitusalueesta": "IMO Assembly Resolution: Marine Emission Reduction Measures and North-East Atlantic Emission Control Area Enacted",
+    "imo:ssa edettiin kohti maailmanlaajuisia keinoja alusliikenteen kasvihuonekaasupäästöjen vähentämiseksi": "IMO Deliberations Advance Global Measures to Reduce Marine Greenhouse Gas Emissions",
+    "imo:ssa edistettiin kestävää merenkulkua välimerellä": "International Maritime Organization Advances Environmental Standards in Mediterranean Shipping",
+    "konsumentskyddsmyndigheter uppmanar shein att följa regelverket": "Consumer Protection Authorities Issue Joint Demands on Platform Compliance with EU Consumer Law",
+    "markkinoiden hermoilu hellitti tullisopimusten myötä – rahastopääoman arvo kohosi yli 190 miljardin euron": "Market Volatility Eases Following Trade Agreements: Fund Capital Assets Rise Above EUR 190 Billion",
+    "miten eläkeikäsi määräytyy?": "Supervisory Information Brief: Statutory Pension Age Determination and Life Expectancy Coefficients",
+    "nopeasta toiminnasta kiitos – rahastoliiketoiminta voi pysyä jatkossakin suomessa": "Industry Commentary: Timely Regulatory Actions Secure Operating Conditions for Domestic Investment Funds",
+    "nya regler om undantag från bestämmelser i aktiebolagslagen": "New Statutory Regulations on Exemptions Under the Swedish Companies Act",
+    "parliament of finland (eduskunta) kannattaa eu-lainsäädännön tavoitteita yritysten hallinnollisen taakan vähentämiseksi": "Parliament Endorses EU Legislative Initiatives to Reduce Corporate Administrative Burden",
+    "pyydämme organisaatioita päivittämään tietosuojavastaavien yhteystiedot": "Data Protection Ombudsman Notice: Supervised Entities Must Update Data Protection Officer Registry Details",
+    "speech by minister for defence pål jonson in manila": "Speech by Swedish Minister for Defence Pal Jonson in Manila",
+    "stressitestien mukaan suomalaispankit selviäisivät rankoissakin oloissa – vakavaraisuusvaatimusten lisäkiristykset heikentäisivät pankkien kykyä rahoittaa talouskasvua": "FIN-FSA Stress Tests: Supervised Banks Maintain High Buffers; Excessive Capital Tightening Could Restrict Lending",
+    "traficom ncsc-fi (cyber security centre) sai eagle s -aluksen satamavaltiotarkastuksen päätökseen – alus pysäytetty puutteiden vuoksi": "Port State Control Inspection Concluded: Vessel Detained Over Regulatory and Safety Deficiencies",
+    "traficom sai eagle s -aluksen satamavaltiotarkastuksen päätökseen – alus pysäytetty puutteiden vuoksi": "Port State Control Inspection Concluded: Vessel Detained Over Regulatory and Safety Deficiencies",
+    "tulli mukana puolustusvoimain lippujuhlan päivässä kuopiossa 4.6.2025": "Customs Event Notice: Inter-Agency Participation in National Flag Day Celebrations",
+    "ulkoasiainvaliokunnan tiedotustilaisuus ottawan sopimusta koskevasta mietinnöstä pe 13.6. klo 13.45": "Parliamentary Foreign Affairs Committee Press Briefing on Ottawa Convention Report",
+    "vahvistetut s-100 standardit ohjaavat työtä kohti uuden sukupolven digitaalisia navigointituotteita": "Confirmed S-100 Hydrographic Standards Guide Next-Generation Digital Navigation Systems",
+    "åtgärder mot missbruk av alternativa betalningssystem": "Supervisory Measures Against Fraudulent Abuse of Alternative Payment Systems",
+    "”think before you click” – även efter oktober": "Cybersecurity Advisory: Ongoing Awareness on Phishing and Credential Harvesting Attacks",
+    "dataskyddsombudens roll och ställning": "Supervisory Guidance on the Role and Legal Standing of Data Protection Officers (DPOs)",
+    "delegerad förordning och frågor och svar om det enhetliga elektroniska rapporteringsformatet (esef) har publicerats": "Delegated Regulation and Q&A Published on the European Single Electronic Format (ESEF)",
+    "delegerade förordningar som kompletterar benchmarkförordningen": "Delegated Regulations Published Supplementing the EU Benchmarks Regulation (BMR)",
+    "dom i mål om tull, mervärdesskatt och ersättning för kostnader": "Court Judgment in Case Concerning Customs Duties, VAT, and Litigation Costs",
+    "dom i målet konsumentverket –technology of sweden": "Court Judgment in Consumer Agency Enforcement Case Against Technology of Sweden",
+    "eba påminner om ukrainska flyktingars rätt till finansiella tjänster": "EBA Reminder on Displaced Persons Access to Basic Financial and Payment Services",
+    "eu har publicerat nytt kapitaltäckningsregelverk för värdepappersbolag": "EU Enacts New Capital Requirements Framework for Investment Firms (IFR/IFD)",
+    "eu-komissio julkaisi sovelluksen iän varmistamiseksi – tavoitteena suojella lapsia aikuisille tarkoitetulta verkkosisällöltä": "European Commission Releases Age Verification Technical Application to Protect Minors Online",
+    "eu:n neuvosto ja euroopan parlamentti alustavaan sopimukseen uudesta asetuksesta – tavoitteena nopeuttaa tietosuojaviranomaisten työtä useita maita koskevissa asioissa": "EU Council and Parliament Reach Provisional Agreement to Streamline Cross-Border GDPR Enforcement",
+    "eu:n tieliikenteen liikkuvuuspaketin täytäntöönpano muuttaa tavara- ja henkilöliikennelupia koskevia säännöksiä": "EU Road Mobility Package Transposition Updates Commercial Transport Licensing Rules",
+    "eduskunnan kirjasto on julkaissut tietopaketin edunvalvontasääntelyn muuttamisesta": "Parliamentary Library Publishes Legislative Information Brief on Guardianship Reform",
+    "eduskunnan kirjasto on julkaissut tietopaketin kansalaisuuslain nuhteettomuus- ja toimeentuloedellytysten muuttamisesta": "Parliamentary Library Publishes Legislative Brief on Reformed Citizenship Criteria",
+    "efrag publicerar utkast till digitala taxonomier för hållbarhetsrapportering": "EFRAG Releases Draft Digital Taxonomies for European Sustainability Reporting Standards (ESRS)",
+    "employment (co-determination in the workplace) act (lag om medbestämmande i arbetslivet)": "Statutory Overview: Employment Co-Determination in the Workplace Act (MBL)",
+    "employment protection act (lag om anställningsskydd)": "Statutory Overview: Employment Protection Act (LAS)",
+    "ensimmäiset s-100 testituotteet valmiina pilotointiin": "First S-100 Hydrographic Test Datasets Ready for Digital Maritime Navigation Piloting",
+    "eric leijonram är nu generaldirektör för integritetsskyddsmyndigheten": "Eric Leijonram Appointed Director General of the Swedish Privacy Authority (IMY)",
+    "eric leijonram – ny generaldirektör för imy": "Eric Leijonram Named New Director General of the Swedish Privacy Authority (IMY)",
+    "erik thedéen: näringslivet kan och borde ta chansen att snabba på omställningen": "FI Director General Speech: Business Sector Must Accelerate the Climate Transition",
+    "erik thedéen: regler förebygger kriser": "FI Director General Erik Thedéen: Robust Prudential Rules Prevent Financial Crises",
+    "erik thedéen: tio år efter finanskrisen – är regelverken effektiva?": "FI Director General Speech: A Decade After the Financial Crisis — Evaluating Regulatory Effectiveness",
+    "erik thedéens tal vid driving global standards on sustainable finance": "Executive Address by Erik Thedéen: Driving Global Standards on Sustainable Finance",
+    "esma ger svar om tekniskt format för inrapportering av årsredovisningar": "ESMA Issues Q&A on Technical Formatting and Validation for ESEF Annual Financial Reports",
+    "esma publicerar fokusområden för tillsynen över börsföretagens finansiella rapporter": "ESMA Publishes Supervisory Focus Priorities for Listed Companies Financial Disclosures",
+    "eurooppalaiset ja kotimaiset stressitestit valmistuneet: pankeilla hyvä kestokyky myös geopoliittisten jännitteiden tuomille toimintaympäristön muutoksille": "EU and Domestic Bank Stress Tests Completed: Supervised Banks Maintain High Resilience Against Geopolitical Shocks",
+    "fi bedömer en kontracyklisk kapitalbuffert på 1 procent som rimlig": "Finansinspektionen Determines 1 Percent Countercyclical Capital Buffer Target Appropriate",
+    "fi följer riktlinjer om angivande och offentliggörande av systemviktiga indikatorer": "Finansinspektionen Implements EBA Guidelines on Disclosure of Systemic Importance Indicators",
+    "fi föreslår nya regler om att fondbolag, förvaltningsbolag och värdepappersinstitut ska beakta hållbarhetsfaktorer och integrera hållbarhetsrisker": "FI Proposes Mandatory ESG Integration and Sustainability Risk Rules for Fund Managers and Securities Firms",
+    "fi föreslår ändrade regler och ändrad tillämpning av bankers kapitalkrav": "Finansinspektionen Proposes Revisions to Capital Requirements and Prudential Assessment Methods for Banks",
+    "fi förtydligar skyldigheter för tredjepartsleverantörer av betaltjänster": "Finansinspektionen Clarifies Operational Obligations for Third-Party Payment Service Providers (TPPs)",
+    "fi har beslutat om nya och ändrade föreskrifter": "Finansinspektionen Enacts New and Amending Supervisory Regulations (FFFS)",
+    "fi har beslutat om ändringar i fem föreskrifter": "Finansinspektionen Adopts Amendments Across Five Core Supervisory Regulations",
+    "fi har beslutat om ändringar i två föreskrifter": "Finansinspektionen Enacts Amendments Across Two Capital and Reporting Regulations",
+    "fi publicerar pelare 2-krav på likviditetstäckningskvot i enskilda valutor": "Finansinspektionen Publishes Pillar 2 Guidance on Liquidity Coverage Ratios (LCR) in Individual Currencies",
+    "fi sätter fokus på livförsäkringsföretags återförsäkring av risk för massannullation": "Finansinspektionen Examines Life Insurers Reinsurance Arrangements for Mass Lapse Risk",
+    "fi tillämpar riktlinjer för lämplighetsbedömning av medlemmar i ledningsorgan för utgivare av tillgångsanknutna token och leverantörer av kryptotillgångstjänster": "FI Applies EBA Guidelines on Fit and Proper Suitability for Asset-Referenced Token Issuers and CASPs under MiCA",
+    "fi tillämpar riktlinjer för lämplighetsbedömningar av ledamöter i ledningsorgan och ledande befattningshavare": "FI Adopts Joint ESMA and EBA Guidelines on Management Suitability and Fit & Proper Assessments",
+    "fi tillämpar riktlinjer för lämplighetsbedömningar av ledamöter i ledningsorgan och ledande befattningshavare med vissa undantag": "FI Adopts Management Suitability Guidelines with Specific Domestic Legal Exceptions",
+    "fi tillämpar riktlinjer om riskfaktorer": "Finansinspektionen Implements Joint Guidelines on ML/TF Risk Factors and Customer Due Diligence",
+    "fi tillämpar riktlinjer om tillsyn över hållbarhetsinformation": "Finansinspektionen Implements Guidelines on Supervisory Oversight of Corporate Sustainability Disclosures",
+    "fi:s innovationscenter vägleder under stockholm fintech week": "FI Innovation Centre Provides Supervisory Regulatory Guidance at Stockholm Fintech Week",
+    "fi:s pelare 2-krav på likviditetstäckningskvot i enskilda valutor": "Supervisory Circular: Pillar 2 Requirements for Liquidity Coverage Ratios (LCR) by Currency",
+    "fi:s prioriterade områden 2021": "Finansinspektionen Supervisory Priorities and Strategic Risk Outlook",
+    "finansiella företag": "Supervisory Overview and Reporting Guidelines for Regulated Financial Entities",
+    "finanssisektorin digitaalista häiriönsietokykyä koskevan asetuksen soveltaminen alkoi – finanssivalvonta keskittyy valvonnassaan ict-riskien ja kyberuhkien hallintaan": "DORA Enters into Application: FIN-FSA Focuses Supervisory Scrutiny on ICT Third-Party Risks and Cyber Threat Resilience",
+    "finanssisektorin vakavaraisuus 30.6.2024: vaisu talouskehitys ja geopoliittiset jännitteet pitäneet finanssisektorin riskit korkeana – vakavaraisuus säilynyt vahvana": "FIN-FSA Financial Sector Solvency Report: Solid Capital Buffers Guard Against Subdued Macroeconomic and Geopolitical Risks",
+    "finanssivalvonnan arvio: osa kuluttajaluotonmyöntäjistä ei hallitse maksukyvyttömyysriskejä riittävällä tavalla, myös sopimusehdoissa puutteita": "FIN-FSA Thematic Review: Deficiencies Identified in Consumer Lenders Insolvency Risk Controls and Standard Contract Terms",
+    "finanssivalvonta selvitti peruspankkipalveluiden saatavuutta - saatavuudessa tai hinnoittelussa ei merkittäviä muutoksia aiempaan": "FIN-FSA Survey on Basic Banking Services: Accessibility and Fee Levels Remain Largely Stable Across Digital Channels",
+    "fintaric-tullinimikepalvelun tietoja on päivitetty 4.6.2025": "Fintaric Customs Tariff Database Updated with Harmonized Tariff Schedules (June 4, 2025)",
+    "fintaric-tullinimikepalvelun tietoja on päivitetty 9.7.2025": "Fintaric Customs Tariff Database Updated with Revised Tariff Schedules (July 9, 2025)",
+    "fintaric-tullinimiketietoja on päivitetty 26.6.2025": "Fintaric Customs Tariff System Technical Data Schedule Update (June 26, 2025)",
+    "fiva pitää asuntolainakaton ennallaan – pankkien lisäpääomavaatimuksia olisi pitänyt alentaa": "FIN-FSA Keeps Loan-to-Collateral Cap Unchanged Despite Industry Calls to Adjust Capital Buffers",
+    "focus on global stocktake at cop28": "Supervisory Briefing: Focus on Global Stocktake and ESG Transition Finance at COP28",
+    "föreläggande avis": "Consumer Agency Injunction Issued Against Avis for Inadequate Fee Disclosures",
+    "föreläggande mot reva media ab": "Enforcement Injunction Issued Against Reva Media AB for Aggressive Digital Marketing Practices",
+    "föreläggande mot sambla ab": "Consumer Protection Injunction Issued Against Sambla AB for Misleading Loan Intermediation",
+    "föreläggande mot åhléns ab": "Consumer Agency Enforces Injunction on Misleading Pricing Practices Against Retailing Chain",
+    "förslag till nya föreskrifter och allmänna råd": "Consultation: Proposed New Regulations and General Guidelines on Clearing Operations",
+    "förslag till nya föreskrifter om ägar-, ägarlednings- och ledningsprövning": "Proposed New Regulations on Fit & Proper Assessments for Owners and Senior Management",
+    "förslag till nya och ändrade regler för tjänstepensionsföretag och försäkringsföretag": "Proposed Amendments to Prudential and Governance Rules for Occupational Pension Institutions and Insurers",
+    "förslag till ändrade föreskrifter om ägar-, ägarlednings- och ledningsprövning": "Proposed Amendments to Fit and Proper Management Suitability Assessment Regulations",
+    "förslag till ändrade regler bland annat om mycket stora värdepappersbolag": "Consultation on Prudential Regulatory Amendments for Systemically Significant Investment Firms",
+    "förslag till ändrade regler med anledning av mifid 2 och mifir": "Proposed Rule Changes Pursuant to MiFID II and MiFIR Transposition",
+    "första behandling av förslaget om att frånträda ottawakonventionen": "Parliamentary Reading on Proposed Legislative Withdrawal from Ottawa Convention",
+    "första omgången riktlinjer som kompletterar solvens 2 klara": "EIOPA Finalizes Initial Tranche of Technical Guidelines Implementing Solvency II",
+    "försvarsutskottet för att säga upp ottawakonventionen": "Defence Committee Approves Proposal to Denounce the Ottawa Convention",
+    "förtydligande om likviditetsrapportering och svenska kronor som signifikant valuta": "Regulatory Clarification on Liquidity Reporting and Swedish Krona Designation as Significant Currency",
+    "hushållens skulder oroar": "Riksbank Financial Stability Report: Household Debt Levels Present Vulnerability to Macroeconomic Shocks",
+    "höjda tillsynsavgifter för 2024": "Finansinspektionen Enacts Revised Supervisory Fee Schedule for Regulated Institutions for 2024",
+    "imy förstärker – rekryterar ett 50-tal nya medarbetare": "Swedish Privacy Authority Expands Supervisory Capacity with Recruitment of Regulatory Specialists",
+    "imy har flyttat": "Swedish Privacy Authority (IMY) Relocates Official Headquarters and Administrative Offices",
+    "imy söker nu dataskyddsombud till våra referensgrupper!": "Swedish Privacy Authority Invites Data Protection Officers to Join Specialized Regulatory Working Groups",
+    "imy vill se fortsatta satsningar på dataskyddsområdet": "IMY Annual Assessment: Sustained Public and Private Investment Required for GDPR Compliance",
+    "imy:s innovationsportal – ett sätt att ge vägledning till innovatörer": "Swedish Privacy Authority Launches Regulatory Sandbox Portal to Guide Tech Innovators on Privacy by Design",
+    "information om aktivitetsgrad i fondförvaltning": "Supervisory Information Bulletin on Active Share Metrics in UCITS Fund Management",
+    "information om rapportering enligt dora": "Supervisory Guidance on Information Register Reporting Under DORA",
+    "jollyroom återkallar barnvagga på grund av risk för kvävning och klämskada": "Product Safety Alert: Consumer Agency Announces Recall of Defective Child Cradle",
+    "ko har ordet: beklämmande hur e-handlare nonchalerar lagen": "Consumer Ombudsman Address: Systematic Non-Compliance Among E-Commerce Platforms Requires Deterrent Penalties",
+    "kansalaisuuslain muuttaminen nuhteettomuus- ja toimeentuloedellytysten osalta": "Statutory Amendment: Revised Integrity and Livelihood Requirements in the Finnish Citizenship Act",
+    "kryptovarapalveluiden sääntely kiristyi mica-asetuksen myötä – kuluttajien edelleen syytä olla tarkkana": "MiCA Enters into Force: Stricter Regulatory Standards for Crypto-Asset Service Providers",
+    "lennokkitoiminta siirtyy eu-sääntelyn alaisuuteen 1.1.2023 alkaen": "Unmanned Aircraft and Drone Operations Transition to Harmonized EU Regulatory Framework",
+    "lomalla ulkomaille? katso tästä tullin vinkit sujuvaan kotiinpaluuseen": "Finnish Customs Traveler Advisory: Import Allowances and Electronic Declarations",
+    "maa- ja metsätalousvaliokunnan lausunto eu:n monivuotisesta rahoituskehyksestä valmistui": "Parliamentary Committee Opinion on the European Union Multiannual Financial Framework",
+    "maa- ja metsätalousvaliokunta kannattaa lunastuslain muuttamista": "Parliamentary Committee Endorsement of Statutory Expropriation Act Reforms",
+    "maksamisen kotivarasta kannattaa huolehtia ja muistaa maltti häiriötilanteessa – uusi varautumisopas julkaistu": "National Contingency Guide: Maintaining Backup Household Payment Means During Digital Infrastructure Disruptions",
+    "markkinoiden heilunta näkyi – huhtikuussa pääomia siirrettiin lyhyen koron rahastoihin": "Fund Market Analysis: Volatility Shifts Capital Allocations to Short-Term Money Market Funds",
+    "merkittävät kiinteistöriskit suomen finanssisektorilla – vahvat puskurit suojaavat": "FIN-FSA Financial Stability Review: Commercial Real Estate Risks Offset by Robust Bank Capital Buffers",
+    "millu ab återkallar reflexselar i barnstorlek": "Consumer Agency Product Safety Recall of Non-Compliant Child Reflective Harnesses",
+    "misslyckade bilköp kostar svenskarna 4,2 miljarder kronor årligen": "Consumer Agency Economic Study: Faulty Motor Vehicle Transactions Inflict SEK 4.2B in Annual Consumer Detriment",
+    "muistutuskutsu: finanssivalvonnan lehdistötilaisuus torstaina 3.4. finanssisektorin tilasta ja riskeistä – erityisteemoina kiinteistöriskit, rahastosektori sekä kryptovarapalveluiden valvonta": "FIN-FSA Press Briefing: Financial Sector Stability Outlook, Real Estate Risks, and MiCA Supervision",
+    "muutoksia yhdistetyn nimikkeistön selittäviin huomautuksiin (cn-selitykset)": "Finnish Customs Bulletin: Amendments to Explanatory Notes of the Combined Nomenclature (CN)",
+    "många nätbutiker som säljer secondhand-varor ger bristande information om rätten att returnera varor": "Consumer Agency Sweep: Inadequate Statutory Withdrawal and Cancellation Information in Online Stores",
+    "ny strategisk allokering av guld- och valutareserven och oförändrad valutasäkring": "Sveriges Riksbank Decides on Strategic Asset Allocation of Gold and Foreign Currency Reserves",
+    "nya hållbarhetsregler har trätt i kraft": "New Sustainable Finance Disclosure (SFDR) Rules Enter into Force",
+    "nya metoder för bankernas riskvikter och kapitalkrav beslutade": "Finansinspektionen Decides on New Risk Weight Assessment Methodologies for Banking Capital Requirements",
+    "nya och ändrade föreskrifter och allmänna råd om clearingverksamhet": "New and Amended Regulations and General Guidelines on Financial Clearing Operations",
+    "nya regler mot penningtvätt och finansiering av terrorism": "New Supervisory Regulations Enacted Against Money Laundering and Terrorist Financing (AML/CFT)",
+    "nya regler om hållbarhetsrapportering": "Corporate Sustainability Reporting Directive (CSRD) Transposition Rules Enacted",
+    "pankin turvatili on sitkeä valhe – pankki ei tarvitse asiakkaan tunnuksia rahojen turvaamiseen": "Supervisory Fraud Warning: Banks Never Require Customer Security Credentials to Secure Accounts",
+    "peruspankkipalveluiden käyttö keskittyy digitaalisiin kanaviin - hintataso pysynyt pääosin ennallaan": "FIN-FSA Review: Basic Banking Services Shift to Digital Channels with Stable Fee Baseline",
+    "pohjoismaiden tietosuojaviranomaiset sopivat yhteistyön tiivistämisestä tietoturvakysymyksissä ja rajat ylittävissä asioissa": "Nordic Data Protection Authorities Agree to Deepen Cross-Border Cooperation on Cybersecurity and GDPR Enforcement",
+    "protokoll från det penningpolitiska mötet den 18 december 2024": "Minutes of the Riksbank Monetary Policy Meeting (December 18, 2024)",
+    "protokoll från det penningpolitiska mötet den 19 augusti 2024": "Minutes of the Riksbank Monetary Policy Meeting (August 19, 2024)",
+    "protokoll från det penningpolitiska mötet den 19 mars 2025": "Minutes of the Riksbank Monetary Policy Meeting (March 19, 2025)",
+    "protokoll från det penningpolitiska mötet den 26 juni 2024": "Minutes of the Riksbank Monetary Policy Meeting (June 26, 2024)",
+    "protokoll från det penningpolitiska mötet den 28 januari 2025": "Minutes of the Riksbank Monetary Policy Meeting (January 28, 2025)",
+    "protokoll från det penningpolitiska mötet den 7 maj 2024": "Minutes of the Riksbank Monetary Policy Meeting (May 7, 2024)",
+    "puhelinneuvonta ja kirjaamo suljettuna 27.5.2025": "Office of the Data Protection Ombudsman Administrative Schedule Notice",
+    "puhelinneuvontamme on suljettu 7.7.–3.8.2025": "Data Protection Ombudsman Summer Administrative Schedule Notice",
+    "pågående undersökningar": "Supervisory Register: Active Investigations and Thematic Examinations",
+    "rahastomarkkinoilla oli kesäkuussa myönteinen vire – uusia pääomia kertyi kaikkiin rahastoluokkiin yhteensä yli 1,3 miljardia euroa": "Nordic Fund Market Report: Net Inflows Exceed EUR 1.3B Across Major Asset Classes in June",
+    "rahastot mukaan osakesäästötiliin – fa:n ahosniemi kehuu pääministeri orpon ja elinkeinoministeri puiston avausta": "Finance Finland Welcomes Government Initiative to Include Investment Funds in Equity Savings Accounts",
+    "rapportering av tjänstepensionsdata": "Supervisory Guidelines for Data Submissions by Occupational Pension Institutions",
+    "rapporteringsförändringar": "Prudential Regulatory Reporting Framework Changes and Schema Updates",
+    "redovisning av samarbete för att motverka olaglig spelverksamhet och penningtvätt": "Supervisory Report on Cross-Agency Cooperation to Combat Illegal Gambling and Money Laundering",
+    "regionstyrelsen region sörmland": "Administrative Court Review: Health Authority IT Procurement Compliance",
+    "remiss – nya föreskrifter om en paneuropeisk privat pensionsprodukt": "Consultation Paper: Proposed New Regulations on Pan-European Personal Pension Products (PEPP)",
+    "revideringen av mifid och mifir klar: nya regelverk publicerade": "MiFID II and MiFIR Review Concluded: Revised Regulatory Framework Enacted",
+    "riksdagen godkände innehållet i förslaget om att ändra sametingslagen": "Parliament Approves Statutory Amendments to the Sámi Parliament Act",
+    "riksdagen godkände uppsägning av ottawakonventionen": "Parliament Approves Denunciation of the Ottawa Anti-Personnel Mine Convention",
+    "riksdagen röstar om sametingslagen torsdagen den 19.6": "Parliamentary Agenda: Vote on Sámi Parliament Act Amendments Scheduled",
+    "riksdagsbibliotekets infopaket om bruk av teknologi för gränssäkerhet": "Parliamentary Research Brief on Digital Border Surveillance and Identity Technology",
+    "samarbete mot oseriösa nätbutiker stoppade misstänkta bedrägerier för 134 miljoner": "Joint Enforcement Taskforce Halts SEK 134 Million in Suspected Digital Payment Fraud",
+    "shein utreds av konsumentverket och andra europeiska konsumentskyddsmyndigheter": "European Consumer Protection Authorities Launch Joint Coordinated Investigation into Shein Platform",
+    "sosiaali- ja terveysvaliokunta järjestää julkisen kuulemisen eutanasialakia ehdottavasta kansalaisaloitteesta": "Parliamentary Committee Organizes Public Hearing on Healthcare Legislation Initiative",
+    "startskott för eba:s stresstest av europeiska banker 2018": "EBA Launches Comprehensive Stress Test Exercise for European Banking Sector",
+    "stora förändringar av ramverket för bankernas kreditriskmodeller": "Major Regulatory Overhaul of Prudential Framework for Bank Internal Credit Risk Models (IRB)",
+    "stora utskottet tog ställning till återvändandeförordningen, budgetramen och beredskapsunionen": "Parliament Grand Committee Resolves Position on EU Return Directive, Budget Framework, and Preparedness",
+    "suomalaiset tyytyväisiä vakuutuksiinsa – hakemusten hylkäykset harvinaisia, 86 prosenttia koki korvauksen vastanneen sattunutta vahinkoa": "Insurance Consumer Survey: High Claim Settlement Rates and Customer Satisfaction Reported in Finland",
+    "suomalaispankkien luottojen arvonalentumisluokitteluissa eroja – oikea-aikaiset ja riittävät luottotappiovaraukset edellyttävät toimivaa luottoriskien hallintaa": "FIN-FSA Thematic Audit: Variance in Bank Loan Impairment Classifications Highlights Need for Robust Credit Risk Provisions",
+    "suomen finanssisektorin vakavaraisuus säilynyt vahvana – epävarmuus varjostaa talousnäkymiä": "FIN-FSA Solvency Assessment: Finnish Financial Sector Retains High Capital Adequacy Amid Macroeconomic Uncertainty",
+    "suomi läpäisi merenkulun hallinnon imsas-auditoinnin": "Finland Successfully Completes International Maritime Organization (IMO) IMSAS Audit",
+    "suuri valiokunta yhtyy täsmennyksin valtioneuvoston kantaan neuvotteluissa csam-asetuksesta": "Grand Committee Endorses Government Position in Negotiations on EU Online Safety Regulation",
+    "sveriges digitalisering måste vara hållbar": "Director General Statement: Digital Transformation in the Financial Sector Must Ensure Resilience and Sustainability",
+    "särskilda pm och beslut": "Supervisory Memoranda and Individual Precedent Decisions",
+    "taxonomi 4.0  – datum för rapportering": "Supervisory Schedule Update: EU Taxonomy 4.0 Electronic Reporting Timelines and Technical Guidance",
+    "thedéen: makromötet – hur ser en riksbankschef på omvärldsläget?": "Riksbank Governor Speech: Central Bank Perspective on Global Macroeconomic and Financial Stability Risks",
+    "thedéen: sveriges ekonomiska läge i en turbulent omvärld": "Riksbank Governor Speech: Sweden's Economic Position and Inflation Outlook in Turbulent Global Markets",
+    "tiedote lentäjille: part-fcl-lupakirjojen kelpuutuksiin jatkoa tarvittaessa": "Aviation Safety Notice: Temporary Extensions for Part-FCL Flight Crew Licensing Ratings",
+    "tietosuojavaltuutetun toimiston toimintakertomus 2024: tietosuojatyötä digitaalisen yhteiskunnan ja sääntelyn murroksessa": "Office of the Data Protection Ombudsman Annual Report 2024: Data Protection in a Transforming Digital Society",
+    "tietosuojaviranomaisten päälliköt kokoontuvat helsingissä": "Nordic and European Data Protection Commissioners Convene in Helsinki on Cross-Border Enforcement",
+    "traficomin säädösinfoissa luodaan katsaus ajankohtaisiin säädös- ja määräysasioihin": "Traficom Regulatory Briefing: Overview of Upcoming Transport and Cyber Security Regulations",
+    "tre områden i fokus för granskning av finansiella rapporter från börsföretag": "Supervisory Priorities: Three Core Focus Areas for Financial Statement Audits of Listed Companies",
+    "tullimuseo toivottaa kävijät tervetulleiksi elokuun loppuun asti": "Finnish Customs Cultural Heritage Notice: Customs Museum Open for Public Visits",
+    "tullin määräys 9/2022 unionitavaran tuonnista ahvenanmaalle toisesta eu-maasta": "Finnish Customs Regulation 9/2022: Importation of Union Goods into the Aland Islands from EU Member States",
+    "tullin vastuullisuusvuotta 2024 värittivät itärajan sulun vaikutukset, monitahoinen viranomaisyhteistyö ja verkkokauppatilausten räjähdysmäinen kasvu": "Finnish Customs Annual Sustainability Review 2024: Border Sanctions Enforcement and E-Commerce Freight Growth",
+    "tullin vuosi 2024: kaupankäynti venäjän kanssa romahti, verkkokaupan volyymit kasvoivat räjähdysmäisesti": "Finnish Customs Annual Report 2024: Sanctions Enforcement and Digital E-Commerce Trade Dynamics",
+    "turvallinen arki ja vauraampi tulevaisuus – huijausten torjunta ja kansankapitalismin edistäminen fa:n lobbauksen kärkiaiheita": "Financial Sector Priority: Fraud Prevention and Retail Investment Participation Form Core Industry Initiatives",
+    "två förordningar kompletterar eu:s taxonomiförordning": "European Commission Adopts Delegated Regulations Complementing the EU Taxonomy Regulation",
+    "täsmämuutoksia tietosuojasääntelyyn: euroopan tietosuojaviranomaiset tukevat pienten ja keskikokoisten yritysten velvollisuuksien helpottamista": "GDPR Regulatory Alignment: European Data Protection Authorities Support Targeted Compliance Relief for SMEs",
+    "ukrainalaisten ajokortit ja autot": "Transport Regulatory Notice: Recognition of Ukrainian Driving Licences and Motor Vehicles",
+    "upphandling av journalsystem får grönt ljus av förvaltningsrätten": "Administrative Court Upholds Legality of Public Healthcare IT System Procurement",
+    "uptown rider ståbräda återkallas - risk för huvudskador": "Consumer Agency Product Safety Recall: Defective Stroller Board Poses Head Injury Hazard",
+    "utrikesutskottet: finland kan frånträda ottawakonventionen": "Parliamentary Foreign Affairs Committee Report: Legal Assessment of Ottawa Convention Withdrawal",
+    "utrikesutskottets pressträff om betänkandet gällande ottawakonventionen den 13.6 kl. 13.45": "Parliamentary Press Briefing: Foreign Affairs Committee Report on Ottawa Convention",
+    "uudet purje- ja kuumailmapallolentotoiminnan lupakirja- ja koulutusmääräykset julkaistu – traficom myöntää siirtymäaikaa kansalliselle koulutukselle": "Traficom Publishes Updated Pilot Licensing and Training Regulations with National Transition Period",
+    "uusi markkinavalvontastrategia yhtenäistää markkinavalvontaa suomessa": "New National Market Surveillance Strategy Harmonizes Cross-Agency Product Safety Enforcement",
+    "vaali- ja puoluerahoituslainsäädännön muuttaminen": "Legislative Reform: Statutory Amendments to Campaign and Political Party Financing Laws",
+    "vahva vakavaraisuus suojaa finanssisektoria riskeiltä – epävarmuus lisääntynyt taloudessa ja rahoitusmarkkinoilla": "FIN-FSA Financial Sector Assessment: Strong Capital Buffers Shield Financial Institutions Amid Market Uncertainty",
+    "valvonnan vuosijulkaisu 2024 on julkaistu": "Finansinspektionen Supervisory Annual Publication 2024 Released",
+    "vägledande medskick till vården och omsorgen efter imy:s tillsyner": "Swedish Privacy Authority Issues Sector Guidance on Health and Social Care GDPR Audit Findings",
+    "vägledning för integritetsanalys i lagstiftningsarbete": "Supervisory Guidance for Data Protection Impact Assessments in Legislative Drafting",
+    "vägledning vid kamerabevakning": "Swedish Privacy Authority Issues Comprehensive Guidance on Video Surveillance Compliance",
+    "välkommen till imy-bloggen!": "Swedish Privacy Authority Editorial Bulletin: Regulatory Updates and Privacy Insights",
+    "webbinarium: drabbad av bankbedrägeri?": "Educational Supervisory Webinar: Preventive Measures Against Banking Fraud and Social Engineering",
+    "webbinarium: om flygresor för dig som konsument": "Consumer Agency Educational Webinar: Passenger Rights and Aviation Consumer Protections",
+    "yrityslähestymiskiellon toteutus etenee – tiedossa aiempaa parempaa suojaa häiriköintiä ja uhkailua vastaan työpaikoilla": "Legislative Implementation: Corporate Restraining Order Protections Advance in Parliament",
+    "äldre regler om bankers kapitalkrav upphör": "Finansinspektionen Repeals Legacy Capital Requirements Regulations Following CRR Transposition",
+    "ändrade föreskrifter om kapitaltäckning och ersättningssystem för värdepappersbolag": "Amended Regulations on Capital Adequacy and Remuneration Systems for Investment Firms",
+    "ändringar i sättet att rapportera incidenter till fi": "Finansinspektionen Updates Operational Procedures for Mandatory Incident Reporting",
+    "årsredovisning 2023": "Annual Supervisory Report 2023",
+}
+
+
+def translate_title(title: str) -> str:
+    cleaned = title.strip().replace("\u00ad", "").replace("\u00a0", " ")
+    low = cleaned.lower()
+
+    # Exact dictionary lookup
+    if low in TITLE_MAP:
+        return sanitize_text(TITLE_MAP[low])
+
+    # Pattern-based translations
+    m_case = re.match(r"^mål:\s*([\d\-]+)$", low)
+    if m_case:
+        return f"Swedish Administrative Court Case No. {m_case.group(1)}"
+
+    m_air = re.match(r"^ilmailun säädösseuranta\s*(.*)$", low)
+    if m_air:
+        return f"Aviation Regulatory Horizon Bulletin ({m_air.group(1).strip()})"
+
+    m_rail = re.match(r"^raideliikenteen säädösseuranta\s*(.*)$", low)
+    if m_rail:
+        return f"Railway Regulatory Horizon Bulletin ({m_rail.group(1).strip()})"
+
+    m_fintaric = re.match(r"^fintaric.*päivitetty\s*(.*)$", low)
+    if m_fintaric:
+        return f"Fintaric Customs Tariff Database Updated ({m_fintaric.group(1).strip()})"
+
+    m_proto = re.match(r"^protokoll från det penningpolitiska mötet den\s*(.*)$", low)
+    if m_proto:
+        return f"Minutes of the Riksbank Monetary Policy Meeting ({m_proto.group(1).strip()})"
+
+    m_forel = re.match(r"^föreläggande(?:\s+mot)?\s+(.*)$", low)
+    if m_forel:
+        target = sanitize_text(m_forel.group(1).strip().title())
+        return f"Consumer Agency Injunction Issued Against {target}"
+
+    # If title is in English already, just sanitize bank names
+    return sanitize_text(cleaned)
+
+
+RISK_CATEGORIES_MAP: List[Tuple[str, str]] = [
+    (r"(?:ai\b|algoritm|machine\s*learning|automaatio)", "Algorithmic and AI transparency and governance risk"),
+    (r"(?:penningtvätt|aml|rahanpesu|terroris|cft|pep|fiu)", "Money laundering and terrorist financing risk (AML/CFT)"),
+    (r"(?:kredit|luotto|maksukyvyttömyys|insolvens|default)", "Credit assessment and counterparty default risk"),
+    (r"(?:it-|ict|kyber|cyber|haavoittuv|incident|tiber|teknolog)", "Information security and ICT operational resilience risk"),
+    (r"(?:dataskydd|tietosuoja|gdpr|integritet|personuppgift|yksityisy)", "Data protection and privacy compliance risk (GDPR)"),
+    (r"(?:betalning|maksu|bedrägeri|fraud|huijaus|sca|kortti)", "Payment fraud and transaction security risk"),
+    (r"(?:sanktion|seuraamus|böter|vite|påföljd)", "Supervisory penalty and administrative sanction exposure"),
+    (r"(?:marknadsmissbruk|insider|sisäpiiri|mar\b)", "Market abuse and insider dealing risk (MAR)"),
+    (r"(?:hållbarhet|vastuullisuus|esg|greenwashing|sfdr|taxonomi)", "Sustainability disclosure and greenwashing risk (SFDR)"),
+    (r"(?:kapital|vakavaraisuus|likviditet|maksuvalmius|srep|crr|crd)", "Capital adequacy and prudential liquidity risk"),
+    (r"(?:försäkring|vakuutus|solvens|idd)", "Insurance underwriting and solvency risk (Solvency II)"),
+    (r"(?:konsument|kuluttaja|marknadsföring)", "Consumer protection and product conduct risk"),
+    (r"(?:upphandling|hankinta)", "Procurement and contractual compliance risk"),
+    (r"(?:tulli|tull|tullaus|vienti|tuonti)", "Customs and cross-border trade compliance risk"),
+    (r"(?:ilmailu|lento|aviation)", "Aviation regulatory compliance and safety risk"),
+    (r"(?:raide|liikenne|transport)", "Transport and infrastructure regulatory risk"),
+    (r"(?:tarkastus|tillsyn|audit|valvonta)", "Supervisory audit and examination deficiency risk"),
+]
+
+
+def translate_risk(risk_str: str) -> str:
+    cleaned = risk_str.strip().replace("\u00ad", "").replace("\u00a0", " ")
+    low = cleaned.lower()
+
+    # If it matches a cluster, map to standardized English risk
+    for pattern, replacement in RISK_CATEGORIES_MAP:
+        if re.search(pattern, low):
+            return replacement
+
+    # If already clean English without non-English characters
+    if not re.search(r"[äöåÄÖÅ]", cleaned):
+        return sanitize_text(cleaned)
+
+    return "Regulatory compliance and supervisory risk"
+
+
+# ============================================================
+# Classification & Score Calibration
 # ============================================================
 
 def resolve_category(title: str, summary: str, link: str, score: int) -> str:
@@ -371,6 +756,7 @@ def resolve_category(title: str, summary: str, link: str, score: int) -> str:
 def calibrate_regulatory_score(raw_s: int, category: str, title: str, summary: str, frameworks: List[str], risks: List[str]) -> int:
     blob = f"{title} {summary} {' '.join(frameworks)} {' '.join(risks)}".lower()
 
+    # 1. Critical Impact (Score 5)
     if any(k in blob for k in [
         "penalty fee", "35m penalty", "sek 35m", "revocation", "återkallad",
         "critical vulnerability", "zero-day", "sfs 2026:916", "kill switch",
@@ -378,18 +764,30 @@ def calibrate_regulatory_score(raw_s: int, category: str, title: str, summary: s
     ]):
         return 5
 
+    # 2. Informational Updates (Score 1) — Routine surveys, statistical bulletins, taxonomy updates, informational notices
+    if category not in ["ENFORCEMENT", "AMENDMENT"] and any(k in blob for k in [
+        "taxonomy 4.0", "active share", "fintaric customs tariff", "conformance update",
+        "statistical bulletin", "statistical overview", "summer administrative",
+        "administrative schedule", "cultural heritage", "webinar", "bloggen",
+        "traveler advisory", "customs museum"
+    ]):
+        return 1
+
+    # 3. Consultations & Market Discussions (Score 2)
     if category == "CONSULTATION":
         return 2
-    if any(k in blob for k in ["survey", "rapport", "undersökning", "statistik", "publikation", "årsredovisning", "marknadsläge", "stabilitetsrapport", "memo", "promemoria", "tilastot"]):
+    if any(k in blob for k in ["consultation paper", "speech by", "hearing", "address by", "perspective on global"]):
         return 2
 
+    # 4. Binding Amendments, Technical Standards & Regulatory Enforcements (Score 4)
     if category in ["TECHNICAL_STANDARD", "AMENDMENT"]:
         return 4
-    if category == "CIRCULAR" and any(k in blob for k in ["mandatory", "strict", "immediate", "deadline", "compliance obligation", "föreskrift", "määräys"]):
+    if category == "CIRCULAR" and any(k in blob for k in ["mandatory", "strict", "immediate", "deadline", "compliance obligation", "binding", "pillar 2"]):
         return 4
     if category == "ENFORCEMENT":
         return 4
 
+    # 5. Standard Circulars & Supervisory Advisories (Score 3)
     if category == "CIRCULAR":
         return 3
     if raw_s >= 4:
@@ -430,14 +828,51 @@ def synthesize_action(category: str, risks: List[str], frameworks: List[str]) ->
 
 
 # ============================================================
-# Main Pipeline Runner
+# Main Pipeline Runner & Text Normalization
 # ============================================================
+
+def strip_nordic_accents(text: str) -> str:
+    replacements = {
+        'ä': 'a', 'ö': 'o', 'å': 'a',
+        'Ä': 'A', 'Ö': 'O', 'Å': 'A',
+        'é': 'e', 'É': 'E', 'ü': 'u', 'Ü': 'U'
+    }
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+    return text
+
+
+SCANDI_STOPS = {
+    "och", "att", "som", "en", "ett", "den", "det", "av", "för", "med", "har", "om", "på", "till", "från",
+    "eller", "inte", "under", "också", "efter", "över", "vid", "mot", "är", "ska", "blev", "blir",
+    "ja", "on", "ei", "oli", "sekä", "että", "tai", "joka", "jotka", "mukaan", "kanssa", "jälkeen",
+    "myös", "kun", "jotta", "koska", "jos", "ovat", "ole", "ollut", "tämä", "nämä"
+}
+
+
+def is_english_text(s: str) -> bool:
+    if not s:
+        return False
+    words = [re.sub(r"[^\w]", "", w.lower()) for w in s.split()[:25]]
+    non_en = sum(1 for w in words if w in SCANDI_STOPS)
+    return non_en < 2
+
+
+def ensure_english_summary(summary: str, explanation: str, title: str, auth_label: str, statute_ref: str, category: str) -> str:
+    cleaned = sanitize_text(summary)
+    if is_english_text(cleaned):
+        return strip_nordic_accents(cleaned)
+    cleaned_exp = sanitize_text(explanation)
+    if is_english_text(cleaned_exp):
+        return strip_nordic_accents(cleaned_exp)
+    cat_desc = category.lower().replace('_', ' ')
+    return f"{auth_label} issues supervisory {cat_desc} update regarding {statute_ref}: {title}. The announcement establishes supervisory compliance obligations and risk monitoring standards for supervised institutions."
+
 
 def main():
     parser = argparse.ArgumentParser(description="Ingest articles from rss-mapper-poc into Nordic RegTech feed")
     parser.add_argument("--input", type=str, help="Path to articles.json from rss-mapper-poc")
     parser.add_argument("--output", type=str, default=str(OUTPUT_PATH), help="Output path for feed_items.json")
-    parser.add_argument("--limit", type=int, default=320, help="Target number of curated items to output")
     args = parser.parse_args()
 
     input_file = None
@@ -459,7 +894,7 @@ def main():
 
     print(f"Loaded {len(raw_articles)} raw articles from rss-mapper-poc.")
 
-    # Deduplicate and group by authority
+    # Deduplicate and group by authority (filtering low-value navigation items)
     by_auth: Dict[str, List[Dict[str, Any]]] = {}
     total_processed = 0
 
@@ -470,6 +905,10 @@ def main():
         summary = item.get("summary", "").strip()
 
         if not title or not summary:
+            continue
+
+        clean_t = title.lower().replace("\u00ad", "").replace("\u00a0", " ").strip()
+        if clean_t in LOW_VALUE_NAVIGATION_TITLES:
             continue
 
         auth_rule = resolve_authority(source, link, title, summary, item.get("vendors", []))
@@ -494,7 +933,7 @@ def main():
         "riksdagen": 30,    # Swedish Parliament & Government
         "eduskunta": 25,    # Parliament of Finland
         "imy": 25,          # Swedish Privacy Authority (IMY / GDPR)
-        "konsumentverket": 20, # Swedish Consumer Agency (Credit & Enforcement)
+        "konsumentverket": 20, # Swedish Consumer Agency
         "riksbank": 15,     # Sveriges Riksbank
         "tulli": 15,        # Finnish Customs (Trade & Sanctions)
         "domstol": 10,      # Swedish Courts
@@ -508,8 +947,10 @@ def main():
 
     for aid, target_count in quotas.items():
         candidates = by_auth.get(aid, [])
+        # Prioritize articles where summary is in English, followed by rich AI metadata
         candidates.sort(
             key=lambda x: (
+                1 if is_english_text(x.get("summary", "")) else 0,
                 len(x.get("frameworks", [])),
                 len(x.get("risks", [])),
                 len(x.get("vendors", [])),
@@ -537,8 +978,8 @@ def main():
     for idx, raw in enumerate(selected_raw):
         source = raw.get("source", "")
         link = raw.get("link", "")
-        title = raw.get("title", "").strip()
-        summary = raw.get("summary", "").strip()
+        raw_title = raw.get("title", "").strip()
+        raw_summary = raw.get("summary", "").strip()
         explanation = raw.get("explanation", "").strip()
         raw_score = int(raw.get("score", 3))
 
@@ -547,22 +988,37 @@ def main():
         raw_risks = [r.strip() for r in raw.get("risks", []) if r.strip()]
         created_at = raw.get("created_at", "2025-08-22 12:00:00")
 
-        # Anonymize entities & translate risks
-        vendors = list(dict.fromkeys(anonymize_entity(v) for v in raw_vendors))
-        risks = list(dict.fromkeys(translate_risk(r) for r in raw_risks))
-        frameworks = raw_frameworks
-
-        auth_rule = resolve_authority(source, link, title, summary, raw_vendors)
+        auth_rule = resolve_authority(source, link, raw_title, raw_summary, raw_vendors)
         auth_id = auth_rule.authority_id
         auth_label = auth_rule.authority_name
         auth_short = auth_rule.short_name
         jur = auth_rule.jurisdiction
 
-        category = resolve_category(title, summary, link, raw_score)
+        category = resolve_category(raw_title, raw_summary, link, raw_score)
+
+        # 100% English title translation & originalTitle tracking
+        title = strip_nordic_accents(translate_title(raw_title))
+        orig_title = raw_title if raw_title.lower() != title.lower() else None
+
+        # Statutory rule resolution
+        text_blob_temp = f"{title} {' '.join(raw_frameworks)} {' '.join(raw_risks)} {link}"
+        statute_rule = resolve_statute(text_blob_temp, jur)
+        statute_id = statute_rule.statute_id
+        statute_ref = statute_rule.statute_ref
+        statute_sec = statute_rule.statute_sec
+
+        # Sanitize summary and guarantee 100% English with zero Scandinavian accents
+        summary = ensure_english_summary(raw_summary, explanation, title, auth_label, statute_ref, category)
+
+        # Anonymize entities & translate risks
+        vendors = list(dict.fromkeys(strip_nordic_accents(anonymize_entity(v)) for v in raw_vendors))
+        risks = list(dict.fromkeys(strip_nordic_accents(translate_risk(r)) for r in raw_risks))
+        frameworks = [strip_nordic_accents(sanitize_text(f)) for f in raw_frameworks]
+
         score = calibrate_regulatory_score(raw_score, category, title, summary, frameworks, risks)
         text_blob = f"{title} {summary} {' '.join(frameworks)} {' '.join(risks)} {link}"
 
-        # Statutory rule resolution
+        # Refine statutory resolution with full text blob
         statute_rule = resolve_statute(text_blob, jur)
         statute_id = statute_rule.statute_id
         statute_ref = statute_rule.statute_ref
@@ -599,9 +1055,12 @@ def main():
             item_id = f"feed-{auth_id}-{hash_suffix}-{idx}"
         seen_ids.add(item_id)
 
-        why_it_matters = explanation if explanation else f"Supervisory and compliance update from {auth_label} regarding {statute_ref}."
-        before_after = synthesize_before_after(category, summary, why_it_matters)
-        action_required = synthesize_action(category, risks, frameworks)
+        if explanation and is_english_text(explanation):
+            why_it_matters = strip_nordic_accents(sanitize_text(explanation))
+        else:
+            why_it_matters = f"Supervisory and compliance update from {auth_label} regarding {statute_ref}. Establishes risk oversight and reporting standards for supervised entities."
+        before_after = strip_nordic_accents(synthesize_before_after(category, summary, why_it_matters))
+        action_required = strip_nordic_accents(synthesize_action(category, risks, frameworks))
 
         tags = list(dict.fromkeys(
             frameworks[:3] +
@@ -610,10 +1069,6 @@ def main():
         ))
 
         relative_time = format_relative_time(created_at)
-
-        orig_title = raw.get("original_title") or (raw.get("title", "") if raw.get("language") in ["fi", "sv"] else None)
-        if orig_title and orig_title.strip().lower() == title.strip().lower():
-            orig_title = None
 
         # Build and validate using Pydantic FeedItemModel
         model = FeedItemModel(
@@ -672,7 +1127,7 @@ def main():
                 "actionRequired": "Immediately update Algorithmic Trading Policy (POL-ALG-01), execute stress testing on kill-switch latency for CTL-ALG-01 and CTL-ALG-03, and file compliance attestation.",
             },
             "frameworks": ["SFS 2026:916", "Algorithmic Trading", "MiFID II", "MAR"],
-            "vendors": ["Sveriges Riksdag", "Finansinspektionen"],
+            "vendors": ["Swedish Parliament (Sveriges Riksdag)", "Swedish Financial Supervisory Authority (FI)"],
             "risks": ["Algorithmic execution runaway risk", "Market disruption liability", "Director personal liability"],
             "policyIds": ["pol-alg-01"],
             "controlIds": ["ctl-alg-01", "ctl-alg-03"],
@@ -703,8 +1158,8 @@ def main():
                 "actionRequired": "Re-audit cloud outsourcing contracts under POL-DORA-01, verify contract audit clauses in CTL-DORA-01, and populate register templates.",
             },
             "frameworks": ["DORA", "Regulation (EU) 2022/2554", "FFFS", "EBA Guidelines"],
-            "vendors": ["Finansinspektionen", "AWS", "Microsoft Azure", "Google Cloud"],
-            "risks": ["Third-party ICT concentration risk", "Supervisory deficiency notice", "Vendor lock-in"],
+            "vendors": ["Swedish Financial Supervisory Authority (FI)", "AWS", "Microsoft Azure", "Google Cloud"],
+            "risks": ["Information security and ICT operational resilience risk", "Supervisory deficiency notice", "Vendor lock-in"],
             "policyIds": ["pol-dora-01"],
             "controlIds": ["ctl-dora-01", "ctl-dora-02"],
             "riskIds": ["rsk-dora-01"],
@@ -727,15 +1182,15 @@ def main():
             "statuteId": "sfs-2017-630",
             "statuteSec": "riksdagen_sfs-2017-630_k3_p1",
             "statuteRef": "SFS 2017:630 3 kap. 1 §",
-            "summary": "Finansinspektionen has issued a formal warning and an administrative fine of 35 million SEK against a Nordic credit institution for systemic delays in investigating automated AML alerts and backlogs exceeding 30 days.",
+            "summary": "Finansinspektionen has issued a formal warning and an administrative fine of 35 million SEK against Nordic Sovereign Bank for systemic delays in investigating automated AML alerts and backlogs exceeding 30 days.",
             "plainEnglish": {
                 "whyItMatters": "The decision establishes that staffing shortages and alert fatigue are not defensible justifications for transaction monitoring queues exceeding 7 business days.",
                 "beforeAfter": "Regulators previously accepted risk-based triage of high vs low priority AML alerts. FI now requires auditable throughput SLAs across all automated scenario triggers.",
                 "actionRequired": "Benchmark current alert queue SLA against the 5-day regulatory ceiling under CTL-AML-02, and evaluate machine-learning false-positive suppression rules.",
             },
             "frameworks": ["SFS 2017:630", "AML/CFT", "EU 4th AMLD", "FATF Recommendations"],
-            "vendors": ["Finansinspektionen"],
-            "risks": ["Supervisory fine and public sanction", "Reputational damage", "Systemic alert backlog"],
+            "vendors": ["Swedish Financial Supervisory Authority (FI)", "Nordic Sovereign Bank"],
+            "risks": ["Money laundering and terrorist financing risk (AML/CFT)", "Reputational damage", "Systemic alert backlog"],
             "policyIds": ["pol-aml-01"],
             "controlIds": ["ctl-aml-02"],
             "riskIds": ["rsk-aml-01"],
@@ -764,9 +1219,9 @@ def main():
                 "beforeAfter": "Self-declarations accompanied by certified register extracts were sufficient. Under Circular 02/2026, independent corroboration of wealth origin is mandatory.",
                 "actionRequired": "Review onboarding workflows in POL-AML-01, re-screen existing wealth management client dossiers under CTL-AML-01.",
             },
-            "frameworks": ["Laki rahanpesun ja terrorismin rahoittamisen estämisestä (444/2017)", "EU AML Directives"],
-            "vendors": ["FIN-FSA (Finanssivalvonta)"],
-            "risks": ["Offshore beneficial ownership evasion", "Money laundering vulnerability", "Regulatory non-compliance"],
+            "frameworks": ["AML Act (444/2017)", "EU AML Directives"],
+            "vendors": ["FIN-FSA (Financial Supervisory Authority)", "Polaris Wealth"],
+            "risks": ["Money laundering and terrorist financing risk (AML/CFT)", "Offshore beneficial ownership evasion", "Regulatory non-compliance"],
             "policyIds": ["pol-aml-01"],
             "controlIds": ["ctl-aml-01"],
             "riskIds": ["rsk-aml-01"],
@@ -796,8 +1251,8 @@ def main():
                 "actionRequired": "Align incident response runbooks in CTL-DORA-01 with the new ESAs classification matrix and verify automated ticket escalation.",
             },
             "frameworks": ["DORA", "ESAs RTS", "Regulation (EU) 2022/2554"],
-            "vendors": ["EBA", "ESMA", "EIOPA"],
-            "risks": ["Late incident notification penalties", "Operational downtime misclassification"],
+            "vendors": ["European Banking Authority", "European Securities and Markets Authority"],
+            "risks": ["Information security and ICT operational resilience risk", "Late incident notification penalties"],
             "policyIds": ["pol-dora-01"],
             "controlIds": ["ctl-dora-01"],
             "riskIds": ["rsk-dora-01"],
@@ -827,8 +1282,8 @@ def main():
                 "actionRequired": "Screen all active Nordic fund titles against portfolio taxonomy percentages and update prospectus disclosures under POL-ALG-01.",
             },
             "frameworks": ["SFDR (Regulation (EU) 2019/2088)", "EU Taxonomy", "ESMA Guidelines"],
-            "vendors": ["ESMA"],
-            "risks": ["Greenwashing enforcement action", "Forced fund rebranding", "Investor litigation risk"],
+            "vendors": ["European Securities and Markets Authority", "Aura Asset Management"],
+            "risks": ["Sustainability disclosure and greenwashing risk (SFDR)", "Forced fund rebranding", "Investor litigation risk"],
             "policyIds": ["pol-alg-01"],
             "controlIds": ["ctl-alg-02"],
             "riskIds": ["rsk-alg-01"],
@@ -858,8 +1313,8 @@ def main():
                 "actionRequired": "Treasury and risk teams should simulate revised outflow coefficients in the internal liquidity adequacy assessment (ILAAP).",
             },
             "frameworks": ["CRR / CRD IV", "EBA Guidelines", "Basel III"],
-            "vendors": ["EBA"],
-            "risks": ["Liquidity run risk", "Capital buffer recalculation", "Higher funding cost"],
+            "vendors": ["European Banking Authority", "Nordic Sovereign Bank"],
+            "risks": ["Capital adequacy and prudential liquidity risk", "Liquidity run risk", "Higher funding cost"],
             "policyIds": ["pol-alg-01"],
             "controlIds": ["ctl-alg-01", "ctl-alg-02"],
             "riskIds": ["rsk-alg-01"],
@@ -889,8 +1344,8 @@ def main():
                 "actionRequired": "Ensure financial reporting software vendor updates XBRL taxonomy schemas prior to annual audit sign-off.",
             },
             "frameworks": ["ESEF", "Transparency Directive", "XBRL Taxonomy"],
-            "vendors": ["ESMA"],
-            "risks": ["Filing gateway rejection", "Schema format non-conformance"],
+            "vendors": ["European Securities and Markets Authority"],
+            "risks": ["Supervisory audit and examination deficiency risk", "Schema format non-conformance"],
             "policyIds": ["pol-alg-01"],
             "controlIds": ["ctl-alg-02"],
             "riskIds": ["rsk-alg-01"],
@@ -911,6 +1366,19 @@ def main():
         json.dump(final_items, f, indent=2, ensure_ascii=False)
 
     print(f"\nSuccessfully wrote {len(final_items)} total feed items ({len(final_items) - len(anchor_items)} ingested from the upstream rss-mapper-poc) to {out_path} ({os.path.getsize(out_path) / 1024:.1f} KB).")
+
+    # Print summary statistics
+    scores = {}
+    jurs = {}
+    for it in final_items:
+        s = it["score"]
+        scores[s] = scores.get(s, 0) + 1
+        j = it["jurisdiction"]
+        jurs[j] = jurs.get(j, 0) + 1
+
+    print("\nSummary Statistics:")
+    print(f"  Scores: {dict(sorted(scores.items()))}")
+    print(f"  Jurisdictions: {dict(sorted(jurs.items()))}")
 
 
 if __name__ == "__main__":
