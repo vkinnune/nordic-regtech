@@ -12,11 +12,20 @@ test('Regulatory Feed Data: FEED_ITEMS, categories and authorities integrity', (
   assert.ok(feedJs.includes('export const FEED_CATEGORIES'), 'feed.js must export FEED_CATEGORIES');
   assert.ok(feedJs.includes('export const FEED_AUTHORITIES'), 'feed.js must export FEED_AUTHORITIES');
 
-  // Verify key authorities and categories are present
+  // Verify Swedish authorities and categories are present
   assert.ok(feedJs.includes('Finansinspektionen'), 'Must include Finansinspektionen');
   assert.ok(feedJs.includes('Sveriges Riksdag'), 'Must include Riksdagen');
-  assert.ok(feedJs.includes('FIN-FSA'), 'Must include FIN-FSA');
-  assert.ok(feedJs.includes('European Banking Authority'), 'Must include EBA');
+  assert.ok(feedJs.includes('Swedish Consumer Agency'), 'Must include Swedish Consumer Agency');
+  assert.ok(feedJs.includes('Swedish Privacy Authority'), 'Must include Swedish Privacy Authority');
+  assert.ok(feedJs.includes('Sveriges Riksbank'), 'Must include Sveriges Riksbank');
+  assert.ok(feedJs.includes('Swedish Courts'), 'Must include Swedish Courts');
+
+  // Ensure Finnish and EU authorities are purged
+  assert.ok(!feedJs.includes('FIN-FSA'), 'Must not include FIN-FSA');
+  assert.ok(!feedJs.includes('European Banking Authority'), 'Must not include EBA');
+  assert.ok(!feedJs.includes('Traficom'), 'Must not include Traficom');
+  assert.ok(!feedJs.includes('Eduskunta'), 'Must not include Eduskunta');
+
   assert.ok(feedJs.includes('AMENDMENT'), 'Must include AMENDMENT category');
   assert.ok(feedJs.includes('CIRCULAR'), 'Must include CIRCULAR category');
   assert.ok(feedJs.includes('ENFORCEMENT'), 'Must include ENFORCEMENT category');
@@ -98,24 +107,59 @@ test('Regulatory Feed Review Standards: layer separation, pure store getters, an
   assert.ok(feedPageJs.includes('class="select" data-in="feedAuth"'), 'feed.js must use class="select" for authority filter');
 });
 
-test('Regulatory Feed Pipeline Connection & Data Integrity: FIN-FSA, anonymity, English copy, and governance causality', () => {
+test('Regulatory Feed Pipeline Connection & Data Integrity: 100% Swedish supervisory stream, anonymity, English copy, and governance causality', () => {
   const feedItemsPath = path.join(ROOT, 'src/data/feed_items.json');
   assert.ok(fs.existsSync(feedItemsPath), 'src/data/feed_items.json must exist');
 
   const items = JSON.parse(fs.readFileSync(feedItemsPath, 'utf-8'));
   assert.ok(items.length >= 250, `Must contain rich real article dataset (found ${items.length})`);
 
-  // Verify real articles from key Nordic authorities including FIN-FSA
+  // Assert 100% of feed items have jurisdiction === 'SE'
+  assert.ok(
+    items.every(i => i.jurisdiction === 'SE'),
+    '100% of items in feed_items.json must have jurisdiction === "SE"',
+  );
+
+  // Exactly 0 items from Finnish or EU authorities exist
   const authorities = new Set(items.map(i => i.authorityId));
+  assert.ok(!authorities.has('fiva'), 'Must not contain FIN-FSA items');
+  assert.ok(!authorities.has('fin-fsa'), 'Must not contain FIN-FSA items');
+  assert.ok(!authorities.has('traficom'), 'Must not contain Traficom items');
+  assert.ok(!authorities.has('eduskunta'), 'Must not contain Eduskunta items');
+  assert.ok(!authorities.has('tulli'), 'Must not contain Tulli items');
+  assert.ok(!authorities.has('tietosuoja'), 'Must not contain Tietosuoja items');
+  assert.ok(!authorities.has('eba'), 'Must not contain EBA items');
+  assert.ok(!authorities.has('esma'), 'Must not contain ESMA items');
+
+  const nonSweItems = items.filter(i => i.jurisdiction !== 'SE');
+  assert.equal(nonSweItems.length, 0, 'Must contain exactly 0 non-Swedish items');
+
+  // Verify real articles from Swedish authorities
   assert.ok(authorities.has('fi'), 'Must contain Finansinspektionen items');
-  assert.ok(authorities.has('fiva') || authorities.has('fin-fsa'), 'Must contain FIN-FSA items');
-  assert.ok(authorities.has('traficom'), 'Must contain Traficom items');
+  assert.ok(authorities.has('riksdagen'), 'Must contain Riksdagen items');
   assert.ok(authorities.has('imy'), 'Must contain IMY items');
   assert.ok(authorities.has('konsumentverket'), 'Must contain Konsumentverket items');
-  assert.ok(authorities.has('eduskunta'), 'Must contain Eduskunta items');
+  assert.ok(authorities.has('riksbank'), 'Must contain Riksbank items');
+  assert.ok(authorities.has('domstol'), 'Must contain Domstol items');
 
-  const fivaItems = items.filter(i => i.authorityId === 'fiva' || i.authorityId === 'fin-fsa');
-  assert.ok(fivaItems.length >= 15, `Must contain substantial real FIN-FSA items (found ${fivaItems.length})`);
+  const fiItems = items.filter(i => i.authorityId === 'fi');
+  assert.ok(fiItems.length >= 50, `Must contain substantial real Finansinspektionen items (found ${fiItems.length})`);
+
+  // Every article traces to authentic Swedish regulator URLs
+  const swedishDomains = new Set([
+    'www.fi.se',
+    'www.government.se',
+    'data.riksdagen.se',
+    'www.imy.se',
+    'www.konsumentverket.se',
+    'www.riksbank.se',
+    'www.domstol.se',
+  ]);
+  for (const item of items) {
+    assert.ok(item.sourceUrl && item.sourceUrl.startsWith('http'), `Item ${item.id} must have a valid source URL`);
+    const parsedUrl = new URL(item.sourceUrl);
+    assert.ok(swedishDomains.has(parsedUrl.hostname), `Item ${item.id} has unauthorized host: ${parsedUrl.hostname}`);
+  }
 
   // Verify Client Anonymity: NO real commercial banks in title, summary, or vendors
   const forbiddenBanks = ['nordea', 'swedbank', 'seb', 'handelsbanken', 'klarna', 'aktia', 'danske'];
@@ -180,6 +224,24 @@ test('Regulatory Feed Pipeline Connection & Data Integrity: FIN-FSA, anonymity, 
   assert.ok(withVendors.length > 50, 'Must have identified market entities/vendors');
   assert.ok(withRisks.length > 50, 'Must have classified compliance risks');
   assert.ok(withSourceUrl.length > 100, 'Must have official source URLs');
+
+  // Verify UI Exposure: Swedish authority segmentation in feed page toolbar and stats strip
+  const feedPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/feed.js'), 'utf-8');
+  assert.ok(feedPageJs.includes('data-k="feedAuthSeg" data-v="all"'), 'Toolbar must have All segment');
+  assert.ok(feedPageJs.includes('data-k="feedAuthSeg" data-v="fi"'), 'Toolbar must have FI segment');
+  assert.ok(feedPageJs.includes('data-k="feedAuthSeg" data-v="riksdagen"'), 'Toolbar must have Riksdagen segment');
+  assert.ok(feedPageJs.includes('data-k="feedAuthSeg" data-v="consumer_imy"'), 'Toolbar must have Consumer / IMY segment');
+  assert.ok(feedPageJs.includes('data-k="feedAuthSeg" data-v="riksbank"'), 'Toolbar must have Riksbank segment');
+  assert.ok(feedPageJs.includes('Finansinspektionen'), 'Toolbar must display Finansinspektionen');
+  assert.ok(feedPageJs.includes('Consumer / IMY'), 'Toolbar must display Consumer / IMY');
+
+  // Verify stats strip has Swedish supervisory metrics without FI/EU counters
+  assert.ok(!feedPageJs.includes('${euCount}'), 'Stats strip must not contain euCount');
+  assert.ok(!feedPageJs.includes('FIN-FSA'), 'Stats strip must not contain FIN-FSA');
+  assert.ok(!feedPageJs.includes('EU Directives & Cross-Border'), 'Stats strip must not contain EU Directives card');
+  assert.ok(feedPageJs.includes('100% Swedish supervisory stream'), 'Stats strip must indicate Swedish supervisory stream');
+  assert.ok(feedPageJs.includes('FSA supervisory notices'), 'Stats strip must indicate FSA supervisory notices');
+  assert.ok(feedPageJs.includes('Riksdagen & Agencies'), 'Stats strip must include Riksdagen & Agencies');
 });
 
 test('Regulatory Feed Unslop & Regulation Navigation: pure real data, authentic explanations, and 1-click reader jumps', () => {

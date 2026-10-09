@@ -87,44 +87,23 @@ class FeedItemModel(BaseModel):
 
 AUTHORITY_RULES: List[AuthorityRule] = [
     AuthorityRule(domain_match="fi.se", authority_id="fi", authority_name="Finansinspektionen (Swedish FSA)", short_name="FI", flag="🇸🇪", jurisdiction="SE"),
-    AuthorityRule(domain_match="finanssivalvonta.fi", authority_id="fiva", authority_name="FIN-FSA (Financial Supervisory Authority)", short_name="FIN-FSA", flag="🇫🇮", jurisdiction="FI"),
-    AuthorityRule(domain_match="fiva.fi", authority_id="fiva", authority_name="FIN-FSA (Financial Supervisory Authority)", short_name="FIN-FSA", flag="🇫🇮", jurisdiction="FI"),
-    AuthorityRule(domain_match="traficom.fi", authority_id="traficom", authority_name="Traficom NCSC-FI (Cyber Security Centre)", short_name="NCSC-FI", flag="🇫🇮", jurisdiction="FI"),
-    AuthorityRule(domain_match="kyberturvallisuuskeskus.fi", authority_id="traficom", authority_name="Traficom NCSC-FI (Cyber Security Centre)", short_name="NCSC-FI", flag="🇫🇮", jurisdiction="FI"),
     AuthorityRule(domain_match="government.se", authority_id="riksdagen", authority_name="Swedish Government (Regeringen)", short_name="Regeringen", flag="🇸🇪", jurisdiction="SE"),
     AuthorityRule(domain_match="riksdagen.se", authority_id="riksdagen", authority_name="Swedish Parliament (Sveriges Riksdag)", short_name="Riksdagen", flag="🇸🇪", jurisdiction="SE"),
-    AuthorityRule(domain_match="eduskunta.fi", authority_id="eduskunta", authority_name="Parliament of Finland (Eduskunta)", short_name="Eduskunta", flag="🇫🇮", jurisdiction="FI"),
     AuthorityRule(domain_match="imy.se", authority_id="imy", authority_name="Swedish Privacy Authority (IMY)", short_name="IMY", flag="🇸🇪", jurisdiction="SE"),
     AuthorityRule(domain_match="konsumentverket.se", authority_id="konsumentverket", authority_name="Swedish Consumer Agency", short_name="SCA", flag="🇸🇪", jurisdiction="SE"),
     AuthorityRule(domain_match="riksbank.se", authority_id="riksbank", authority_name="Sveriges Riksbank (Central Bank)", short_name="Riksbank", flag="🇸🇪", jurisdiction="SE"),
     AuthorityRule(domain_match="domstol.se", authority_id="domstol", authority_name="Swedish Courts (Domstolsverket)", short_name="Domstol", flag="🇸🇪", jurisdiction="SE"),
-    AuthorityRule(domain_match="tulli.fi", authority_id="tulli", authority_name="Finnish Customs (Tulli)", short_name="Tulli", flag="🇫🇮", jurisdiction="FI"),
-    AuthorityRule(domain_match="tietosuoja.fi", authority_id="tietosuoja", authority_name="Data Protection Ombudsman (Tietosuoja)", short_name="Tietosuoja", flag="🇫🇮", jurisdiction="FI"),
-    AuthorityRule(domain_match="eba.europa.eu", authority_id="eba", authority_name="European Banking Authority", short_name="EBA", flag="🇪🇺", jurisdiction="EU"),
-    AuthorityRule(domain_match="esma.europa.eu", authority_id="esma", authority_name="European Securities and Markets Authority", short_name="ESMA", flag="🇪🇺", jurisdiction="EU"),
 ]
 
 
 def resolve_authority(source: str, link: str, title: str = "", summary: str = "", vendors: Optional[List[str]] = None) -> Optional[AuthorityRule]:
     s_low = source.lower()
     l_low = link.lower()
-    t_low = title.lower()
-    sum_low = summary.lower()
-    v_low = [v.lower() for v in (vendors or [])]
 
-    # Domain match takes strict precedence (prevents Swedish FI articles mentioning FIN-FSA from misattribution)
+    # Domain match takes strict precedence for Swedish supervisory authorities
     for rule in AUTHORITY_RULES:
         if rule.domain_match in l_low or rule.domain_match in s_low:
             return rule
-
-    # Special handling for STT Info press releases issued by Finanssivalvonta (FIN-FSA)
-    if "sttinfo" in s_low or "sttinfo" in l_low:
-        if any(k in t_low or k in sum_low or any(k in v for v in v_low) for k in ["finanssivalvonta", "fin-fsa", "fiva", "valvottavatiedotteet"]):
-            return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
-
-    # Vendor-based fallback for non-domain sources
-    if any("finanssivalvonta" in v or "fin-fsa" in v for v in v_low):
-        return next(r for r in AUTHORITY_RULES if r.authority_id == "fiva")
 
     return None
 
@@ -926,43 +905,53 @@ def main():
     for aid, items_list in by_auth.items():
         print(f"  - {aid}: {len(items_list)} articles")
 
-    # Balanced quotas prioritizing Finansinspektionen, FIN-FSA, Riksdagen, Eduskunta & EU
+    # Balanced quotas for 100% Swedish supervisory authorities
     quotas = {
-        "fi": 70,           # Finansinspektionen (Sweden FSA)
-        "fiva": 30,         # FIN-FSA (Financial Supervisory Authority Finland)
-        "traficom": 35,     # Traficom NCSC-FI (Cyber Security / Telecoms)
-        "riksdagen": 30,    # Swedish Parliament & Government
-        "eduskunta": 25,    # Parliament of Finland
-        "imy": 25,          # Swedish Privacy Authority (IMY / GDPR)
-        "konsumentverket": 20, # Swedish Consumer Agency
-        "riksbank": 15,     # Sveriges Riksbank
-        "tulli": 15,        # Finnish Customs (Trade & Sanctions)
-        "domstol": 10,      # Swedish Courts
-        "tietosuoja": 10,   # Finnish Data Protection Ombudsman
-        "eba": 10,          # European Banking Authority
-        "esma": 10,         # ESMA
+        "fi": 135,           # Finansinspektionen (Sweden FSA)
+        "riksdagen": 50,     # Swedish Parliament & Government
+        "imy": 40,           # Swedish Privacy Authority (IMY)
+        "konsumentverket": 30, # Swedish Consumer Agency
+        "riksbank": 20,      # Sveriges Riksbank
+        "domstol": 15,       # Swedish Courts
     }
 
     selected_raw = []
     seen_links = set()
 
+    def is_informational_item(it: Dict[str, Any]) -> bool:
+        link = it.get("link", "")
+        t = it.get("title", "")
+        sm = it.get("summary", "")
+        raw_s = int(it.get("score", 3))
+        cat = resolve_category(t, sm, link, raw_s)
+        return calibrate_regulatory_score(raw_s, cat, t, sm, it.get("frameworks", []), it.get("risks", [])) == 1
+
     for aid, target_count in quotas.items():
         candidates = by_auth.get(aid, [])
-        # Prioritize articles where summary is in English, followed by rich AI metadata
-        candidates.sort(
-            key=lambda x: (
-                1 if is_english_text(x.get("summary", "")) else 0,
-                len(x.get("frameworks", [])),
-                len(x.get("risks", [])),
-                len(x.get("vendors", [])),
-                len(x.get("explanation", "")),
-                x.get("created_at", "")
-            ),
-            reverse=True
+        s1_items = [it for it in candidates if is_informational_item(it)]
+        other_items = [it for it in candidates if not is_informational_item(it)]
+
+        sort_key = lambda x: (
+            1 if is_english_text(x.get("summary", "")) else 0,
+            len(x.get("frameworks", [])),
+            len(x.get("risks", [])),
+            len(x.get("vendors", [])),
+            len(x.get("explanation", "")),
+            x.get("created_at", "")
         )
+        s1_items.sort(key=sort_key, reverse=True)
+        other_items.sort(key=sort_key, reverse=True)
 
         chosen = []
-        for it in candidates:
+        # Guarantee representation of calibrated Score 1 (Informational) notices
+        s1_target = min(len(s1_items), 3)
+        for it in s1_items[:s1_target]:
+            l = it.get("link", "")
+            if l not in seen_links:
+                seen_links.add(l)
+                chosen.append(it)
+
+        for it in (other_items + s1_items[s1_target:]):
             l = it.get("link", "")
             if l not in seen_links:
                 seen_links.add(l)
@@ -971,7 +960,7 @@ def main():
                     break
         selected_raw.extend(chosen)
 
-    print(f"Selected {len(selected_raw)} balanced articles across authorities.")
+    print(f"Selected {len(selected_raw)} balanced articles across Swedish authorities.")
 
     curated_items: List[Dict[str, Any]] = []
     seen_ids = set()
@@ -1028,26 +1017,8 @@ def main():
         # Governance matrix linkages (100% valid IDs from governance.js)
         policies, controls, risk_ids = resolve_governance_linkages(statute_id, text_blob)
 
-        # Classify jurisdiction: if update specifically concerns EU level regulations/standards
-        if any(
-            k in text_blob.lower()
-            for k in [
-                "eba ",
-                "esma ",
-                "sfdr",
-                "regulation (eu)",
-                "directive (eu)",
-                "delegated regulation (eu)",
-                "delegerade förordningen",
-                "eu-sanktioner",
-                "market abuse regulation (mar)",
-                "kapitaltäckningsdirektivet",
-                "bmr",
-                "benchmarks regulation",
-                "dora",
-            ]
-        ):
-            jur = "EU"
+        # Jurisdiction is 100% Swedish (SE) supervisory stream
+        jur = "SE"
 
         # Unique stable ID
         hash_suffix = hashlib.md5(f"{title}_{link}".encode("utf-8")).hexdigest()[:6]

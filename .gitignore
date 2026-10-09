@@ -16,4 +16,7 @@ pipeline/.ruff_cache/
 *.db
 *.sqlite
 
+# Agent orchestration artifacts
+.agents/
+
 

@@ -79,8 +79,8 @@ def test_pydantic_feed_item_model_invalid_missing_fields():
 
 
 def test_resolve_authority_domain_first():
-    """Verify that domain matching strictly takes precedence over vendor tags."""
-    # Swedish FI article referencing FIN-FSA in vendors must NOT be misclassified as fiva
+    """Verify that domain matching strictly takes precedence and resolves only Swedish authorities."""
+    # Swedish FI article referencing FIN-FSA in vendors must resolve to fi (SE)
     auth_sweden_with_fiva_vendor = resolve_authority(
         "www.fi.se",
         "https://www.fi.se/sv/publicerat/nyheter/2026/memorandum-nordic-supervision/",
@@ -91,21 +91,20 @@ def test_resolve_authority_domain_first():
     assert auth_sweden_with_fiva_vendor.authority_id == "fi"
     assert auth_sweden_with_fiva_vendor.jurisdiction == "SE"
 
-    # Direct FIN-FSA link
-    auth_fiva = resolve_authority("www.finanssivalvonta.fi", "https://www.finanssivalvonta.fi/tiedotteet/test")
-    assert auth_fiva is not None
-    assert auth_fiva.authority_id == "fiva"
-    assert auth_fiva.jurisdiction == "FI"
+    # Swedish Riksdagen / Government link
+    auth_riksdagen = resolve_authority("www.government.se", "https://www.government.se/press-releases/test")
+    assert auth_riksdagen is not None
+    assert auth_riksdagen.authority_id == "riksdagen"
+    assert auth_riksdagen.jurisdiction == "SE"
 
-    # STT Info release for Finanssivalvonta
-    auth_stt = resolve_authority(
-        "www.sttinfo.fi",
-        "https://www.sttinfo.fi/tiedote/70280942/roble-services",
-        title="Finanssivalvonnan arvio luottolaitoksille",
-        vendors=["Finanssivalvonta (FIN-FSA)"],
-    )
-    assert auth_stt is not None
-    assert auth_stt.authority_id == "fiva"
+    # Finnish authorities (FIN-FSA, STT Info, Traficom) must be dropped (return None)
+    assert resolve_authority("www.finanssivalvonta.fi", "https://www.finanssivalvonta.fi/tiedotteet/test") is None
+    assert resolve_authority("www.sttinfo.fi", "https://www.sttinfo.fi/tiedote/70280942/roble-services", vendors=["Finanssivalvonta (FIN-FSA)"]) is None
+    assert resolve_authority("www.traficom.fi", "https://www.traficom.fi/test") is None
+
+    # EU authorities must be dropped (return None)
+    assert resolve_authority("eba.europa.eu", "https://www.eba.europa.eu/test") is None
+    assert resolve_authority("esma.europa.eu", "https://www.esma.europa.eu/test") is None
 
 
 def test_client_anonymity_strict_three_mock_entities():
@@ -251,3 +250,9 @@ def test_ingested_dataset_anonymity_and_english():
 
     # Verify Score 1 items exist
     assert score_1_count >= 5, f"Expected at least 5 Score 1 items, got {score_1_count}"
+
+    # Verify 100% Swedish (SE) supervisory stream with 0 Finnish or EU authorities
+    allowed_auths = {"fi", "riksdagen", "imy", "konsumentverket", "riksbank", "domstol"}
+    for it in items:
+        assert it["jurisdiction"] == "SE", f"Item {it['id']} has non-SE jurisdiction: {it['jurisdiction']}"
+        assert it["authorityId"] in allowed_auths, f"Item {it['id']} has unauthorized authority: {it['authorityId']}"

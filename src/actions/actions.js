@@ -205,7 +205,7 @@ A.openProject = el => go('project', { id: el.dataset.id, tab: S.prefs.defaultTab
 A.set = el => {
   const k = el.dataset.k;
   let v = el.dataset.v;
-  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$|Layout$|Domain$|Tier$|Auth$|Gov$|Era$|Sort$/.test(k)) fxSet({ tabs: true });
+  if (/Tab$|Cat$|Mode$|View$|Status$|Filter$|Juris$|Layout$|Domain$|Tier$|Auth$|Gov$|Era$|Sort$|Seg$/.test(k)) fxSet({ tabs: true });
   if (k === 'inboxSel' && !v) v = null;
   S.ui[k] = v;
   if (k === 'membersTab' || k === 'searchCat') S.ui.pop = null;
@@ -1455,6 +1455,7 @@ A.createTaskFromFeed = el => {
 A.clearFeedFilters = () => {
   delete S.ui.feedQ;
   delete S.ui.feedJuris;
+  delete S.ui.feedAuthSeg;
   delete S.ui.feedScore;
   delete S.ui.feedCat;
   delete S.ui.feedAuth;

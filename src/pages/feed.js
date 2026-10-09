@@ -6,7 +6,7 @@ import { empty, feedScoreClass, feedScoreLabel, getFeedCat, getFeedAuth } from '
 export function pageFeed() {
   const u = S.ui;
   const q = (u.feedQ || '').toLowerCase().trim();
-  const juris = u.feedJuris || 'all'; // 'all', 'se', 'fi', 'eu'
+  const authSeg = u.feedAuthSeg || 'all'; // 'all', 'fi', 'riksdagen', 'consumer_imy', 'riksbank'
   const scoreFilter = u.feedScore || 'all'; // 'all', '5', '4', '3', '2', '1'
   const catFilter = u.feedCat || 'all'; // 'all', 'AMENDMENT', 'CIRCULAR', etc.
   const authFilter = u.feedAuth || 'all'; // 'all', 'fi', 'riksdagen', etc.
@@ -15,9 +15,12 @@ export function pageFeed() {
   const allItems = allFeedItems();
 
   const filtered = allItems.filter(item => {
-    // Jurisdiction filter
-    if (juris !== 'all' && item.jurisdiction.toLowerCase() !== juris.toLowerCase()) {
-      return false;
+    // Swedish Authority Segment filter
+    if (authSeg !== 'all') {
+      if (authSeg === 'fi' && item.authorityId !== 'fi') return false;
+      if (authSeg === 'riksdagen' && item.authorityId !== 'riksdagen') return false;
+      if ((authSeg === 'consumer_imy' || authSeg === 'consumer-imy') && item.authorityId !== 'konsumentverket' && item.authorityId !== 'imy') return false;
+      if (authSeg === 'riksbank' && item.authorityId !== 'riksbank') return false;
     }
 
     // Impact score filter
@@ -76,10 +79,14 @@ export function pageFeed() {
   const totalCount = allItems.length;
   const criticalCount = allItems.filter(i => i.score >= 5).length;
   const highImpactCount = allItems.filter(i => i.score >= 4).length;
-  const seCount = allItems.filter(i => i.jurisdiction === 'SE').length;
-  const fiCount = allItems.filter(i => i.jurisdiction === 'FI').length;
-  const euCount = allItems.filter(i => i.jurisdiction === 'EU').length;
   const unreviewedCount = allItems.filter(i => i.status === 'UNREVIEWED').length;
+
+  // Swedish Authority segment counts
+  const fiCount = allItems.filter(i => i.authorityId === 'fi').length;
+  const riksdagenCount = allItems.filter(i => i.authorityId === 'riksdagen').length;
+  const consumerImyCount = allItems.filter(i => i.authorityId === 'konsumentverket' || i.authorityId === 'imy').length;
+  const riksbankCount = allItems.filter(i => i.authorityId === 'riksbank').length;
+  const agencyCount = totalCount - fiCount;
 
   const feedLimit = u.feedLimit || 24;
   const paged = filtered.slice(0, layout === 'list' ? feedLimit * 2 : feedLimit);
@@ -91,7 +98,7 @@ export function pageFeed() {
     body = `<div class="panel">${empty(
       'search-x',
       'No matching regulatory updates',
-      'Try adjusting your search query, jurisdiction, or active score filters.',
+      'Try adjusting your search query, authority segment, or active score filters.',
       `<button class="btn btn-secondary btn-sm" data-a="clearFeedFilters">${ic('rotate-ccw', 13)} Reset all filters</button>`,
     )}</div>`;
   } else if (layout === 'list') {
@@ -109,13 +116,13 @@ export function pageFeed() {
   }
 
   // Active filter count
-  const hasActiveFilters = q || juris !== 'all' || scoreFilter !== 'all' || catFilter !== 'all' || authFilter !== 'all';
+  const hasActiveFilters = q || authSeg !== 'all' || scoreFilter !== 'all' || catFilter !== 'all' || authFilter !== 'all';
 
   return `<div class="page wide">
     <div class="ph">
       <div>
         <h1>Regulatory Monitoring Feed</h1>
-        <p>Real-time horizon tracking across Nordic supervisory authorities, Riksdagen legislative amendments, and EU technical standards</p>
+        <p>Real-time horizon tracking across Swedish supervisory authorities, Riksdagen legislative amendments, and Finansinspektionen regulatory standards</p>
       </div>
       <div class="acts">
         ${
@@ -137,7 +144,7 @@ export function pageFeed() {
       <div class="stat">
         <span class="k">Monitored Updates</span>
         <span class="v">${totalCount}</span>
-        <span class="d">active horizon stream</span>
+        <span class="d">100% Swedish supervisory stream</span>
       </div>
       <div class="stat">
         <span class="k">Critical & High Impact</span>
@@ -145,14 +152,14 @@ export function pageFeed() {
         <span class="d">${criticalCount} critical (score 5)</span>
       </div>
       <div class="stat">
-        <span class="k">Swedish Authorities</span>
-        <span class="v">${seCount}</span>
-        <span class="d">FI, Riksdagen & KO</span>
+        <span class="k">Finansinspektionen</span>
+        <span class="v">${fiCount}</span>
+        <span class="d">FSA supervisory notices</span>
       </div>
       <div class="stat">
-        <span class="k">EU Directives & Cross-Border</span>
-        <span class="v">${euCount + fiCount}</span>
-        <span class="d">${euCount} EU · ${fiCount} FIN-FSA</span>
+        <span class="k">Riksdagen & Agencies</span>
+        <span class="v">${agencyCount}</span>
+        <span class="d">${riksdagenCount} Riksdagen · ${consumerImyCount} Consumer/IMY · ${riksbankCount} RB</span>
       </div>
     </div>
 
@@ -164,12 +171,13 @@ export function pageFeed() {
         ${u.feedQ ? `<button class="pillbtn" data-a="set" data-k="feedQ" data-v="" style="padding:2px 6px">${ic('x', 12)}Clear</button>` : ''}
       </div>
 
-      <!-- Jurisdiction Segment -->
+      <!-- Swedish Authority Segment -->
       <div class="seg" role="tablist">
-        <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="feedJuris" data-v="all">All (${totalCount})</button>
-        <button class="${juris === 'se' ? 'on' : ''}" data-a="set" data-k="feedJuris" data-v="se">🇸🇪 Sweden (${seCount})</button>
-        <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="feedJuris" data-v="fi">🇫🇮 Finland (${fiCount})</button>
-        <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="feedJuris" data-v="eu">🇪🇺 EU (${euCount})</button>
+        <button class="${authSeg === 'all' ? 'on' : ''}" data-a="set" data-k="feedAuthSeg" data-v="all">All (${totalCount})</button>
+        <button class="${authSeg === 'fi' ? 'on' : ''}" data-a="set" data-k="feedAuthSeg" data-v="fi">Finansinspektionen (${fiCount})</button>
+        <button class="${authSeg === 'riksdagen' ? 'on' : ''}" data-a="set" data-k="feedAuthSeg" data-v="riksdagen">Riksdagen (${riksdagenCount})</button>
+        <button class="${authSeg === 'consumer_imy' || authSeg === 'consumer-imy' ? 'on' : ''}" data-a="set" data-k="feedAuthSeg" data-v="consumer_imy">Consumer / IMY (${consumerImyCount})</button>
+        <button class="${authSeg === 'riksbank' ? 'on' : ''}" data-a="set" data-k="feedAuthSeg" data-v="riksbank">Riksbank (${riksbankCount})</button>
       </div>
 
       <!-- Impact Score Filter Select -->
@@ -217,7 +225,7 @@ export function pageFeed() {
         ? `<div class="row feed-chips-bar" style="margin-bottom:14px;gap:6px;flex-wrap:wrap">
             <span class="faint mono" style="font-size:11px;margin-right:2px">Active filters:</span>
             ${q ? `<span class="feed-chip">Query: "${esc(q)}" <button data-a="set" data-k="feedQ" data-v="">${ic('x', 11)}</button></span>` : ''}
-            ${juris !== 'all' ? `<span class="feed-chip">Jurisdiction: ${esc(juris.toUpperCase())} <button data-a="set" data-k="feedJuris" data-v="all">${ic('x', 11)}</button></span>` : ''}
+            ${authSeg !== 'all' ? `<span class="feed-chip">Authority: ${esc(authSeg === 'consumer_imy' || authSeg === 'consumer-imy' ? 'Consumer / IMY' : authSeg === 'fi' ? 'Finansinspektionen' : authSeg === 'riksdagen' ? 'Riksdagen' : authSeg === 'riksbank' ? 'Riksbank' : authSeg)} <button data-a="set" data-k="feedAuthSeg" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${scoreFilter !== 'all' ? `<span class="feed-chip">Score: ${scoreFilter === '5' ? 'Critical (5)' : scoreFilter === '1' ? 'Informational (1)' : scoreFilter + '+'} <button data-a="set" data-k="feedScore" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${catFilter !== 'all' ? `<span class="feed-chip">Category: ${esc(FEED_CATEGORIES[catFilter]?.label || catFilter)} <button data-a="set" data-k="feedCat" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${authFilter !== 'all' ? `<span class="feed-chip">Authority: ${esc(FEED_AUTHORITIES[authFilter]?.short || authFilter)} <button data-a="set" data-k="feedAuth" data-v="all">${ic('x', 11)}</button></span>` : ''}
