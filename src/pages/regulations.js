@@ -229,7 +229,6 @@ function renderRegulationsReader(u) {
   const selActId = u.regSel || 'sfs-2004-46';
   const curAct = regulation(selActId) || REGULATIONS[0];
   const q = (u.regQ || '').toLowerCase().trim();
-  const showPlain = u.regPlain !== false;
 
   const allSecs = allSectionsOf(curAct);
   const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
@@ -452,21 +451,18 @@ function renderRegulationsReader(u) {
               : ''
           }
 
-          <!-- Simple Toolbar: Plain English Toggle & Clear Search -->
-          <div class="finlex-toolbar">
-            <button class="btn btn-sm ${showPlain ? 'btn-primary' : 'btn-ghost'}" data-a="toggleRegPlain" title="Toggle Plain English summary">
-              ${ic('sparkles', 13)}
-              <span>Plain English</span>
-            </button>
-            <span class="sp"></span>
-            ${
-              q
-                ? `<button class="pillbtn" data-a="set" data-k="regQ" data-v="" style="font-size:11.5px">
+          <!-- Search Filter Toolbar (only when searching) -->
+          ${
+            q
+              ? `<div class="finlex-toolbar">
+                  <span class="faint" style="font-size:12px">Filtered by "${esc(q)}"</span>
+                  <span class="sp"></span>
+                  <button class="pillbtn" data-a="set" data-k="regQ" data-v="" style="font-size:11.5px">
                     ${ic('x', 12)}Clear search
-                  </button>`
-                : ''
-            }
-          </div>
+                  </button>
+                </div>`
+              : ''
+          }
 
           <!-- Statutory Sections Stream -->
           <div class="finlex-sections-stream">
@@ -483,7 +479,7 @@ function renderRegulationsReader(u) {
                         <button class="btn btn-secondary btn-sm" data-a="setRegView" data-view="library">${ic('arrow-left', 13)} Back to Regulations</button>
                       </div>
                     </div>`
-                : renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs)
+                : renderFinlexSections(chapters, activeSecId, q, isFffs)
             }
           </div>
         </div>
@@ -514,8 +510,7 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
           s.heading.toLowerCase().includes(q) ||
           (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
           s.text.toLowerCase().includes(q) ||
-          (s.textEn && s.textEn.toLowerCase().includes(q)) ||
-          (s.plainEnglish && s.plainEnglish.summary.toLowerCase().includes(q))
+          (s.textEn && s.textEn.toLowerCase().includes(q))
         );
       });
 
@@ -543,7 +538,7 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
     .join('');
 }
 
-function renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs) {
+function renderFinlexSections(chapters, activeSecId, q, isFffs) {
   return chapters
     .map(ch => {
       const matchingSecs = (ch.sections || []).filter(s => {
@@ -553,8 +548,7 @@ function renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs) {
           s.heading.toLowerCase().includes(q) ||
           (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
           s.text.toLowerCase().includes(q) ||
-          (s.textEn && s.textEn.toLowerCase().includes(q)) ||
-          (s.plainEnglish && s.plainEnglish.summary.toLowerCase().includes(q))
+          (s.textEn && s.textEn.toLowerCase().includes(q))
         );
       });
 
@@ -566,14 +560,14 @@ function renderFinlexSections(chapters, activeSecId, showPlain, q, isFffs) {
           <h2 class="finlex-chap-name">${esc(ch.title)}</h2>
         </div>
         <div class="finlex-chap-body">
-          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, showPlain, isFffs)).join('')}
+          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, isFffs)).join('')}
         </div>
       `;
     })
     .join('');
 }
 
-function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
+function renderSectionBlock(s, activeSecId, isFffs) {
   const isActive = s.id === activeSecId;
   const textToShow = s.textEn || s.text;
   const headingToShow = s.headingEn || s.heading;
@@ -591,23 +585,6 @@ function renderSectionBlock(s, activeSecId, showPlain, isFffs) {
       </div>
       ${headingToShow ? `<h3 class="finlex-sec-title">${esc(headingToShow)}</h3>` : ''}
     </header>
-
-    <!-- PLAIN ENGLISH BOX (Clean, simple, no fancy colors) -->
-    ${
-      showPlain && s.plainEnglish
-        ? `<div class="finlex-plain-box">
-            <div class="finlex-plain-tag">${ic('sparkles', 11)} Plain English:</div>
-            <p class="finlex-plain-summary">${esc(s.plainEnglish.summary)}</p>
-            ${
-              s.plainEnglish.points && s.plainEnglish.points.length
-                ? `<ul class="finlex-plain-list">
-                    ${s.plainEnglish.points.map(pt => `<li>${esc(pt)}</li>`).join('')}
-                  </ul>`
-                : ''
-            }
-          </div>`
-        : ''
-    }
 
     <!-- STATUTORY BODY / PARAGRAPHS -->
     ${

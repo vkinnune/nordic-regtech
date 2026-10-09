@@ -1280,10 +1280,6 @@ A.selectSec = el => {
   S.ui.pendingScrollSec = el.dataset.id;
   render();
 };
-A.toggleRegPlain = () => {
-  S.ui.regPlain = S.ui.regPlain === false ? true : false;
-  render();
-};
 A.toggleDiffPlain = () => {
   S.ui.diffPlain = S.ui.diffPlain === false ? true : false;
   render();

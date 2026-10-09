@@ -260,4 +260,11 @@ test('Regulations Feature: Zero mock controls or policies in header, cards, list
   assert.ok(!storeJs.includes('REGULATION_GOV_SCOPES'), 'store.js must not export REGULATION_GOV_SCOPES');
   assert.ok(!regJs.includes('REGULATION_GOV_SCOPES'), 'regulations.js must not define REGULATION_GOV_SCOPES');
   assert.ok(regJs.includes("label: 'Relevance'"), 'regulations.js must use clean Relevance sort label');
+
+  // Must not render Plain English toggle or plain English box
+  assert.ok(!regPageJs.includes('Plain English'), 'regulations.js must not contain Plain English button or label');
+  assert.ok(!regPageJs.includes('toggleRegPlain'), 'regulations.js must not contain toggleRegPlain');
+  assert.ok(!regPageJs.includes('finlex-plain-box'), 'regulations.js must not contain finlex-plain-box');
+  const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
+  assert.ok(!actionsJs.includes('A.toggleRegPlain'), 'actions.js must not define A.toggleRegPlain');
 });
