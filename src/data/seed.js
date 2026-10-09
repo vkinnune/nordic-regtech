@@ -47,7 +47,7 @@ export function seed() {
       email: 'risk@example.com',
       role: 'Member',
       team: 'risk',
-      title: 'Head of Operational Risk & DORA Lead',
+      title: 'Head of Operational Risk & Resilience',
       c: '#C48A1E',
       status: 'active',
       last: 28,
@@ -126,8 +126,8 @@ export function seed() {
     },
     {
       id: 'p2',
-      key: 'DORA',
-      name: 'Regulation (EU) 2022/2554 · DORA',
+      key: 'SFS297',
+      name: 'SFS 2004:297 · Bank- och finansiering',
       icon: 'shield-check',
       color: 'blue',
       status: 'risk',
@@ -137,17 +137,17 @@ export function seed() {
       start: dOff(-90),
       fav: true,
       members: ['m1', 'm3', 'm4', 'm6', 'm8'],
-      desc: 'Digital Operational Resilience Act compliance program across Nordic entities. Covers ICT risk frameworks, major incident reporting, register of information for critical ICT third parties, and TIBER-SE digital resilience testing.',
+      desc: 'Swedish Banking and Financing Business Act. Statutory governance of credit institutions, capital adequacy, risk control, and digital operational resilience (6 kap. 2 a §).',
       milestones: [
-        { name: 'ICT Third-Party Register Freeze', date: dOff(5) },
-        { name: 'Board Resilience Attestation', date: dOff(20) },
-        { name: 'Supervisory Dry Run with FI/Fiva', date: dOff(48) },
+        { name: 'SFS 2004:297 6 kap. Resilience Review', date: dOff(5) },
+        { name: 'Board Risk Management Attestation', date: dOff(20) },
+        { name: 'Finansinspektionen Supervisory Audit Preparation', date: dOff(48) },
       ],
       last: 15,
     },
     {
       id: 'p3',
-      key: 'AML',
+      key: 'SFS630',
       name: 'SFS 2017:630 · Penningtvättslagen',
       icon: 'lock',
       color: 'rose',
@@ -158,7 +158,7 @@ export function seed() {
       start: dOff(-40),
       fav: true,
       members: ['m1', 'm3', 'm5', 'm6', 'm7'],
-      desc: 'Swedish Act on Measures against Money Laundering and Terrorist Financing, aligned with FFFS 2017:11 and the new EU AMLR 2024/1624 package. KYC/CDD, transaction surveillance, and PEP screening.',
+      desc: 'Swedish Act on Measures against Money Laundering and Terrorist Financing, aligned with FFFS 2017:11. KYC/CDD, transaction surveillance, and PEP screening.',
       milestones: [
         { name: 'Annual General Risk Assessment (GRA)', date: dOff(8) },
         { name: 'Sanctions Screening Architecture Audit', date: dOff(28) },
@@ -167,7 +167,7 @@ export function seed() {
     },
     {
       id: 'p4',
-      key: 'AIFM',
+      key: 'FFFS9',
       name: 'FFFS 2013:9 · AIFM-Föreskrifter',
       icon: 'briefcase',
       color: 'amber',
@@ -187,8 +187,8 @@ export function seed() {
     },
     {
       id: 'p5',
-      key: 'MIFID',
-      name: 'Sijoituspalvelulaki 747/2012 · MiFID II',
+      key: 'SFS528',
+      name: 'SFS 2007:528 · Värdepappersmarknaden',
       icon: 'landmark',
       color: 'violet',
       status: 'planning',
@@ -198,14 +198,14 @@ export function seed() {
       start: dOff(-15),
       fav: false,
       members: ['m1', 'm2', 'm3', 'm6', 'm7'],
-      desc: 'Nordic securities markets and investment services conduct. Best execution, client classification, suitability assessments, and annual RTS 28 disclosure packages.',
-      milestones: [{ name: 'Annual Best Execution RTS 28 Publication', date: dOff(25) }],
+      desc: 'Swedish Securities Market Act governing investment firms, algorithmic trading systems, best execution, client classification, and market conduct.',
+      milestones: [{ name: 'Annual Best Execution Compliance Publication', date: dOff(25) }],
       last: 180,
     },
     {
       id: 'p6',
-      key: 'ESG',
-      name: 'SFDR 2019/2088 & Green Taxonomy',
+      key: 'SFS561',
+      name: 'SFS 2013:561 · Alternativa fonder',
       icon: 'leaf',
       color: 'green',
       status: 'active',
@@ -215,8 +215,8 @@ export function seed() {
       start: dOff(-50),
       fav: false,
       members: ['m1', 'm6', 'm7'],
-      desc: 'Sustainable Finance Disclosure Regulation and EU Taxonomy Regulation (2020/852). Pre-contractual information, website disclosures, and entity-level Principal Adverse Impacts (PAI) reporting.',
-      milestones: [{ name: 'Entity-level PAI Statement Validation', date: dOff(60) }],
+      desc: 'Swedish Alternative Investment Fund Managers Act. Depositary oversight, liquidity management, valuation rules, and supervisory reporting.',
+      milestones: [{ name: 'AIFM Supervisory Reporting Validation', date: dOff(60) }],
       last: 240,
     },
   ];
@@ -314,13 +314,13 @@ export function seed() {
     ],
   });
 
-  t('p1', 'SFS 2024:1284 § 6 kap. 2 a § · DORA Implementation in Swedish Credit Institutions', 'progress', 'm1', 'high', 5, ['fi', 'dora', 'funds'], {
+  t('p1', 'SFS 2024:1284 § 6 kap. 2 a § · Resiliens och IT-drift i kreditinstitut', 'progress', 'm1', 'high', 5, ['fi', 'sfs297', 'funds'], {
     key: 'SFS 6:2a',
     est: '1 week',
     len: 5,
     age: 15,
     upd: 12,
-    desc: '<p>Direct statutory amendment explicitly transposing Regulation (EU) 2022/2554 (DORA) into Swedish banking law (SFS 2004:297 6 kap. 2 a §). Mandates that network and information systems meet DORA digital operational resilience standards.</p>',
+    desc: '<p>Direct statutory amendment transposing digital operational resilience standards into Swedish banking law (SFS 2004:297 6 kap. 2 a §). Mandates that credit institution network and information systems meet digital operational resilience standards.</p>',
     diff: {
       identifier: '6 kap. 2 a §',
       regulation: 'SFS 2004:297 (Lag om bank- och finansieringsrörelse)',
@@ -338,19 +338,19 @@ export function seed() {
       authority: 'Finansinspektionen & Riksdagen',
       inForce: '2025-01-17',
       plainEnglish: {
-        summary: 'Formally incorporates EU DORA cybersecurity and operational resilience obligations directly into Swedish statutory banking law.',
+        summary: 'Formally incorporates digital operational resilience obligations directly into Swedish statutory banking law.',
         points: [
-          'Direct statutory scope: Binds Swedish financial institutions directly to EU DORA resilience and third-party risk rules.',
+          'Direct statutory scope: Binds Swedish financial institutions directly to operational resilience and third-party risk rules.',
           'ICT provider register: Requires maintaining comprehensive registers of critical ICT third-party service providers.',
           'Operational testing: Mandates threat-led resilience testing and business continuity architectures.',
         ],
         whyItMatters: 'Mandatory statutory law under SFS 2024:1284. Non-compliance exposes institutions to Finansinspektionen administrative fines.',
         beforeAfter: {
-          before: 'General IT guidelines without direct statutory DORA penalties in Swedish law.',
-          after: 'Statutory mandate under SFS 2004:297 6 kap. 2 a § enforcing DORA operational resilience.',
+          before: 'General IT guidelines without direct statutory penalties in Swedish banking law.',
+          after: 'Statutory mandate under SFS 2004:297 6 kap. 2 a § enforcing digital operational resilience.',
         },
         translation:
-          "2 a § A credit institution's network and information systems shall comply with the requirements of Regulation (EU) 2022/2554 of the European Parliament and of the Council on digital operational resilience for the financial sector (DORA).",
+          "2 a § A credit institution's network and information systems shall comply with statutory digital operational resilience standards under Lag (2024:1284).",
       },
     },
     subtasks: [
@@ -419,58 +419,67 @@ export function seed() {
     est: '3 weeks',
   });
 
-  /* ---- DORA Regulation (EU) 2022/2554 ---- */
-  t('p2', 'DORA Art. 5-16 · ICT Risk Management Framework Gap Analysis & Policy Overhaul', 'review', 'm4', 'urgent', 1, ['dora', 'risk'], {
-    key: 'DORA §5',
+  /* ---- SFS 2004:297 Bank- och finansieringsrörelse ---- */
+  t('p2', 'SFS 2004:297 6 kap. 2 a § · ICT Risk Management Framework Gap Analysis & Policy Overhaul', 'review', 'm4', 'urgent', 1, ['sfs297', 'risk'], {
+    key: 'SFS297 §2a',
     fav: true,
     est: '4 weeks',
     len: 12,
     age: 30,
     upd: 5,
-    desc: '<p>Comprehensive audit of the internal ICT risk management framework against the Regulatory Technical Standards (RTS) under Articles 5-16 of DORA.</p><p>Mandates formal business impact analyses (BIA), RTO/RPO metrics for critical trading and transfer agency services, and dual-center backup validation.</p>',
+    desc: '<p>Comprehensive audit of the internal ICT risk management framework against SFS 2004:297 6 kap. 2 a § and Finansinspektionen guidelines.</p><p>Mandates formal business impact analyses (BIA), RTO/RPO metrics for critical trading and transfer agency services, and dual-center backup validation.</p>',
     subtasks: [
       { id: 's10', title: 'Audit current RTO/RPO targets for fund pricing and order routing engines', done: true },
       { id: 's11', title: 'Review ICT risk tolerance levels with Chief Risk Officer', done: true },
       { id: 's12', title: 'Complete board-approved ICT security policy documentation', done: false },
     ],
     attachments: [
-      { id: 'a3', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200) },
+      { id: 'a3', name: 'SFS_2004_297_6kap_Resilience_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200) },
       { id: 'a4', name: 'Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400) },
     ],
   });
 
-  t('p2', 'DORA Art. 28 · Register of Information for Critical Third-Party ICT Providers (CTPPs)', 'progress', 'm8', 'urgent', 4, ['dora', 'it_security'], {
-    key: 'DORA §28',
-    est: '3 weeks',
-    len: 9,
-    age: 20,
-    subtasks: [
-      { id: 's13', title: 'Map all cloud, market data, and core banking vendors to EBA standard schema', done: true },
-      { id: 's14', title: 'Assess supply chain concentration risk (Azure / AWS / Bloomberg)', done: true },
-      { id: 's15', title: 'Execute mandatory audit right addendums with sub-processors', done: false },
-      { id: 's16', title: 'Validate register JSON against FI / ESMA submission portal schema', done: false },
-    ],
-  });
+  t(
+    'p2',
+    'SFS 2004:297 6 kap. 4 § · Register of Information for Critical Third-Party ICT Providers',
+    'progress',
+    'm8',
+    'urgent',
+    4,
+    ['sfs297', 'it_security'],
+    {
+      key: 'SFS297 §4',
+      est: '3 weeks',
+      len: 9,
+      age: 20,
+      subtasks: [
+        { id: 's13', title: 'Map all cloud, market data, and core banking vendors to supervisory schema', done: true },
+        { id: 's14', title: 'Assess supply chain concentration risk (Azure / AWS / Bloomberg)', done: true },
+        { id: 's15', title: 'Execute mandatory audit right addendums with sub-processors', done: false },
+        { id: 's16', title: 'Validate register JSON against Finansinspektionen submission portal schema', done: false },
+      ],
+    },
+  );
 
-  t('p2', 'DORA Art. 17-23 · Major ICT-related Incident Reporting Procedure & Runbook', 'todo', 'm8', 'high', 9, ['dora', 'it_security'], {
-    key: 'DORA §17',
+  t('p2', 'SFS 2004:297 6 kap. 2 § · Major ICT-related Incident Reporting Procedure & Runbook', 'todo', 'm8', 'high', 9, ['sfs297', 'it_security'], {
+    key: 'SFS297 §2',
     est: '2 weeks',
     len: 6,
     subtasks: [
-      { id: 's17', title: 'Define 4-hour initial notification trigger threshold for Finansinspektionen / Fiva', done: true },
+      { id: 's17', title: 'Define 4-hour initial notification trigger threshold for Finansinspektionen', done: true },
       { id: 's18', title: 'Build automated incident classification calculator based on financial & user impact', done: false },
       { id: 's19', title: 'Dry-run tabletop simulation with crisis management team', done: false },
     ],
   });
 
-  t('p2', 'TIBER-SE / DORA Art. 26 · Threat-Led Penetration Testing (TLPT) Scope Validation', 'todo', 'm4', 'medium', 19, ['dora', 'risk'], {
-    key: 'TIBER §26',
+  t('p2', 'TIBER-SE · Threat-Led Penetration Testing (TLPT) Scope Validation', 'todo', 'm4', 'medium', 19, ['sfs297', 'risk'], {
+    key: 'TIBER §1',
     est: '2 weeks',
     len: 5,
   });
 
-  t('p2', 'Board of Directors ICT Governance & Cybersecurity Training Curriculum', 'done', 'm3', 'medium', -7, ['dora', 'compliance'], {
-    key: 'DORA §4',
+  t('p2', 'Board of Directors ICT Governance & Cybersecurity Training Curriculum', 'done', 'm3', 'medium', -7, ['sfs297', 'compliance'], {
+    key: 'SFS297 §1',
     est: '1 week',
   });
 
@@ -491,17 +500,17 @@ export function seed() {
     attachments: [{ id: 'a5', name: 'AML_General_Risk_Assessment_Draft_2026.docx', type: 'doc', size: '2.1 MB', by: 'm5', at: minsAgo(600) }],
   });
 
-  t('p3', 'AMLR (EU) 2024/1624 · Transition Roadmap for the Unified EU AML Rulebook & AMLA', 'todo', 'm5', 'high', 15, ['aml', 'legal'], {
-    key: 'AMLR §1',
+  t('p3', 'SFS 2017:630 3 kap. 1 § · Customer Due Diligence (KYC) Architecture Audit', 'todo', 'm5', 'high', 15, ['aml', 'legal'], {
+    key: 'AML §1',
     est: '4 weeks',
     len: 10,
     subtasks: [
-      { id: 's23', title: 'Gap analysis of current CDD measures against new direct-acting EU regulation', done: false },
-      { id: 's24', title: 'Evaluate AMLA direct supervision thresholds for cross-border wealth operations', done: false },
+      { id: 's23', title: 'Gap analysis of current CDD measures against statutory requirements', done: false },
+      { id: 's24', title: 'Evaluate enhanced customer due diligence (EDD) escalation thresholds', done: false },
     ],
   });
 
-  t('p3', 'Real-time Sanctions Screening & Asset Freeze Automation (EU, UN, OFAC)', 'review', 'm1', 'urgent', 0, ['aml', 'risk'], {
+  t('p3', 'Real-time Sanctions Screening & Asset Freeze Automation (UN, OFAC)', 'review', 'm1', 'urgent', 0, ['aml', 'risk'], {
     key: 'AML §3',
     est: '1 week',
     len: 4,
@@ -538,32 +547,32 @@ export function seed() {
     est: '3 days',
   });
 
-  /* ---- MiFID II & SFDR ---- */
-  t('p5', 'MiFID II Delegated Reg 2017/565 · Best Execution Surveillance & Annual RTS 28 Publication', 'todo', 'm3', 'high', 21, ['mifid', 'funds'], {
-    key: 'RTS §28',
+  /* ---- SFS 2007:528 & SFS 2013:561 ---- */
+  t('p5', 'SFS 2007:528 8 kap. 1 § · Best Execution Surveillance & Annual Reporting', 'todo', 'm3', 'high', 21, ['sfs528', 'funds'], {
+    key: 'SFS528 §8:1',
     est: '2 weeks',
     len: 8,
   });
 
-  t('p5', 'Product Governance (POG) Target Market Verification for Complex Structured Notes', 'backlog', 'm2', 'medium', 35, ['mifid', 'compliance'], {
-    key: 'POG §9',
+  t('p5', 'SFS 2007:528 8 kap. 21 § · Product Governance Target Market Verification', 'backlog', 'm2', 'medium', 35, ['sfs528', 'compliance'], {
+    key: 'SFS528 §8:21',
     est: '3 weeks',
   });
 
-  t('p6', 'SFDR RTS Art. 14 · Principal Adverse Impact (PAI) Statement for Article 8/9 Funds', 'progress', 'm6', 'high', 11, ['esg', 'legal'], {
-    key: 'SFDR §14',
+  t('p6', 'SFS 2013:561 8 kap. 1 § · Liquidity Risk Management & Stress Testing Framework', 'progress', 'm6', 'high', 11, ['funds', 'risk'], {
+    key: 'SFS561 §8:1',
     est: '4 weeks',
     len: 10,
     subtasks: [
-      { id: 's30', title: 'Collect scope 1, 2, and 3 GHG emissions data across underlying portfolio companies', done: true },
-      { id: 's31', title: 'Review water emissions and hazardous waste metrics with ESG data vendor', done: false },
-      { id: 's32', title: 'Prepare website disclosure summary in Swedish and English', done: false },
+      { id: 's30', title: 'Calibrate liquidity profiles across alternative investment funds', done: true },
+      { id: 's31', title: 'Review redemption gate thresholds with fund board', done: false },
+      { id: 's32', title: 'Prepare annual liquidity risk assessment report', done: false },
     ],
-    attachments: [{ id: 'a6', name: 'SFDR_PAI_Consolidated_Statement_2026.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200) }],
+    attachments: [{ id: 'a6', name: 'SFS_2013_561_Liquidity_Risk_Framework.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200) }],
   });
 
-  t('p6', 'EU Green Taxonomy Alignment Verification for Nordic Climate Infrastructure Fund', 'todo', 'm7', 'medium', 25, ['esg'], {
-    key: 'TAXON §3',
+  t('p6', 'SFS 2013:561 10 kap. 2 § · Supervisory Reporting & Valuation Verification', 'todo', 'm7', 'medium', 25, ['funds', 'legal'], {
+    key: 'SFS561 §10:2',
     est: '2 weeks',
   });
 
@@ -636,7 +645,7 @@ export function seed() {
       type: 'update',
       by: null,
       project: 'p2',
-      text: 'DORA Compliance Package requires attention',
+      text: 'SFS 2004:297 Compliance Package requires attention',
       snippet: '3 critical ICT third-party provider assessments due in 5 days',
       at: minsAgo(140),
       read: false,
@@ -647,7 +656,7 @@ export function seed() {
       by: 'm3',
       task: 't2',
       text: 'assigned you',
-      snippet: 'SFS 2024:1284 § 6 kap. 2 a § · DORA Implementation in Swedish Credit Institutions',
+      snippet: 'SFS 2004:297 6 kap. 2 a § · Resiliens och IT-drift i kreditinstitut',
       at: minsAgo(260),
       read: false,
     },
@@ -677,7 +686,7 @@ export function seed() {
       by: null,
       task: 't13',
       text: 'is due today',
-      snippet: 'Real-time Sanctions Screening & Asset Freeze Automation (EU, UN, OFAC)',
+      snippet: 'Real-time Sanctions Screening & Asset Freeze Automation (UN, OFAC)',
       at: minsAgo(15),
       read: false,
     },
@@ -686,18 +695,18 @@ export function seed() {
   const files = [
     { id: 'f1', project: 'p1', name: 'SFS_2007_528_Lag_om_vardepappersmarknaden.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180), task: 't1' },
     { id: 'f2', project: 'p1', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400), task: 't1' },
-    { id: 'f3', project: 'p2', name: 'DORA_Regulation_EU_2022_2554_Official_Journal.pdf', type: 'pdf', size: '3.4 MB', by: 'm4', at: minsAgo(5000) },
-    { id: 'f4', project: 'p2', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200), task: 't6' },
+    { id: 'f3', project: 'p2', name: 'SFS_2004_297_Lag_om_bank_och_finansieringsrorelse.pdf', type: 'pdf', size: '3.4 MB', by: 'm4', at: minsAgo(5000) },
+    { id: 'f4', project: 'p2', name: 'SFS_2004_297_6kap_Resilience_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200), task: 't6' },
     { id: 'f5', project: 'p2', name: 'Resilience_Gap_Analysis_2026.xlsx', type: 'sheet', size: '480 KB', by: 'm1', at: minsAgo(3400), task: 't6' },
     { id: 'f6', project: 'p3', name: 'Finansinspektionen_FFFS_2017_11_Penningtvatt.pdf', type: 'pdf', size: '890 KB', by: 'm5', at: minsAgo(8000) },
     { id: 'f7', project: 'p3', name: 'AML_General_Risk_Assessment_Draft_2026.docx', type: 'doc', size: '2.1 MB', by: 'm5', at: minsAgo(600), task: 't11' },
     { id: 'f8', project: 'p4', name: 'FFFS_2013_9_AIFM_Consolidated.pdf', type: 'pdf', size: '1.6 MB', by: 'm7', at: minsAgo(9500) },
-    { id: 'f9', project: 'p6', name: 'SFDR_PAI_Consolidated_Statement_2026.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200), task: 't19' },
+    { id: 'f9', project: 'p6', name: 'SFS_2013_561_AIFM_Supervisory_Report.pdf', type: 'pdf', size: '920 KB', by: 'm6', at: minsAgo(2200), task: 't19' },
   ];
 
   const events = [
-    { id: 'e1', title: 'Finansinspektionen Supervisory Dialogue · SFS 2007:528 & DORA', date: dOff(2), time: '10:00', project: 'p1' },
-    { id: 'e2', title: 'DORA Steering Committee & CTPP Freeze', date: dOff(5), time: '13:30', project: 'p2' },
+    { id: 'e1', title: 'Finansinspektionen Supervisory Dialogue · SFS 2007:528 & SFS 2004:297', date: dOff(2), time: '10:00', project: 'p1' },
+    { id: 'e2', title: 'ICT Resilience Steering Committee & Outsourcing Freeze', date: dOff(5), time: '13:30', project: 'p2' },
     { id: 'e3', title: 'Executive Board Compliance & GRA Attestation', date: dOff(8), time: '15:00', project: 'p3' },
     { id: 'e4', title: 'AIFM Annex IV Supervisory Filing Deadline', date: dOff(10), time: '17:00', project: 'p4' },
     { id: 'e5', title: 'Quarterly Best Execution Review Committee', date: dOff(25), time: '11:00', project: 'p5' },
@@ -728,7 +737,7 @@ export function seed() {
     events,
     projOrder: projects.map(p => p.id),
     savedViews: [{ id: 'v1', project: 'p1', name: 'High Priority', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
-    recentSearches: ['14 kap. 1 §', 'DORA', 'Penningtvätt', 'SFS 2007:528'],
+    recentSearches: ['14 kap. 1 §', 'SFS 2004:297', 'Penningtvätt', 'SFS 2007:528'],
     sessions: [
       { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },
       { id: 'se2', dev: 'Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },

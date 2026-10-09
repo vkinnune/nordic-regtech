@@ -125,13 +125,14 @@ export function diffTokenHtml(tk) {
 }
 
 const SEC_BADGE_PREFIXES = [
-  { prefix: 'finlex-', format: p => `747/2012 ${p.join(':')} §` },
   {
     prefix: 'sfs-',
     format: p => (p.length >= 3 ? `SFS ${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `SFS ${p.join(':')} §`),
   },
-  { prefix: 'dora-', format: p => `DORA Art. ${p.join('-')}` },
-  { prefix: 'aml-', format: p => `AML 444/2017 ${p.join(':')} §` },
+  {
+    prefix: 'fffs-',
+    format: p => (p.length >= 3 ? `FFFS ${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `FFFS ${p.join(':')} §`),
+  },
 ];
 
 function formatNordicSecId(secId, prefix, label) {

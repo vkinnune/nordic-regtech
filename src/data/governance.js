@@ -23,8 +23,8 @@ export const POLICIES = [
   {
     id: 'pol-dora-01',
     code: 'POL-DORA-01',
-    title: 'ICT Third-Party Risk & Digital Operational Resilience Principles',
-    shortTitle: 'DORA ICT Third-Party Risk Policy',
+    title: 'ICT Systems Risk & Digital Operational Resilience Principles',
+    shortTitle: 'ICT Resilience & Third-Party Policy',
     category: 'Operational Resilience & ICT',
     owner: 'Workspace Owner',
     ownerRole: 'Chief Technology & Risk Officer',
@@ -33,11 +33,11 @@ export const POLICIES = [
     lastReviewDate: '2026-01-10',
     nextReviewDue: '2026-06-30',
     summary:
-      'Sets mandatory obligations under Swedish statutory transposition SFS 2024:1284 and DORA for maintaining registers of critical ICT third-party providers, multi-cloud exit strategies, and digital operational testing.',
+      'Sets mandatory obligations under Swedish statutory transposition SFS 2024:1284 (SFS 2004:297 6 kap. 2 a §) for maintaining registers of critical ICT third-party providers, multi-cloud exit strategies, and digital operational testing.',
     statuteSections: ['riksdagen_sfs-2004-297_k6_p2a', 'riksdagen_sfs-2004-46_k2_p17c'],
     controlIds: ['ctl-dora-01', 'ctl-dora-02'],
     riskIds: ['rsk-dora-01'],
-    projectId: 'p1',
+    projectId: 'p2',
   },
   {
     id: 'pol-aml-01',
@@ -56,7 +56,7 @@ export const POLICIES = [
     statuteSections: ['riksdagen_sfs-2017-630_k3_p1', 'riksdagen_sfs-2017-630_k4_p1'],
     controlIds: ['ctl-aml-01', 'ctl-aml-02'],
     riskIds: ['rsk-aml-01'],
-    projectId: 'p4',
+    projectId: 'p3',
   },
 ];
 

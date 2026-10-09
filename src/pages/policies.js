@@ -67,7 +67,7 @@ export function pagePolicies() {
       <div class="stat"><span class="k">Policies</span><span class="v">${policies.length}</span><span class="d">${activeCount} active standards</span></div>
       <div class="stat"><span class="k">Needs Review</span><span class="v" style="${needsReviewCount ? 'color:var(--amber)' : ''}">${needsReviewCount}</span><span class="d">${needsReviewCount ? 'flagged by law amendments' : 'all standards cleared'}</span></div>
       <div class="stat"><span class="k">Linked Controls</span><span class="v">${totalControlsLinked}</span><span class="d">operational controls</span></div>
-      <div class="stat"><span class="k">Statutory Acts</span><span class="v">${distinctStatutes}</span><span class="d">Nordic & EU directives</span></div>
+      <div class="stat"><span class="k">Statutory Acts</span><span class="v">${distinctStatutes}</span><span class="d">Swedish statutes</span></div>
     </div>
 
     <div class="row" style="margin-bottom:16px;flex-wrap:wrap;gap:8px">

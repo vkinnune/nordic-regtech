@@ -145,3 +145,44 @@ test('Governance Matrix Linkages: 100% authentic Swedish section IDs', () => {
   assert.ok(!govJs.includes('FIN-FSA'), 'governance.js must not reference FIN-FSA');
   assert.ok(!govJs.includes('European Supervisory Authorities'), 'governance.js must not reference ESAs');
 });
+
+test('Projects & Seed Integrity: 100% authentic Swedish statutes and ZERO Finnish or EU projects', () => {
+  const seedJs = fs.readFileSync(path.join(ROOT, 'src/data/seed.js'), 'utf-8');
+
+  // Forbidden project titles
+  assert.ok(!seedJs.includes('Sijoituspalvelulaki'), 'seed.js must not contain Sijoituspalvelulaki');
+  assert.ok(!seedJs.includes('747/2012'), 'seed.js must not contain 747/2012');
+  assert.ok(!seedJs.includes("name: 'Regulation (EU)"), 'seed.js must not contain Regulation (EU) project');
+  assert.ok(!seedJs.includes("name: 'SFDR"), 'seed.js must not contain SFDR project');
+  assert.ok(!seedJs.includes('Fiva'), 'seed.js must not reference Fiva');
+
+  // Required Swedish projects
+  assert.ok(seedJs.includes('SFS 2004:46 · Värdepappersfonder'), 'Must include SFS 2004:46 project');
+  assert.ok(seedJs.includes('SFS 2004:297 · Bank- och finansiering'), 'Must include SFS 2004:297 project');
+  assert.ok(seedJs.includes('SFS 2017:630 · Penningtvättslagen'), 'Must include SFS 2017:630 project');
+  assert.ok(seedJs.includes('FFFS 2013:9 · AIFM-Föreskrifter'), 'Must include FFFS 2013:9 project');
+  assert.ok(seedJs.includes('SFS 2007:528 · Värdepappersmarknaden'), 'Must include SFS 2007:528 project');
+  assert.ok(seedJs.includes('SFS 2013:561 · Alternativa fonder'), 'Must include SFS 2013:561 project');
+});
+
+test('Regulations UI & View Engine: Swedish authority segmentation and ZERO Finnish/EU jurisdiction filters', () => {
+  const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
+  const viewEngineJs = fs.readFileSync(path.join(ROOT, 'src/shell/view-engine.js'), 'utf-8');
+  const storeJs = fs.readFileSync(path.join(ROOT, 'src/core/store.js'), 'utf-8');
+
+  // Verify UI copy and segmented controls in regulations.js
+  assert.ok(regPageJs.includes('Swedish financial statutory library and supervisory regulations'), 'Must have Swedish library subtitle');
+  assert.ok(regPageJs.includes('Swedish acts & FFFS circulars'), 'Must have Swedish acts metric label');
+  assert.ok(regPageJs.includes('Finansinspektionen (${fffsCount})'), 'Must have Finansinspektionen segment tab');
+  assert.ok(regPageJs.includes('Riksdagen Acts (${sfsCount})'), 'Must have Riksdagen Acts segment tab');
+  assert.ok(!regPageJs.includes('>Finland</button>'), 'Must not have Finland segment button');
+  assert.ok(!regPageJs.includes('>European Union</button>'), 'Must not have European Union segment button');
+
+  // Verify view-engine has no legacy jurisdiction field in REG_FIELDS
+  assert.ok(!viewEngineJs.includes('jurisdiction: {'), 'view-engine.js must not define jurisdiction in REG_FIELDS');
+  assert.ok(viewEngineJs.includes("f.f !== 'jurisdiction'"), 'view-engine.js must sanitize legacy jurisdiction filters in viewOf');
+
+  // Verify store version bump and cache sanitization
+  assert.ok(storeJs.includes("STORE_KEY = 'regtech.studio.v8'"), 'store.js must be bumped to v8');
+  assert.ok(storeJs.includes('regtech.studio.v7'), 'store.js must purge legacy v7 cache');
+});

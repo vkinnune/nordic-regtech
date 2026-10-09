@@ -101,15 +101,6 @@ export const REG_FIELDS = {
     icon: 'calendar',
     opts: () => REGULATION_ERAS.filter(e => e.id !== 'all').map(e => ({ id: e.id, name: e.label })),
   },
-  jurisdiction: {
-    name: 'Jurisdiction',
-    icon: 'globe',
-    opts: () => [
-      { id: 'fi', name: 'Finland' },
-      { id: 'se', name: 'Sweden' },
-      { id: 'eu', name: 'European Union' },
-    ],
-  },
 };
 
 export function viewOf(key) {
@@ -123,6 +114,9 @@ export function viewOf(key) {
       colW: {},
       showDone: true,
     };
+  if (key === 'regulations' && S.views[key].filters) {
+    S.views[key].filters = S.views[key].filters.filter(f => f.f !== 'jurisdiction');
+  }
   return S.views[key];
 }
 export function matchF(t, f) {
@@ -290,13 +284,6 @@ export function matchRegFilter(item, f) {
       if (val === '1990s') return item.year >= 1990 && item.year <= 1999;
       return false;
     });
-  } else if (f.f === 'jurisdiction') {
-    hit = f.v.some(val => {
-      if (val === 'fi') return item.r.jurisdiction.includes('Finland');
-      if (val === 'se') return item.r.jurisdiction.includes('Sweden');
-      if (val === 'eu') return item.r.jurisdiction.includes('European Union');
-      return false;
-    });
   }
   return f.op === 'not' ? !hit : hit;
 }
@@ -305,14 +292,16 @@ export function applyRegView(decorated, v, juris = 'all') {
   let out = decorated;
   if (juris && juris !== 'all') {
     out = out.filter(item => {
-      if (juris === 'fi') return item.r.jurisdiction.includes('Finland');
-      if (juris === 'se') return item.r.jurisdiction.includes('Sweden');
-      if (juris === 'eu') return item.r.jurisdiction.includes('European Union');
+      if (juris === 'fi') return item.regAuth === 'fi';
+      if (juris === 'riksdagen') return item.regAuth === 'riksdagen';
       return true;
     });
   }
   if (v.filters && v.filters.length) {
-    out = out.filter(item => v.filters.every(f => matchRegFilter(item, f)));
+    const activeFilters = v.filters.filter(f => f.f !== 'jurisdiction');
+    if (activeFilters.length) {
+      out = out.filter(item => activeFilters.every(f => matchRegFilter(item, f)));
+    }
   }
   if (v.q) {
     const q = v.q.toLowerCase().trim();

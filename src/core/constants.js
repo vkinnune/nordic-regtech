@@ -16,14 +16,13 @@ export const PRIOS = [
 ];
 export const PR = Object.fromEntries(PRIOS.map(p => [p.id, p]));
 export const LABELS = [
-  { id: 'dora', name: 'DORA', c: 'var(--blue)' },
+  { id: 'sfs297', name: 'SFS 2004:297', c: 'var(--blue)' },
   { id: 'aml', name: 'AML / Sanctions', c: 'var(--red)' },
   { id: 'funds', name: 'Funds & UCITS', c: 'var(--violet)' },
   { id: 'risk', name: 'Risk & Liquidity', c: 'var(--amber)' },
-  { id: 'mifid', name: 'MiFID II', c: 'var(--teal)' },
-  { id: 'esg', name: 'ESG & SFDR', c: 'var(--green)' },
+  { id: 'sfs528', name: 'SFS 2007:528', c: 'var(--teal)' },
   { id: 'fi', name: 'Finansinspektionen', c: 'var(--orange)' },
-  { id: 'fiva', name: 'FIN-FSA', c: 'var(--rose)' },
+  { id: 'riksdagen', name: 'Sveriges Riksdag', c: 'var(--indigo)' },
 ];
 export const LB = Object.fromEntries(LABELS.map(l => [l.id, l]));
 export const PSTAT = {

@@ -3,7 +3,7 @@ import { TODAY, diffD, iso, parse, uid } from './utils.js';
 import { PCOLORS, TEAMS_SEED } from './constants.js';
 import { seed } from '../data/seed.js';
 
-export const STORE_KEY = 'regtech.studio.v7';
+export const STORE_KEY = 'regtech.studio.v8';
 export const DEFAULT_PREFS = {
   theme: 'system',
   accent: 'indigo',
@@ -21,10 +21,27 @@ export const DEFAULT_PREFS = {
 };
 export function load() {
   try {
+    // Purge legacy storage versions if present
+    ['regtech.studio.v6', 'regtech.studio.v7'].forEach(k => {
+      try {
+        localStorage.removeItem(k);
+      } catch {
+        /* ignore */
+      }
+    });
+
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const j = JSON.parse(raw);
-      if (j && j.data && j.data.tasks) return j;
+      if (j && j.data && j.data.tasks && j.data.projects) {
+        // Drop cache if it contains legacy non-Swedish projects
+        const hasLegacy = j.data.projects.some(p => /747\/2012|sijoituspalvelu|dora\b.*2022|sfdr/i.test(p.name));
+        if (hasLegacy) {
+          localStorage.removeItem(STORE_KEY);
+          return null;
+        }
+        return j;
+      }
     }
   } catch {
     /* storage blocked or corrupt: start from seed data */

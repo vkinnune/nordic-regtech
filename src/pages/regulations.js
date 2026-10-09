@@ -108,6 +108,9 @@ function renderRegulationsLibrary(u) {
     body = renderRegulationsGrid(filtered);
   }
 
+  const fffsCount = allActs.filter(r => (r.authority || '').toLowerCase().includes('finansinspektionen') || (r.code && r.code.startsWith('FFFS'))).length;
+  const sfsCount = allActs.filter(r => (r.authority || '').toLowerCase().includes('riksdagen') || (r.code && r.code.startsWith('SFS'))).length;
+
   const extra = `<div class="seg" role="tablist">
     <button class="${layout !== 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="grid" title="Cards view">${ic('layout-grid', 13)}<span class="hide-m">Cards</span></button>
     <button class="${layout === 'list' ? 'on' : ''}" data-a="set" data-k="regLibLayout" data-v="list" title="List view">${ic('list', 13)}<span class="hide-m">List</span></button>
@@ -115,21 +118,20 @@ function renderRegulationsLibrary(u) {
 
   const right = `<div class="seg" role="tablist">
     <button class="${juris === 'all' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="all">All (${allActs.length})</button>
-    <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finland</button>
-    <button class="${juris === 'se' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="se">Sweden</button>
-    <button class="${juris === 'eu' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="eu">European Union</button>
+    <button class="${juris === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="fi">Finansinspektionen (${fffsCount})</button>
+    <button class="${juris === 'riksdagen' ? 'on' : ''}" data-a="set" data-k="regLibJuris" data-v="riksdagen">Riksdagen Acts (${sfsCount})</button>
   </div>`;
 
   return `<div class="page wide">
     <div class="ph">
       <div>
         <h1>Regulations Library</h1>
-        <p>Nordic financial statutory library and EU directives</p>
+        <p>Swedish financial statutory library and supervisory regulations</p>
       </div>
     </div>
 
     <div class="stats" style="margin-bottom:16px">
-      <div class="stat"><span class="k">Statutes</span><span class="v">${allActs.length}</span><span class="d">Nordic & EU directives</span></div>
+      <div class="stat"><span class="k">Statutes</span><span class="v">${allActs.length}</span><span class="d">Swedish acts & FFFS circulars</span></div>
       <div class="stat"><span class="k">Statutory Sections</span><span class="v">${totalSections}</span><span class="d">indexed legal provisions</span></div>
       <div class="stat"><span class="k">Governing Policies</span><span class="v">${totalPoliciesCount}</span><span class="d">linked compliance standards</span></div>
       <div class="stat"><span class="k">Enforcing Controls</span><span class="v">${totalControlsCount}</span><span class="d">operational safeguards</span></div>

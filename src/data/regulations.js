@@ -62,14 +62,7 @@ export function resolveFrameworkToRegulation(fw) {
     return { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k6_p2a', view: 'reader' };
   }
   // AML / Anti-Money Laundering -> Swedish AML Act SFS 2017:630 3 kap. 1 §
-  if (
-    f.includes('aml') ||
-    f.includes('penningtvatt') ||
-    f.includes('money laundering') ||
-    f.includes('2017:630') ||
-    f.includes('rahanpesu') ||
-    f.includes('444/2017')
-  ) {
+  if (f.includes('aml') || f.includes('penningtvatt') || f.includes('money laundering') || f.includes('2017:630')) {
     return { regId: 'sfs-2017-630', secId: 'riksdagen_sfs-2017-630_k3_p1', view: 'reader' };
   }
   // Market Abuse / MAR -> Swedish Market Abuse Penal Act SFS 2016:1306 1 kap. 1 §
@@ -77,14 +70,7 @@ export function resolveFrameworkToRegulation(fw) {
     return { regId: 'sfs-2016-1306', secId: 'riksdagen_sfs-2016-1306_k1_p1', view: 'reader' };
   }
   // MiFID / Securities Market / Investment Services -> Swedish Securities Market Act SFS 2007:528 1 kap. 1 §
-  if (
-    f.includes('mifid') ||
-    f.includes('mifir') ||
-    f.includes('2007:528') ||
-    f.includes('vardepappersmarknad') ||
-    f.includes('investment services') ||
-    f.includes('747/2012')
-  ) {
+  if (f.includes('mifid') || f.includes('mifir') || f.includes('2007:528') || f.includes('vardepappersmarknad') || f.includes('investment services')) {
     return { regId: 'sfs-2007-528', secId: 'riksdagen_sfs-2007-528_k1_p1', view: 'reader' };
   }
   // Funds / UCITS -> Swedish Investment Funds Act SFS 2004:46 1 kap. 1 §
