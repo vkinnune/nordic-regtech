@@ -46,15 +46,14 @@ test('Regulatory Feed Shell & Router: navigation and route registration', () => 
   assert.ok(layoutJs.includes("sItem('feed', 'Feed'"), 'layout.js sidebar must contain Feed item');
 });
 
-test('Regulatory Feed Actions: drawer, task creation, and filtering', () => {
+test('Regulatory Feed Actions: drawer, assessment, and filtering', () => {
   const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
 
   assert.ok(actionsJs.includes('A.openFeedDrawer'), 'actions.js must define A.openFeedDrawer');
   assert.ok(actionsJs.includes('A.closeFeedDrawer'), 'actions.js must define A.closeFeedDrawer');
-  assert.ok(actionsJs.includes('A.createTaskFromFeed'), 'actions.js must define A.createTaskFromFeed');
   assert.ok(actionsJs.includes('A.ackFeedItem'), 'actions.js must define A.ackFeedItem');
   assert.ok(actionsJs.includes('A.clearFeedFilters'), 'actions.js must define A.clearFeedFilters');
-  assert.ok(actionsJs.includes('f.taskId = newId'), 'actions.js must associate created mitigation task with feed item');
+  assert.ok(!actionsJs.includes('A.createTaskFromFeed'), 'actions.js must not define synthetic A.createTaskFromFeed');
   assert.ok(actionsJs.includes('ensureMutableFeedItem'), 'actions.js must isolate state mutations to action handlers');
   assert.ok(actionsJs.includes("targetRegId.replace(/^reg-/, '')"), 'actions.js must normalize statute prefix in openRegInReader');
 });
@@ -193,24 +192,11 @@ test('Regulatory Feed Pipeline Connection & Data Integrity: 100% Swedish supervi
   const score1Items = items.filter(i => i.score === 1);
   assert.ok(score1Items.length >= 5, `Must have calibrated Score 1 (Informational) items (found ${score1Items.length})`);
 
-  // Verify Governance Matrix Causality: 100% of policyIds, controlIds, and riskIds match real governance items
-  const validPolicies = new Set(['pol-alg-01', 'pol-dora-01', 'pol-aml-01']);
-  const validControls = new Set(['ctl-alg-01', 'ctl-alg-02', 'ctl-alg-03', 'ctl-dora-01', 'ctl-dora-02', 'ctl-aml-01', 'ctl-aml-02']);
-  const validRisks = new Set(['rsk-alg-01', 'rsk-dora-01', 'rsk-aml-01']);
-
+  // Verify Zero Synthetic Mock Fields: 100% of feed items contain ZERO fake statutory links, governance links, tasks, or boilerplate
+  const mockKeys = ['statuteId', 'statuteSec', 'statuteRef', 'policyIds', 'controlIds', 'riskIds', 'plainEnglish', 'taskId'];
   for (const item of items) {
-    assert.ok(item.policyIds && item.policyIds.length > 0, `Item ${item.id} must have policyIds`);
-    assert.ok(item.controlIds && item.controlIds.length > 0, `Item ${item.id} must have controlIds`);
-    assert.ok(item.riskIds && item.riskIds.length > 0, `Item ${item.id} must have riskIds`);
-
-    for (const p of item.policyIds) {
-      assert.ok(validPolicies.has(p), `Invalid policyId "${p}" in item ${item.id}`);
-    }
-    for (const c of item.controlIds) {
-      assert.ok(validControls.has(c), `Invalid controlId "${c}" in item ${item.id}`);
-    }
-    for (const r of item.riskIds) {
-      assert.ok(validRisks.has(r), `Invalid riskId "${r}" in item ${item.id}`);
+    for (const key of mockKeys) {
+      assert.equal(item[key], undefined, `Item ${item.id} must not contain synthetic mock field "${key}"`);
     }
   }
 
@@ -263,18 +249,25 @@ test('Regulatory Feed Unslop & Regulation Navigation: pure real data, authentic 
   const withExplanation = items.filter(i => i.explanation && i.explanation.trim().length > 10);
   assert.ok(withExplanation.length >= 250, `Substantially all items must have authentic compliance explanation (found ${withExplanation.length})`);
 
-  // 3. Drawer HTML must be unslopped: Summary, Compliance & Supervisory Impact, clickable framework buttons
+  // 3. Drawer HTML must be unslopped with zero mock governance/statute sections
   assert.ok(!drawerJs.includes('Supervisory Synopsis'), 'drawer.js must not contain "Supervisory Synopsis"');
   assert.ok(!drawerJs.includes('feed-analysis-grid'), 'drawer.js must not contain the 3-box feed-analysis-grid boilerplate');
   assert.ok(!drawerJs.includes('Executive Impact Assessment'), 'drawer.js must not contain fake "Executive Impact Assessment"');
+  assert.ok(!drawerJs.includes('Internal Governance Matrix Linkages'), 'drawer.js must not contain mock governance matrix linkages');
+  assert.ok(!drawerJs.includes('Statutory Citation & Direct Reader Link'), 'drawer.js must not contain mock statutory linkage');
+  assert.ok(!drawerJs.includes('createTaskFromFeed'), 'drawer.js must not contain createTaskFromFeed');
   assert.ok(drawerJs.includes('Summary'), 'drawer.js must contain clean Summary header');
   assert.ok(drawerJs.includes('Compliance & Supervisory Impact'), 'drawer.js must contain Compliance & Supervisory Impact');
+  assert.ok(drawerJs.includes('Official Supervisory Source'), 'drawer.js must contain Official Supervisory Source');
   assert.ok(drawerJs.includes('feed-explanation-box'), 'drawer.js must use clean feed-explanation-box');
   assert.ok(drawerJs.includes('data-a="openRegFromFramework"'), 'drawer.js must render clickable framework buttons');
 
-  // 4. Feed page cards and list view must have clickable framework buttons
-  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(primaryFramework)}"'), 'Feed cards must have clickable primaryFramework buttons');
-  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(f)}"'), 'Feed list must have clickable framework tag buttons');
+  // 4. Feed page cards and list view must have zero mock tasks/statutes and have clickable framework buttons
+  assert.ok(!feedPageJs.includes('feed-statute-pill'), 'feed.js must not contain mock feed-statute-pill');
+  assert.ok(!feedPageJs.includes('createTaskFromFeed'), 'feed.js must not contain mock createTaskFromFeed');
+  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(fw)}"'), 'Feed cards must have clickable framework buttons');
+  assert.ok(feedPageJs.includes('Official notice ↗'), 'Feed cards must have direct link to official notice');
+  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(item.frameworks[0])}"'), 'Feed list must have clickable framework tag buttons');
 
   // 5. Actions and Regulations mapping integrity
   assert.ok(actionsJs.includes('A.openRegFromFramework'), 'actions.js must define A.openRegFromFramework');

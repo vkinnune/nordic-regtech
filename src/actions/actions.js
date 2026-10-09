@@ -1423,35 +1423,6 @@ A.ackFeedItem = el => {
   }
 };
 
-A.createTaskFromFeed = el => {
-  const f = ensureMutableFeedItem(el.dataset.id);
-  if (!f) return;
-  if (f.taskId && task(f.taskId)) {
-    A.editTask({ dataset: { id: f.taskId } });
-    return;
-  }
-  f.status = 'IN_MITIGATION';
-  const linkedPolicy = f.policyIds?.[0] ? policy(f.policyIds[0]) : null;
-  const projectId = linkedPolicy?.projectId || (f.statuteId === 'reg-dora' ? 'p1' : f.statuteId === 'reg-aml' ? 'p4' : 'p5');
-  const authKey = f.authorityId ? f.authorityId.toUpperCase() : 'HORIZON';
-  const newId = dispatchGovTask({
-    key: `F-${authKey}-${Math.floor(Date.now() % 1000)}`,
-    title: `Mitigate: ${f.title}`,
-    desc:
-      `Regulatory Horizon Monitoring update from ${f.authority} (${f.relativeTime}):\n\n` +
-      `Statute: ${f.statuteRef}\n` +
-      `Impact Score: ${f.score}/5 (${f.category})\n\n` +
-      `Executive Summary:\n${f.summary}\n\n` +
-      `Action Required:\n${f.plainEnglish?.actionRequired || ''}`,
-    project: projectId,
-    labels: ['Compliance', f.category === 'AMENDMENT' ? 'Statutory' : 'Supervisory'],
-    logMessage: `Created mitigation task from regulatory feed: ${f.title}`,
-    toastMessage: `Mitigation task created for ${f.statuteRef}.`,
-  });
-  f.taskId = newId;
-  save();
-};
-
 A.clearFeedFilters = () => {
   delete S.ui.feedQ;
   delete S.ui.feedJuris;

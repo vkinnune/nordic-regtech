@@ -38,19 +38,6 @@ class AuthorityRule(BaseModel):
     jurisdiction: str
 
 
-class StatuteRule(BaseModel):
-    statute_id: str
-    statute_ref: str
-    statute_sec: str
-    keywords: List[str]
-
-
-class PlainEnglishAnalysis(BaseModel):
-    whyItMatters: str
-    beforeAfter: str
-    actionRequired: str
-
-
 class FeedItemModel(BaseModel):
     id: str
     title: str
@@ -62,23 +49,15 @@ class FeedItemModel(BaseModel):
     score: int
     publishedAt: str
     relativeTime: str
-    statuteId: str
-    statuteSec: str
-    statuteRef: str
     summary: str
     explanation: Optional[str] = None
-    plainEnglish: Optional[PlainEnglishAnalysis] = None
     frameworks: List[str] = Field(default_factory=list)
     vendors: List[str] = Field(default_factory=list)
     risks: List[str] = Field(default_factory=list)
-    policyIds: List[str] = Field(default_factory=list)
-    controlIds: List[str] = Field(default_factory=list)
-    riskIds: List[str] = Field(default_factory=list)
     sourceUrl: str
     source: str
     tags: List[str] = Field(default_factory=list)
     status: str = "UNREVIEWED"
-    taskId: Optional[str] = None
 
 
 # ============================================================
@@ -108,137 +87,7 @@ def resolve_authority(source: str, link: str, title: str = "", summary: str = ""
     return None
 
 
-# ============================================================
-# Exact Statutory Linking (1-Click Reader Provision Targets)
-# ============================================================
 
-STATUTE_RULES: List[StatuteRule] = [
-    StatuteRule(
-        statute_id="reg-dora",
-        statute_ref="Regulation (EU) 2022/2554 (DORA) Art. 28",
-        statute_sec="dora-art-28",
-        keywords=["dora", "digital operational resilience", "ict incident", "tiber", "it-säkerhet", "kyberturvallisuuskeskus", "incident reporting", "threat-led"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2017-630",
-        statute_ref="SFS 2017:630 3 kap. 1 § (AML/CFT Act)",
-        statute_sec="riksdagen_sfs-2017-630_k3_p1",
-        keywords=["penningtvätt", "aml", "anti-money laundering", "rahanpesu", "2017:630", "sanktions", "terrorismin", "fiu", "kundkännedom", "pep"]
-    ),
-    StatuteRule(
-        statute_id="reg-aml",
-        statute_ref="AML Act (444/2017) 2 kap. 1 §",
-        statute_sec="aml-2-1",
-        keywords=["444/2017", "rahanpesulaki", "rahanpesun selvittelykeskus"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2016-1306",
-        statute_ref="SFS 2016:1306 1 kap. 1 § (Market Abuse Act)",
-        statute_sec="riksdagen_sfs-2016-1306_k1_p1",
-        keywords=["marknadsmissbruk", "market abuse", "mar", "insider", "handelsförbud", "2016:1306", "sisäpiiritieto"]
-    ),
-    StatuteRule(
-        statute_id="reg-finlex-747-2012",
-        statute_ref="Investment Services Act 747/2012 1 kap. 9 §",
-        statute_sec="finlex-1-9",
-        keywords=["747/2012", "sijoituspalvelulaki", "sijoitustoiminta", "finlex"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2007-528",
-        statute_ref="SFS 2007:528 1 kap. 1 § (Securities Market Act)",
-        statute_sec="riksdagen_sfs-2007-528_k1_p1",
-        keywords=["värdepappersmarknad", "mifid", "mifir", "arvopaperimarkkina", "2007:528", "stibor", "bmr", "benchmarks"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2004-46",
-        statute_ref="SFS 2004:46 1 kap. 1 § (Investment Funds Act)",
-        statute_sec="riksdagen_sfs-2004-46_k1_p1",
-        keywords=["investeringsfond", "fondkommission", "ucits", "2004:46", "sijoitusrahasto", "fondbolag", "rahastoyhtiö"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2004-297",
-        statute_ref="SFS 2004:297 1 kap. 1 § (Banking & Financing Act)",
-        statute_sec="riksdagen_sfs-2004-297_k1_p1",
-        keywords=["bank- och finansiering", "kreditinstitut", "bfrl", "2004:297", "luottolaitos", "kreditprövning", "konsumentkredit", "peruspankkipalvelu"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2010-751",
-        statute_ref="SFS 2010:751 1 kap. 1 § (Payment Services Act)",
-        statute_sec="riksdagen_sfs-2010-751_k1_p1",
-        keywords=["betaltjänst", "psd2", "payment services", "2010:751", "maksupalvelu", "betalningsbedrägerier"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2013-561",
-        statute_ref="SFS 2013:561 1 kap. 1 § (AIFM Act)",
-        statute_sec="riksdagen_sfs-2013-561_k1_p1",
-        keywords=["aif", "aifm", "alternativa investeringsfond", "2013:561"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2010-2043",
-        statute_ref="SFS 2010:2043 1 kap. 1 § (Insurance Business Act)",
-        statute_sec="riksdagen_sfs-2010-2043_k1_p1",
-        keywords=["försäkringsrörelse", "solvens ii", "solvency ii", "2010:2043", "vakuutusyhtiö"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2018-1219",
-        statute_ref="SFS 2018:1219 1 kap. 1 § (Insurance Distribution Act)",
-        statute_sec="riksdagen_sfs-2018-1219_k1_p1",
-        keywords=["försäkringsdistribution", "idd", "2018:1219", "vakuutusedustus"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2019-742",
-        statute_ref="SFS 2019:742 1 kap. 1 § (Pension Companies Act)",
-        statute_sec="riksdagen_sfs-2019-742_k1_p1",
-        keywords=["tjänstepension", "iorp", "2019:742", "eläkesäätiö", "työeläke"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2014-968",
-        statute_ref="SFS 2014:968 1 kap. 1 § (Supervision of Credit Institutions)",
-        statute_sec="riksdagen_sfs-2014-968_k1_p1",
-        keywords=["kapitaltäckning", "crd", "crr", "srep", "2014:968", "vakavaraisuus", "stress test"]
-    ),
-    StatuteRule(
-        statute_id="sfs-2015-1016",
-        statute_ref="SFS 2015:1016 1 kap. 1 § (Resolution Act)",
-        statute_sec="riksdagen_sfs-2015-1016_k1_p1",
-        keywords=["resolution", "brrd", "krishantering", "mrel", "2015:1016", "kriisinratkaisu"]
-    ),
-    StatuteRule(
-        statute_id="reg-sfdr",
-        statute_ref="Regulation (EU) 2019/2088 (SFDR) Art. 4",
-        statute_sec="sfdr-art-4",
-        keywords=["sfdr", "hållbarhet", "sustainability", "esg", "greenwashing", "taxonomy"]
-    ),
-]
-
-
-def resolve_statute(text_blob: str, jurisdiction: str = "SE") -> StatuteRule:
-    low = text_blob.lower()
-    for rule in STATUTE_RULES:
-        if any(kw in low for kw in rule.keywords):
-            return rule
-
-    if jurisdiction == "FI":
-        return next(r for r in STATUTE_RULES if r.statute_id == "reg-finlex-747-2012")
-    return next(r for r in STATUTE_RULES if r.statute_id == "sfs-2007-528")
-
-
-# ============================================================
-# Governance Matrix Linkages (Strictly Real IDs from governance.js)
-# ============================================================
-
-def resolve_governance_linkages(statute_id: str, text_blob: str) -> Tuple[List[str], List[str], List[str]]:
-    low = text_blob.lower()
-    # 1. Anti-Money Laundering & Sanctions
-    if statute_id in ["sfs-2017-630", "reg-aml"] or any(k in low for k in ["aml", "penningtvätt", "sanction", "rahanpesu", "kyt", "due diligence", "beneficial ownership", "fiu"]):
-        return ["pol-aml-01"], ["ctl-aml-01", "ctl-aml-02"], ["rsk-aml-01"]
-
-    # 2. Digital Operational Resilience, ICT, Cyber & Privacy
-    if statute_id == "reg-dora" or any(k in low for k in ["dora", "cyber", "ict", "resilience", "privacy", "gdpr", "tiber", "incident", "outage", "cloud", "tietosuoja"]):
-        return ["pol-dora-01"], ["ctl-dora-01", "ctl-dora-02"], ["rsk-dora-01"]
-
-    # 3. Algorithmic Trading, Market Conduct, Securities, Banking & General
-    return ["pol-alg-01"], ["ctl-alg-01", "ctl-alg-02"], ["rsk-alg-01"]
 
 
 # ============================================================
@@ -783,34 +632,6 @@ def format_relative_time(created_at_str: str) -> str:
         return "Recently"
 
 
-def synthesize_before_after(category: str, summary: str, why_it_matters: str) -> str:
-    if category == "ENFORCEMENT":
-        return "Previously, internal audit flagged minor procedural gaps without formal regulatory censure. Following this enforcement notice, supervisory fines and mandatory corrective remediation plans are legally binding."
-    if category == "AMENDMENT":
-        return "Prior regulatory exemptions or softer discretionary guidelines are replaced with mandatory statutory requirements carrying direct administrative liability."
-    if category == "TECHNICAL_STANDARD":
-        return "Reporting schemas and data validation rules transition from legacy templates to unified electronic taxonomy standards with strict schema validation."
-    if category == "CONSULTATION":
-        return "Supervisory consultation stage: existing supervisory guidance remains active while stakeholder feedback is collected before final binding rules are adopted."
-    return "Prior operational baseline required standard periodic reporting; revised circular establishes enhanced supervisory monitoring and expedited escalation thresholds."
-
-
-def synthesize_action(category: str, risks: List[str], frameworks: List[str]) -> str:
-    r_text = risks[0] if risks else "regulatory compliance risk"
-    fw_text = frameworks[0] if frameworks else "applicable supervisory framework"
-    if category == "ENFORCEMENT":
-        return f"Review internal controls against cited deficiency in {fw_text}, conduct spot audit on {r_text.lower()}, and verify compliance posture."
-    if category == "AMENDMENT":
-        return f"Update core governing policies to reflect statutory changes in {fw_text}, schedule compliance review, and adjust control workflows."
-    if category == "TECHNICAL_STANDARD":
-        return f"Validate electronic reporting schemas against updated {fw_text} technical standards and test submission pipelines."
-    return f"Assess operational exposure to {r_text.lower()}, file internal compliance briefing, and document supervisory alignment."
-
-
-# ============================================================
-# Main Pipeline Runner & Text Normalization
-# ============================================================
-
 def strip_nordic_accents(text: str) -> str:
     replacements = {
         'ä': 'a', 'ö': 'o', 'å': 'a',
@@ -838,7 +659,7 @@ def is_english_text(s: str) -> bool:
     return non_en < 2
 
 
-def ensure_english_summary(summary: str, explanation: str, title: str, auth_label: str, statute_ref: str, category: str) -> str:
+def ensure_english_summary(summary: str, explanation: str, title: str, auth_label: str, category: str) -> str:
     cleaned = sanitize_text(summary)
     if is_english_text(cleaned):
         return strip_nordic_accents(cleaned)
@@ -846,7 +667,7 @@ def ensure_english_summary(summary: str, explanation: str, title: str, auth_labe
     if is_english_text(cleaned_exp):
         return strip_nordic_accents(cleaned_exp)
     cat_desc = category.lower().replace('_', ' ')
-    return f"{auth_label} issues supervisory {cat_desc} update regarding {statute_ref}: {title}. The announcement establishes supervisory compliance obligations and risk monitoring standards for supervised institutions."
+    return f"{auth_label} issues supervisory {cat_desc} update: {title}. The announcement establishes supervisory compliance obligations and risk monitoring standards for supervised institutions."
 
 
 def main():
@@ -990,15 +811,8 @@ def main():
         title = strip_nordic_accents(translate_title(raw_title))
         orig_title = raw_title if raw_title.lower() != title.lower() else None
 
-        # Statutory rule resolution
-        text_blob_temp = f"{title} {' '.join(raw_frameworks)} {' '.join(raw_risks)} {link}"
-        statute_rule = resolve_statute(text_blob_temp, jur)
-        statute_id = statute_rule.statute_id
-        statute_ref = statute_rule.statute_ref
-        statute_sec = statute_rule.statute_sec
-
         # Sanitize summary and guarantee 100% English with zero Scandinavian accents
-        summary = ensure_english_summary(raw_summary, explanation, title, auth_label, statute_ref, category)
+        summary = ensure_english_summary(raw_summary, explanation, title, auth_label, category)
 
         # Anonymize entities & translate risks
         vendors = list(dict.fromkeys(strip_nordic_accents(anonymize_entity(v)) for v in raw_vendors))
@@ -1006,16 +820,6 @@ def main():
         frameworks = [strip_nordic_accents(sanitize_text(f)) for f in raw_frameworks]
 
         score = calibrate_regulatory_score(raw_score, category, title, summary, frameworks, risks)
-        text_blob = f"{title} {summary} {' '.join(frameworks)} {' '.join(risks)} {link}"
-
-        # Refine statutory resolution with full text blob
-        statute_rule = resolve_statute(text_blob, jur)
-        statute_id = statute_rule.statute_id
-        statute_ref = statute_rule.statute_ref
-        statute_sec = statute_rule.statute_sec
-
-        # Governance matrix linkages (100% valid IDs from governance.js)
-        policies, controls, risk_ids = resolve_governance_linkages(statute_id, text_blob)
 
         # Jurisdiction is 100% Swedish (SE) supervisory stream
         jur = "SE"
@@ -1030,9 +834,7 @@ def main():
         if explanation and is_english_text(explanation):
             why_it_matters = strip_nordic_accents(sanitize_text(explanation))
         else:
-            why_it_matters = f"Supervisory and compliance update from {auth_label} regarding {statute_ref}. Establishes risk oversight and reporting standards for supervised entities."
-        before_after = strip_nordic_accents(synthesize_before_after(category, summary, why_it_matters))
-        action_required = strip_nordic_accents(synthesize_action(category, risks, frameworks))
+            why_it_matters = f"Supervisory and compliance update from {auth_label}: {title}. Establishes risk oversight and reporting standards for supervised entities."
 
         tags = list(dict.fromkeys(
             frameworks[:3] +
@@ -1054,22 +856,11 @@ def main():
             score=score,
             publishedAt=created_at.replace(" ", "T") + "Z" if " " in created_at else created_at,
             relativeTime=relative_time,
-            statuteId=statute_id,
-            statuteSec=statute_sec,
-            statuteRef=statute_ref,
             summary=summary,
             explanation=why_it_matters,
-            plainEnglish=PlainEnglishAnalysis(
-                whyItMatters=why_it_matters,
-                beforeAfter=before_after,
-                actionRequired=action_required,
-            ),
             frameworks=frameworks,
             vendors=vendors,
             risks=risks,
-            policyIds=policies,
-            controlIds=controls,
-            riskIds=risk_ids,
             sourceUrl=link,
             source=source,
             tags=tags,

@@ -14,15 +14,11 @@ from pydantic import ValidationError
 from ingest_rss_feed import (
     AuthorityRule,
     FeedItemModel,
-    PlainEnglishAnalysis,
-    StatuteRule,
     anonymize_entity,
     calibrate_regulatory_score,
     ensure_english_summary,
     resolve_authority,
     resolve_category,
-    resolve_governance_linkages,
-    resolve_statute,
     sanitize_text,
     strip_nordic_accents,
     translate_risk,
@@ -31,7 +27,7 @@ from ingest_rss_feed import (
 
 
 def test_pydantic_feed_item_model_valid():
-    """Verify that FeedItemModel validates and serializes correctly."""
+    """Verify that FeedItemModel validates and serializes correctly with pure authentic data."""
     item = FeedItemModel(
         id="feed-fi-test01",
         title="Finansinspektionen Issues Supervisory Guidance",
@@ -42,21 +38,11 @@ def test_pydantic_feed_item_model_valid():
         score=4,
         publishedAt="2026-03-24T12:00:00Z",
         relativeTime="Today",
-        statuteId="sfs-2007-528",
-        statuteSec="riksdagen_sfs-2007-528_k1_p1",
-        statuteRef="SFS 2007:528 1 kap. 1 §",
         summary="Test summary of regulatory circular.",
-        plainEnglish=PlainEnglishAnalysis(
-            whyItMatters="Impacts investment firm licensing.",
-            beforeAfter="Replaces discretionary practices with binding SLAs.",
-            actionRequired="Update internal compliance policies.",
-        ),
+        explanation="Impacts investment firm licensing and operational readiness.",
         frameworks=["MiFID II"],
         vendors=["Nordic Sovereign Bank"],
         risks=["Regulatory compliance and supervisory risk"],
-        policyIds=["pol-alg-01"],
-        controlIds=["ctl-alg-01"],
-        riskIds=["rsk-alg-01"],
         sourceUrl="https://www.fi.se/test",
         source="www.fi.se",
         tags=["MiFID II", "FI"],
@@ -66,7 +52,13 @@ def test_pydantic_feed_item_model_valid():
     dumped = item.model_dump()
     assert dumped["id"] == "feed-fi-test01"
     assert dumped["score"] == 4
-    assert dumped["plainEnglish"]["whyItMatters"] == "Impacts investment firm licensing."
+    assert dumped["explanation"] == "Impacts investment firm licensing and operational readiness."
+    assert "statuteRef" not in dumped
+    assert "plainEnglish" not in dumped
+    assert "policyIds" not in dumped
+    assert "controlIds" not in dumped
+    assert "riskIds" not in dumped
+    assert "taskId" not in dumped
 
 
 def test_pydantic_feed_item_model_invalid_missing_fields():
@@ -179,26 +171,19 @@ def test_language_standard_risk_translation():
     assert trans_aml == "Money laundering and terrorist financing risk (AML/CFT)"
 
 
-def test_statutory_and_governance_matrix_linkages():
-    """Verify statutory provision resolution and governance causality to real IDs."""
-    statute_aml = resolve_statute("Penningtvätt och finansiering av terrorism SFS 2017:630", "SE")
-    assert statute_aml.statute_id == "sfs-2017-630"
-    assert statute_aml.statute_sec == "riksdagen_sfs-2017-630_k3_p1"
+def test_zero_mock_fields_in_feed_items():
+    """Verify that feed items contain absolutely zero synthetic mock fields."""
+    feed_path = PIPELINE_ROOT.parent / "src/data/feed_items.json"
+    if not feed_path.exists():
+        pytest.skip("feed_items.json not generated yet")
 
-    policies, controls, risks = resolve_governance_linkages(statute_aml.statute_id, "penningtvätt")
-    assert "pol-aml-01" in policies
-    assert "ctl-aml-01" in controls
-    assert "rsk-aml-01" in risks
+    with open(feed_path, "r", encoding="utf-8") as f:
+        items = json.load(f)
 
-    # DORA
-    statute_dora = resolve_statute("Digital operational resilience DORA ICT third-party risk", "EU")
-    assert statute_dora.statute_id == "reg-dora"
-    assert statute_dora.statute_sec == "dora-art-28"
-
-    pol_dora, ctl_dora, rsk_dora = resolve_governance_linkages(statute_dora.statute_id, "dora cloud")
-    assert "pol-dora-01" in pol_dora
-    assert "ctl-dora-01" in ctl_dora
-    assert "rsk-dora-01" in rsk_dora
+    mock_keys = {"statuteId", "statuteSec", "statuteRef", "policyIds", "controlIds", "riskIds", "plainEnglish", "taskId"}
+    for it in items:
+        for k in mock_keys:
+            assert k not in it, f"Found mock field '{k}' in feed item {it.get('id')}"
 
 
 def test_score_calibration():

@@ -45,29 +45,13 @@ export function pageFeed() {
       const matchOrig = item.originalTitle && item.originalTitle.toLowerCase().includes(q);
       const matchAuth = item.authority.toLowerCase().includes(q);
       const matchSum = item.summary.toLowerCase().includes(q);
-      const matchStat = item.statuteRef.toLowerCase().includes(q);
       const matchTags = (item.tags || []).some(t => t.toLowerCase().includes(q));
       const matchFw = (item.frameworks || []).some(fw => fw.toLowerCase().includes(q));
       const matchVendors = (item.vendors || []).some(v => v.toLowerCase().includes(q));
       const matchRisks = (item.risks || []).some(r => r.toLowerCase().includes(q));
       const matchExpl = item.explanation && item.explanation.toLowerCase().includes(q);
-      const matchWhy = item.plainEnglish?.whyItMatters && item.plainEnglish.whyItMatters.toLowerCase().includes(q);
-      const matchAct = item.plainEnglish?.actionRequired && item.plainEnglish.actionRequired.toLowerCase().includes(q);
 
-      if (
-        !matchTitle &&
-        !matchOrig &&
-        !matchAuth &&
-        !matchSum &&
-        !matchStat &&
-        !matchTags &&
-        !matchFw &&
-        !matchVendors &&
-        !matchRisks &&
-        !matchExpl &&
-        !matchWhy &&
-        !matchAct
-      ) {
+      if (!matchTitle && !matchOrig && !matchAuth && !matchSum && !matchTags && !matchFw && !matchVendors && !matchRisks && !matchExpl) {
         return false;
       }
     }
@@ -252,7 +236,7 @@ function renderFeedCard(item) {
   const catMeta = getFeedCat(item.category);
   const authMeta = getFeedAuth(item.authorityId, item.authority);
   const scoreClass = feedScoreClass(item.score);
-  const primaryFramework = item.frameworks && item.frameworks.length ? item.frameworks[0] : null;
+  const frameworks = item.frameworks || [];
 
   return `<article class="feed-card" data-id="${item.id}">
     <header class="feed-card-header">
@@ -265,7 +249,6 @@ function renderFeedCard(item) {
 
       <div class="feed-card-status">
         ${item.status === 'ACKNOWLEDGED' ? `<span class="pill mono feed-status-ack">${ic('check', 10)} Assessed</span>` : ''}
-        ${item.status === 'IN_MITIGATION' ? `<span class="pill mono feed-status-mit">${ic('clock', 10)} In Mitigation</span>` : ''}
         <span class="feed-score-badge ${scoreClass}" title="${esc(feedScoreLabel(item.score))} (${item.score}/5)">
           ${item.score}/5
         </span>
@@ -282,14 +265,13 @@ function renderFeedCard(item) {
 
     <div class="feed-card-context">
       <span class="pill mono feed-cat-pill">${esc(catMeta.label)}</span>
-      ${
-        item.statuteRef
-          ? `<button class="pill mono feed-statute-pill" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" title="Jump to ${esc(item.statuteRef)} in regulation reader">
-              ${ic('scale', 11)} ${esc(item.statuteRef)}
-            </button>`
-          : ''
-      }
-      ${primaryFramework ? `<button class="pill mono feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(primaryFramework)}" title="Jump to regulation for ${esc(primaryFramework)}" style="cursor:pointer;border:1px solid var(--border)">${ic('file-check', 11)} ${esc(primaryFramework)}</button>` : ''}
+      ${frameworks
+        .slice(0, 2)
+        .map(
+          fw =>
+            `<button class="pill mono feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(fw)}" title="Jump to regulation for ${esc(fw)}" style="cursor:pointer;border:1px solid var(--border)">${ic('file-check', 11)} ${esc(fw)}</button>`,
+        )
+        .join('')}
     </div>
 
     <footer class="feed-card-footer">
@@ -299,13 +281,11 @@ function renderFeedCard(item) {
 
       <div class="feed-card-acts">
         ${
-          item.taskId
-            ? `<button class="btn btn-sm btn-ghost feed-task-btn" data-a="editTask" data-id="${item.taskId}" title="Open mitigation task #${item.taskId}">
-                ${ic('check', 11)} Task linked
-              </button>`
-            : `<button class="btn btn-sm btn-secondary feed-mit-btn" data-a="createTaskFromFeed" data-id="${item.id}" title="Create mitigation task in workspace">
-                ${ic('plus', 11)} Mitigate
-              </button>`
+          item.sourceUrl
+            ? `<a class="btn btn-sm btn-ghost feed-source-link" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer" title="View official notice on regulator website">
+                ${ic('external-link', 11)} Official notice ↗
+              </a>`
+            : ''
         }
         ${
           item.status !== 'ACKNOWLEDGED'
@@ -330,7 +310,7 @@ function renderFeedList(items) {
         <th style="width:140px">Authority</th>
         <th>Regulatory Event & Synopsis</th>
         <th style="width:140px">Category</th>
-        <th style="width:160px">Statute</th>
+        <th style="width:170px">Frameworks</th>
         <th style="width:100px">Published</th>
         <th style="width:130px;text-align:right">Actions</th>
       </tr>
@@ -386,9 +366,13 @@ function renderFeedList(items) {
               </span>
             </td>
             <td>
-              <button class="pill mono btn-ghost" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" style="padding:3px 7px;font-size:11.5px" title="Jump to statute reader">
-                ${ic('scale', 11)} ${esc(item.statuteRef)}
-              </button>
+              ${
+                item.frameworks && item.frameworks.length
+                  ? `<button class="pill mono btn-ghost feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(item.frameworks[0])}" style="padding:3px 7px;font-size:11.5px" title="Jump to regulation for ${esc(item.frameworks[0])}">
+                      ${ic('file-check', 11)} ${esc(item.frameworks[0])}
+                    </button>`
+                  : `<span class="muted mono" style="font-size:11px">—</span>`
+              }
             </td>
             <td>
               <span class="muted" style="font-size:11.5px">${esc(item.relativeTime)}</span>
@@ -399,13 +383,11 @@ function renderFeedList(items) {
                   Inspect
                 </button>
                 ${
-                  item.taskId
-                    ? `<button class="btn btn-sm btn-ghost" data-a="editTask" data-id="${item.taskId}" style="padding:2px 6px;font-size:11px" title="View linked mitigation task">
-                        Task ✓
-                      </button>`
-                    : `<button class="btn btn-sm btn-secondary" data-a="createTaskFromFeed" data-id="${item.id}" style="padding:2px 6px;font-size:11px" title="Create mitigation task">
-                        + Task
-                      </button>`
+                  item.sourceUrl
+                    ? `<a class="btn btn-sm btn-ghost" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer" style="padding:2px 6px;font-size:11px" title="View official notice">
+                        ${ic('external-link', 11)} ↗
+                      </a>`
+                    : ''
                 }
               </div>
             </td>

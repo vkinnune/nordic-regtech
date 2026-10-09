@@ -559,10 +559,6 @@ export function feedDrawerHtml(feedId) {
   const scoreClass = feedScoreClass(item.score);
   const scoreLabel = feedScoreLabel(item.score);
 
-  const linkedPolicies = (item.policyIds || []).map(policy).filter(Boolean);
-  const linkedControls = (item.controlIds || []).map(control).filter(Boolean);
-  const linkedRisks = (item.riskIds || []).map(risk).filter(Boolean);
-
   return `<aside class="drawer ${u.drawerFull ? 'full' : ''} ${u.fx.drawer ? 'enter' : ''}" role="dialog" aria-modal="${u.drawerFull}" aria-labelledby="feed-d-h" tabindex="-1">
     <div class="drawer-h">
       <div class="row" style="gap:6px">
@@ -589,7 +585,6 @@ export function feedDrawerHtml(feedId) {
         <span class="muted mono" style="font-size:11.5px">·</span>
         <span class="muted" style="font-size:12px">${esc(item.relativeTime)}</span>
         ${item.status === 'ACKNOWLEDGED' ? `<span class="pill mono" style="font-size:10.5px;color:var(--green)">${ic('check', 11)} Acknowledged</span>` : ''}
-        ${item.status === 'IN_MITIGATION' ? `<span class="pill mono" style="font-size:10.5px;color:var(--blue)">${ic('clock', 11)} In Mitigation</span>` : ''}
       </div>
 
       <h2 id="feed-d-h" style="font-size:19px;font-weight:700;color:var(--text);margin:8px 0 6px;line-height:1.35">${esc(item.title)}</h2>
@@ -602,11 +597,11 @@ export function feedDrawerHtml(feedId) {
 
       <!-- Authentic Compliance Impact & Relevance from rss-mapper-poc -->
       ${
-        item.explanation || (item.plainEnglish && item.plainEnglish.whyItMatters)
+        item.explanation
           ? `<div class="dsec" style="margin-top:20px">
               <div class="dsec-h"><h3>Compliance & Supervisory Impact</h3></div>
               <div class="feed-explanation-box">
-                ${esc(item.explanation || item.plainEnglish.whyItMatters)}
+                ${esc(item.explanation)}
               </div>
             </div>`
           : ''
@@ -667,91 +662,22 @@ export function feedDrawerHtml(feedId) {
           : ''
       }
 
-      <!-- Statutory Linkage -->
+      <!-- Official Supervisory Source -->
       <div class="dsec" style="margin-top:20px">
-        <div class="dsec-h"><h3>Statutory Citation & Direct Reader Link</h3></div>
-        <div class="row clickable" style="justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;cursor:pointer" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" title="Jump to ${esc(item.statuteRef)} in regulation reader">
+        <div class="dsec-h"><h3>Official Supervisory Source</h3></div>
+        <div class="row" style="justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
           <div>
             <div class="row" style="gap:6px;align-items:center">
-              ${ic('scale', 14)}
-              <span class="mono" style="font-weight:700;font-size:13px">${esc(item.statuteRef)}</span>
+              ${ic('landmark', 14)}
+              <span class="mono" style="font-weight:600;font-size:13px">${esc(item.source || authMeta.short || item.authority)}</span>
             </div>
-            <div class="muted" style="font-size:11.5px;margin-top:2px">Direct statutory provision indexed in Nordic RegTech library</div>
+            <div class="muted" style="font-size:11.5px;margin-top:2px">Official supervisory publication verified by crawler</div>
           </div>
-          <button class="btn btn-sm btn-secondary" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}">
-            ${ic('book-open', 13)} Open in reader ➔
-          </button>
-        </div>
-      </div>
-
-
-      <!-- Governance Matrix Linkages -->
-      <div class="dsec" style="margin-top:20px">
-        <div class="dsec-h"><h3>Internal Governance Matrix Linkages</h3></div>
-        <div class="col" style="gap:8px">
           ${
-            linkedPolicies.length
-              ? `<div>
-                  <div class="faint mono" style="font-size:11px;margin-bottom:4px">GOVERNING POLICIES (${linkedPolicies.length})</div>
-                  ${linkedPolicies
-                    .map(
-                      p => `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;margin-bottom:4px">
-                        <div>
-                          <span class="mono" style="font-weight:700;font-size:12px">${esc(p.code)}</span>
-                          <span style="font-size:12px;margin-left:6px">${esc(p.shortTitle || p.title)}</span>
-                          <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(p.status)}</span>
-                        </div>
-                        <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="policy" data-id="${p.id}" style="padding:2px 7px;font-size:11.5px">
-                          ${ic('file-text', 12)} Open policy ➔
-                        </button>
-                      </div>`,
-                    )
-                    .join('')}
-                </div>`
-              : ''
-          }
-
-          ${
-            linkedControls.length
-              ? `<div>
-                  <div class="faint mono" style="font-size:11px;margin-bottom:4px">ENFORCING CONTROLS (${linkedControls.length})</div>
-                  ${linkedControls
-                    .map(
-                      c => `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;margin-bottom:4px">
-                        <div>
-                          <span class="mono" style="font-weight:700;font-size:12px">${esc(c.code)}</span>
-                          <span style="font-size:12px;margin-left:6px">${esc(c.title)}</span>
-                          <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(c.status)}</span>
-                        </div>
-                        <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="control" data-id="${c.id}" style="padding:2px 7px;font-size:11.5px">
-                          ${ic('shield-check', 12)} Open control ➔
-                        </button>
-                      </div>`,
-                    )
-                    .join('')}
-                </div>`
-              : ''
-          }
-
-          ${
-            linkedRisks.length
-              ? `<div>
-                  <div class="faint mono" style="font-size:11px;margin-bottom:4px">RESIDUAL REGULATORY RISKS (${linkedRisks.length})</div>
-                  ${linkedRisks
-                    .map(
-                      r => `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;margin-bottom:4px">
-                        <div>
-                          <span class="mono" style="font-weight:700;font-size:12px">${esc(r.code)}</span>
-                          <span style="font-size:12px;margin-left:6px">${esc(r.title)}</span>
-                          <span class="pill mono" style="font-size:10px;margin-left:6px">${esc(r.severity)}</span>
-                        </div>
-                        <button class="btn btn-sm btn-ghost" data-a="openGovDrawer" data-type="risk" data-id="${r.id}" style="padding:2px 7px;font-size:11.5px">
-                          ${ic('alert-triangle', 12)} Open risk ➔
-                        </button>
-                      </div>`,
-                    )
-                    .join('')}
-                </div>`
+            item.sourceUrl
+              ? `<a class="btn btn-sm btn-secondary" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">
+                  ${ic('external-link', 13)} View official notice ↗
+                </a>`
               : ''
           }
         </div>
@@ -761,17 +687,8 @@ export function feedDrawerHtml(feedId) {
       <div class="dsec" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--divider)">
         <div class="row" style="gap:8px;flex-wrap:wrap">
           ${
-            item.taskId
-              ? `<button class="btn btn-primary" data-a="editTask" data-id="${item.taskId}">
-                  ${ic('check', 14)} View Mitigation Task (${esc(item.taskId)})
-                </button>`
-              : `<button class="btn btn-primary" data-a="createTaskFromFeed" data-id="${item.id}">
-                  ${ic('plus', 14)} Create Mitigation Task
-                </button>`
-          }
-          ${
             item.status !== 'ACKNOWLEDGED'
-              ? `<button class="btn btn-secondary" data-a="ackFeedItem" data-id="${item.id}">
+              ? `<button class="btn btn-primary" data-a="ackFeedItem" data-id="${item.id}">
                   ${ic('check', 14)} Mark as Assessed
                 </button>`
               : `<span class="pill mono" style="padding:6px 12px;font-size:12px;color:var(--green)">
