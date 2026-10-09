@@ -124,15 +124,13 @@ export function diffTokenHtml(tk) {
   return `<span class="diff-token-eq">${esc(tk.text)}</span>`;
 }
 
+function formatPrefixParts(label, p) {
+  return `${label} ${p.length >= 3 ? `${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `${p.join(':')} §`}`;
+}
+
 const SEC_BADGE_PREFIXES = [
-  {
-    prefix: 'sfs-',
-    format: p => (p.length >= 3 ? `SFS ${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `SFS ${p.join(':')} §`),
-  },
-  {
-    prefix: 'fffs-',
-    format: p => (p.length >= 3 ? `FFFS ${p[0]}:${p[1]} ${p.slice(2).join(':')} §` : `FFFS ${p.join(':')} §`),
-  },
+  { prefix: 'sfs-', format: p => formatPrefixParts('SFS', p) },
+  { prefix: 'fffs-', format: p => formatPrefixParts('FFFS', p) },
 ];
 
 function formatNordicSecId(secId, prefix, label) {

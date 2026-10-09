@@ -197,7 +197,7 @@ test('Regulations UI & View Engine: Swedish authority segmentation and ZERO Finn
   assert.ok(!constantsJs.includes("'Sveriges Riksdag'"), 'constants.js must not contain Sveriges Riksdag');
   assert.ok(layoutJs.includes("sItem('mytasks', 'Assigned'"), 'layout.js must use single-word Assigned label');
   assert.ok(renderJs.includes("mytasks: 'Assigned'"), 'render.js must use single-word Assigned label');
-  assert.ok(regJs.includes('export const FRAMEWORK_MAPPINGS'), 'regulations.js must export FRAMEWORK_MAPPINGS');
+  assert.ok(!regJs.includes('FRAMEWORK_MAPPINGS'), 'regulations.js must not contain FRAMEWORK_MAPPINGS');
 });
 
 test('Complete Purge of rss-mapper-poc: strictly 100% regtech Swedish law dataset and zero feed artifacts', () => {
@@ -212,12 +212,19 @@ test('Complete Purge of rss-mapper-poc: strictly 100% regtech Swedish law datase
   // 2. Verify layout, router and index.css have no feed references
   const layoutJs = fs.readFileSync(path.join(ROOT, 'src/shell/layout.js'), 'utf-8');
   const renderJs = fs.readFileSync(path.join(ROOT, 'src/shell/render.js'), 'utf-8');
+  const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
   const indexCss = fs.readFileSync(path.join(ROOT, 'src/styles/index.css'), 'utf-8');
   const packageJson = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8');
+  const seedJs = fs.readFileSync(path.join(ROOT, 'src/data/seed.js'), 'utf-8');
+  const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
 
   assert.ok(!layoutJs.includes('pageFeed'), 'layout.js must not reference pageFeed');
   assert.ok(!layoutJs.includes("sItem('feed'"), 'layout.js must not contain feed sidebar item');
   assert.ok(!renderJs.includes("feed: 'Feed'"), 'render.js must not register feed route name');
+  assert.ok(!actionsJs.includes('openRegFromFramework'), 'actions.js must not contain openRegFromFramework');
   assert.ok(!indexCss.includes('feed.css'), 'index.css must not import feed.css');
   assert.ok(!packageJson.includes('feed:ingest'), 'package.json must not have feed:ingest script');
+  assert.ok(!seedJs.includes('Resiliens och IT-drift'), 'seed.js must not contain Swedish task titles');
+  assert.ok(!seedJs.includes("'Penningtvätt'"), 'seed.js must not contain Swedish search terms');
+  assert.ok(!regPageJs.includes('regLibJuris'), 'regulations.js must not contain obsolete regLibJuris fallback');
 });

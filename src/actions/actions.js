@@ -23,7 +23,6 @@ import {
   policy,
   regulation,
   findSectionAndRegulation,
-  resolveFrameworkToRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
 import { effectiveDark } from '../core/theme.js';
@@ -1249,37 +1248,6 @@ A.openRegInReader = el => {
     delete S.ui.pendingScrollSec;
   }
   S.ui.regView = 'reader';
-  delete S.ui.govDrawer;
-  fxSet({ route: true, tabs: true });
-  render();
-};
-A.openRegFromFramework = el => {
-  const fw = el.dataset.fw || el.dataset.id;
-  if (!fw) return;
-  const res = resolveFrameworkToRegulation(fw);
-  if (!res) return;
-
-  S.ui.route = 'regulations';
-  if (res.view === 'reader' && res.regId) {
-    S.ui.regSel = res.regId;
-    if (res.secId) {
-      S.ui.regSec = res.secId;
-      S.ui.pendingScrollSec = res.secId;
-    } else {
-      delete S.ui.regSec;
-      delete S.ui.pendingScrollSec;
-    }
-    S.ui.regView = 'reader';
-  } else {
-    // Open library view filtered by search query
-    S.ui.regView = 'library';
-    if (res.query) {
-      viewOf('regulations').q = res.query;
-      S.ui.regLibQ = res.query;
-    }
-    delete S.ui.regSec;
-    delete S.ui.pendingScrollSec;
-  }
   delete S.ui.govDrawer;
   fxSet({ route: true, tabs: true });
   render();

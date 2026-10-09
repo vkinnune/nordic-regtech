@@ -313,50 +313,59 @@ export function seed() {
     ],
   });
 
-  t('p1', 'SFS 2024:1284 § 6 kap. 2 a § · Resiliens och IT-drift i kreditinstitut', 'progress', 'm1', 'high', 5, ['fi', 'sfs297', 'funds'], {
-    key: 'SFS 6:2a',
-    est: '1 week',
-    len: 5,
-    age: 15,
-    upd: 12,
-    desc: '<p>Direct statutory amendment transposing digital operational resilience standards into Swedish banking law (SFS 2004:297 6 kap. 2 a §). Mandates that credit institution network and information systems meet digital operational resilience standards.</p>',
-    diff: {
-      identifier: '6 kap. 2 a §',
-      regulation: 'SFS 2004:297 (Lag om bank- och finansieringsrörelse)',
-      amendingAct: 'SFS 2024:1284',
-      heading: 'Nätverks- och informationssystem',
-      status: 'ADDED',
-      additions_count: 22,
-      deletions_count: 0,
-      tokens: [
-        {
-          type: 'insert',
-          text: '2 a § Ett kreditinstituts nätverks- och informationssystem ska uppfylla kraven i Europaparlamentets och rådets förordning (EU) 2022/2554 av den 14 december 2022 om digital operativ motståndskraft för finanssektorn (DORA).',
-        },
-      ],
-      authority: 'Finansinspektionen & Riksdagen',
-      inForce: '2025-01-17',
-      plainEnglish: {
-        summary: 'Formally incorporates digital operational resilience obligations directly into Swedish statutory banking law.',
-        points: [
-          'Direct statutory scope: Binds Swedish financial institutions directly to operational resilience and third-party risk rules.',
-          'ICT provider register: Requires maintaining comprehensive registers of critical ICT third-party service providers.',
-          'Operational testing: Mandates threat-led resilience testing and business continuity architectures.',
+  t(
+    'p1',
+    'SFS 2024:1284 § 6 kap. 2 a § · Operational Resilience & IT Operations in Credit Institutions',
+    'progress',
+    'm1',
+    'high',
+    5,
+    ['fi', 'sfs297', 'funds'],
+    {
+      key: 'SFS 6:2a',
+      est: '1 week',
+      len: 5,
+      age: 15,
+      upd: 12,
+      desc: '<p>Direct statutory amendment transposing digital operational resilience standards into Swedish banking law (SFS 2004:297 6 kap. 2 a §). Mandates that credit institution network and information systems meet digital operational resilience standards.</p>',
+      diff: {
+        identifier: '6 kap. 2 a §',
+        regulation: 'SFS 2004:297 (Lag om bank- och finansieringsrörelse)',
+        amendingAct: 'SFS 2024:1284',
+        heading: 'Nätverks- och informationssystem',
+        status: 'ADDED',
+        additions_count: 22,
+        deletions_count: 0,
+        tokens: [
+          {
+            type: 'insert',
+            text: '2 a § Ett kreditinstituts nätverks- och informationssystem ska uppfylla kraven i Europaparlamentets och rådets förordning (EU) 2022/2554 av den 14 december 2022 om digital operativ motståndskraft för finanssektorn (DORA).',
+          },
         ],
-        whyItMatters: 'Mandatory statutory law under SFS 2024:1284. Non-compliance exposes institutions to Finansinspektionen administrative fines.',
-        beforeAfter: {
-          before: 'General IT guidelines without direct statutory penalties in Swedish banking law.',
-          after: 'Statutory mandate under SFS 2004:297 6 kap. 2 a § enforcing digital operational resilience.',
+        authority: 'Finansinspektionen & Riksdagen',
+        inForce: '2025-01-17',
+        plainEnglish: {
+          summary: 'Formally incorporates digital operational resilience obligations directly into Swedish statutory banking law.',
+          points: [
+            'Direct statutory scope: Binds Swedish financial institutions directly to operational resilience and third-party risk rules.',
+            'ICT provider register: Requires maintaining comprehensive registers of critical ICT third-party service providers.',
+            'Operational testing: Mandates threat-led resilience testing and business continuity architectures.',
+          ],
+          whyItMatters: 'Mandatory statutory law under SFS 2024:1284. Non-compliance exposes institutions to Finansinspektionen administrative fines.',
+          beforeAfter: {
+            before: 'General IT guidelines without direct statutory penalties in Swedish banking law.',
+            after: 'Statutory mandate under SFS 2004:297 6 kap. 2 a § enforcing digital operational resilience.',
+          },
+          translation:
+            "2 a § A credit institution's network and information systems shall comply with statutory digital operational resilience standards under Lag (2024:1284).",
         },
-        translation:
-          "2 a § A credit institution's network and information systems shall comply with statutory digital operational resilience standards under Lag (2024:1284).",
       },
+      subtasks: [
+        { id: 's5', title: 'Cross-reference statutory definitions against internal ICT taxonomy', done: true },
+        { id: 's6', title: 'Update internal compliance manual section 2.1', done: false },
+      ],
     },
-    subtasks: [
-      { id: 's5', title: 'Cross-reference statutory definitions against internal ICT taxonomy', done: true },
-      { id: 's6', title: 'Update internal compliance manual section 2.1', done: false },
-    ],
-  });
+  );
 
   t('p1', 'SFS 2016:892 § 2 kap. 17 c § · Risk Management & Remuneration Policy Governance', 'done', 'm6', 'medium', -4, ['fi', 'legal'], {
     key: 'SFS 2:17c',
@@ -483,7 +492,7 @@ export function seed() {
   });
 
   /* ---- AML & SFS 2017:630 ---- */
-  t('p3', 'FFFS 2017:11 Kap 4 · General Risk Assessment (Allmän riskbedömning 2026)', 'progress', 'm5', 'urgent', 3, ['aml', 'fi', 'compliance'], {
+  t('p3', 'FFFS 2017:11 Kap 4 · General Risk Assessment (Annual AML Evaluation 2026)', 'progress', 'm5', 'urgent', 3, ['aml', 'fi', 'compliance'], {
     key: 'AML §4',
     fav: true,
     est: '3 weeks',
@@ -655,7 +664,7 @@ export function seed() {
       by: 'm3',
       task: 't2',
       text: 'assigned you',
-      snippet: 'SFS 2004:297 6 kap. 2 a § · Resiliens och IT-drift i kreditinstitut',
+      snippet: 'SFS 2004:297 6 kap. 2 a § · Operational Resilience & IT Operations in Credit Institutions',
       at: minsAgo(260),
       read: false,
     },
@@ -735,7 +744,7 @@ export function seed() {
     events,
     projOrder: projects.map(p => p.id),
     savedViews: [{ id: 'v1', project: 'p1', name: 'High Priority', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
-    recentSearches: ['14 kap. 1 §', 'SFS 2004:297', 'Penningtvätt', 'SFS 2007:528'],
+    recentSearches: ['14 kap. 1 §', 'SFS 2004:297', 'Anti-Money Laundering', 'SFS 2007:528'],
     sessions: [
       { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },
       { id: 'se2', dev: 'Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },

@@ -42,7 +42,7 @@ export function pageRegulations() {
    ============================================================ */
 function renderRegulationsLibrary(u) {
   const v = viewOf('regulations');
-  const auth = u.regLibAuth || u.regLibJuris || 'all'; // 'all', 'fi', 'riksdagen'
+  const auth = u.regLibAuth || 'all'; // 'all', 'fi', 'riksdagen'
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
   const policies = allPolicies();

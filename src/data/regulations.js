@@ -5,14 +5,22 @@ export const REGULATIONS = swedishRegs;
 
 let _sectionIndex = null;
 let _regIndex = null;
+let _regLowerIndex = null;
 
 function ensureIndexes() {
   if (_sectionIndex) return;
   _sectionIndex = new Map();
   _regIndex = new Map();
+  _regLowerIndex = new Map();
   for (const reg of REGULATIONS) {
-    if (reg.id) _regIndex.set(reg.id, reg);
-    if (reg.code && !_regIndex.has(reg.code)) _regIndex.set(reg.code, reg);
+    if (reg.id) {
+      _regIndex.set(reg.id, reg);
+      _regLowerIndex.set(reg.id.toLowerCase(), reg);
+    }
+    if (reg.code && !_regIndex.has(reg.code)) {
+      _regIndex.set(reg.code, reg);
+      _regLowerIndex.set(reg.code.toLowerCase(), reg);
+    }
     for (const sec of allSectionsOf(reg)) {
       if (sec.id) {
         _sectionIndex.set(sec.id, { section: sec, regulation: reg });
@@ -32,109 +40,14 @@ export function regulation(id) {
   if (direct) return direct;
 
   const low = String(id).toLowerCase().trim();
-  for (const [k, v] of _regIndex.entries()) {
-    if (k.toLowerCase() === low) return v;
-  }
+  const lowerMatch = _regLowerIndex.get(low);
+  if (lowerMatch) return lowerMatch;
+
   if (low.startsWith('reg-')) {
     const stripped = low.replace(/^reg-/, '');
-    for (const [k, v] of _regIndex.entries()) {
-      if (k.toLowerCase() === stripped) return v;
-    }
-  } else {
-    const prefixed = `reg-${low}`;
-    for (const [k, v] of _regIndex.entries()) {
-      if (k.toLowerCase() === prefixed) return v;
-    }
+    return _regLowerIndex.get(stripped) || null;
   }
-  return null;
-}
-
-export const FRAMEWORK_MAPPINGS = [
-  {
-    pattern: /dora|2022\/2554/i,
-    target: { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k6_p2a', view: 'reader' },
-  },
-  {
-    pattern: /aml|penningtvatt|money laundering|2017:630/i,
-    target: { regId: 'sfs-2017-630', secId: 'riksdagen_sfs-2017-630_k3_p1', view: 'reader' },
-  },
-  {
-    pattern: /mar|market abuse|2016:1306|marknadsmissbruk/i,
-    target: { regId: 'sfs-2016-1306', secId: 'riksdagen_sfs-2016-1306_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /mifid|mifir|2007:528|vardepappersmarknad|investment services/i,
-    target: { regId: 'sfs-2007-528', secId: 'riksdagen_sfs-2007-528_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /ucits|2004:46|vardepappersfonder|investeringsfond/i,
-    target: { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /\baif\b|aifm|2013:561/i,
-    target: { regId: 'sfs-2013-561', secId: 'riksdagen_sfs-2013-561_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /2004:297|bank- och finansiering|kreditinstitut|\bcrd\b|\bcrr\b|kapitaltackning|consumer credit|konsumentkredit/i,
-    target: { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /2014:968/i,
-    target: { regId: 'sfs-2014-968', secId: 'riksdagen_sfs-2014-968_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /payment|psd2|2010:751|betaltjanst/i,
-    target: { regId: 'sfs-2010-751', secId: 'riksdagen_sfs-2010-751_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /solvens|solvency|2010:2043|forsakringsrorelse/i,
-    target: { regId: 'sfs-2010-2043', secId: 'riksdagen_sfs-2010-2043_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /idd|2018:1219|forsakringsdistribution/i,
-    target: { regId: 'sfs-2018-1219', secId: 'riksdagen_sfs-2018-1219_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /iorp|2019:742|tjanstepension/i,
-    target: { regId: 'sfs-2019-742', secId: 'riksdagen_sfs-2019-742_k1_p1', view: 'reader' },
-  },
-  {
-    pattern: /sfdr|2019\/2088|taxonomy|greenwashing|sustainability|hallbarhet/i,
-    target: { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' },
-  },
-];
-
-export function resolveFrameworkToRegulation(fw) {
-  if (!fw) return null;
-  const f = String(fw).toLowerCase().trim();
-
-  // Direct code or ID match
-  const direct = regulation(fw);
-  if (direct) return { regId: direct.id, view: 'reader' };
-
-  for (const m of FRAMEWORK_MAPPINGS) {
-    if (m.pattern.test(f)) {
-      return { ...m.target };
-    }
-  }
-
-  // FFFS regulation code matching (e.g. "FFFS 2014:12" or "FFFS 2019:21")
-  const fffsMatch = f.match(/fffs\s*(\d{4}):(\d+)/i);
-  if (fffsMatch) {
-    const fffsId = `fffs-${fffsMatch[1]}-${fffsMatch[2]}`;
-    const fffsReg = regulation(fffsId);
-    if (fffsReg) return { regId: fffsReg.id, view: 'reader' };
-  }
-  // SFS statute matching (e.g. "SFS 2017:630" or "Lag 2004:46" or "2017:630")
-  const sfsMatch = f.match(/sfs\s*(\d{4}):(\d+)/i) || f.match(/(\d{4}):(\d+)/);
-  if (sfsMatch) {
-    const sfsId = `sfs-${sfsMatch[1]}-${sfsMatch[2]}`;
-    const sfsReg = regulation(sfsId) || regulation(`reg-${sfsId}`);
-    if (sfsReg) return { regId: sfsReg.id, view: 'reader' };
-  }
-
-  // Fallback: search in library for this framework term
-  return { query: fw, view: 'library' };
+  return _regLowerIndex.get(`reg-${low}`) || null;
 }
 
 export function findSectionAndRegulation(secId) {
