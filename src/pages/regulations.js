@@ -304,7 +304,7 @@ function renderRegulationsReader(u) {
               ${
                 curAct.ruleType === 'guidance' || (curAct.title && /allmänna råd/i.test(curAct.title))
                   ? `<span class="finlex-rule-badge guidance">General Guidance</span>`
-                  : `<span class="finlex-rule-badge binding">Binding Rule</span>`
+                  : ''
               }
             </div>
             <h1 class="finlex-doc-title">${esc(curAct.shortTitle || curAct.title)}</h1>
@@ -593,7 +593,7 @@ function renderSectionBlock(s, activeSecId, isFffs) {
             .map(p => {
               const pGuidance = p.ruleType === 'guidance';
               return `<div class="finlex-para ${pGuidance ? 'is-guidance' : ''}">
-                ${isFffs ? `<span class="finlex-rule-badge ${pGuidance ? 'guidance' : 'binding'}">${pGuidance ? 'General Guidance · comply or explain' : 'Binding rule'}</span>` : ''}
+                ${isFffs && pGuidance ? `<span class="finlex-rule-badge guidance">General Guidance · comply or explain</span>` : ''}
                 ${p.text ? `<p class="finlex-para-text">${esc(p.text)}</p>` : ''}
                 ${
                   p.points && p.points.length

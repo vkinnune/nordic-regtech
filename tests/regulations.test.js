@@ -267,4 +267,9 @@ test('Regulations Feature: Zero mock controls or policies in header, cards, list
   assert.ok(!regPageJs.includes('finlex-plain-box'), 'regulations.js must not contain finlex-plain-box');
   const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
   assert.ok(!actionsJs.includes('A.toggleRegPlain'), 'actions.js must not define A.toggleRegPlain');
+
+  // Must not render repetitive Binding Rule badges, only highlight General Guidance exceptions
+  assert.ok(!regPageJs.includes('Binding Rule'), 'regulations.js must not contain Binding Rule badge');
+  assert.ok(!regPageJs.includes('Binding rule'), 'regulations.js must not contain Binding rule badge');
+  assert.ok(regPageJs.includes('General Guidance · comply or explain'), 'regulations.js must preserve General Guidance badge for advisory rules');
 });
