@@ -25,7 +25,8 @@ export function pageFeed() {
       const minScore = parseInt(scoreFilter, 10);
       if (!isNaN(minScore)) {
         if (minScore === 5 && item.score !== 5) return false;
-        if (minScore < 5 && item.score < minScore) return false;
+        if (minScore === 1 && item.score !== 1) return false;
+        if (minScore > 1 && minScore < 5 && item.score < minScore) return false;
       }
     }
 
@@ -144,12 +145,12 @@ export function pageFeed() {
       <div class="stat">
         <span class="k">Swedish Authorities</span>
         <span class="v">${seCount}</span>
-        <span class="d">FI, Riksdagen & KO</span>
+        <span class="d">FI, Riksdagen & SCA</span>
       </div>
       <div class="stat">
-        <span class="k">EU Directives & Cross-Border</span>
-        <span class="v">${euCount + fiCount}</span>
-        <span class="d">${euCount} EU · ${fiCount} FIN-FSA</span>
+        <span class="k">Finnish & EU Directives</span>
+        <span class="v">${fiCount + euCount}</span>
+        <span class="d">${fiCount} Finland · ${euCount} EU standards</span>
       </div>
     </div>
 
@@ -171,18 +172,19 @@ export function pageFeed() {
 
       <!-- Impact Score Filter Select -->
       <div class="row" style="gap:4px;align-items:center">
-        <select class="input input-sm" data-in="feedScore" style="width:auto;padding:3px 8px;font-size:12px;font-weight:500" aria-label="Filter by impact score">
+        <select class="select" data-in="feedScore" style="height:28px;width:auto;font-size:12px" aria-label="Filter by impact score">
           <option value="all" ${scoreFilter === 'all' ? 'selected' : ''}>All Scores</option>
           <option value="5" ${scoreFilter === '5' ? 'selected' : ''}>Critical (5)</option>
           <option value="4" ${scoreFilter === '4' ? 'selected' : ''}>High (4+)</option>
           <option value="3" ${scoreFilter === '3' ? 'selected' : ''}>Moderate (3+)</option>
           <option value="2" ${scoreFilter === '2' ? 'selected' : ''}>Low (2+)</option>
+          <option value="1" ${scoreFilter === '1' ? 'selected' : ''}>Informational (1)</option>
         </select>
       </div>
 
       <!-- Category Filter Select -->
       <div class="row" style="gap:4px;align-items:center">
-        <select class="input input-sm" data-in="feedCat" style="width:auto;padding:3px 8px;font-size:12px;font-weight:500" aria-label="Filter by category">
+        <select class="select" data-in="feedCat" style="height:28px;width:auto;font-size:12px" aria-label="Filter by category">
           <option value="all" ${catFilter === 'all' ? 'selected' : ''}>All Categories</option>
           ${Object.values(FEED_CATEGORIES)
             .map(c => `<option value="${c.id}" ${catFilter === c.id ? 'selected' : ''}>${c.label}</option>`)
@@ -192,7 +194,7 @@ export function pageFeed() {
 
       <!-- Authority Filter Select -->
       <div class="row" style="gap:4px;align-items:center">
-        <select class="input input-sm" data-in="feedAuth" style="width:auto;padding:3px 8px;font-size:12px;font-weight:500" aria-label="Filter by authority">
+        <select class="select" data-in="feedAuth" style="height:28px;width:auto;font-size:12px" aria-label="Filter by authority">
           <option value="all" ${authFilter === 'all' ? 'selected' : ''}>All Authorities</option>
           ${Object.values(FEED_AUTHORITIES)
             .map(a => `<option value="${a.id}" ${authFilter === a.id ? 'selected' : ''}>${a.flag} ${a.short}</option>`)
@@ -214,7 +216,7 @@ export function pageFeed() {
             <span class="faint mono" style="font-size:11px;margin-right:2px">Active filters:</span>
             ${q ? `<span class="feed-chip">Query: "${esc(q)}" <button data-a="set" data-k="feedQ" data-v="">${ic('x', 11)}</button></span>` : ''}
             ${juris !== 'all' ? `<span class="feed-chip">Jurisdiction: ${esc(juris.toUpperCase())} <button data-a="set" data-k="feedJuris" data-v="all">${ic('x', 11)}</button></span>` : ''}
-            ${scoreFilter !== 'all' ? `<span class="feed-chip">Score: ${scoreFilter === '5' ? 'Critical (5)' : scoreFilter + '+'} <button data-a="set" data-k="feedScore" data-v="all">${ic('x', 11)}</button></span>` : ''}
+            ${scoreFilter !== 'all' ? `<span class="feed-chip">Score: ${scoreFilter === '5' ? 'Critical (5)' : scoreFilter === '1' ? 'Informational (1)' : scoreFilter + '+'} <button data-a="set" data-k="feedScore" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${catFilter !== 'all' ? `<span class="feed-chip">Category: ${esc(FEED_CATEGORIES[catFilter]?.label || catFilter)} <button data-a="set" data-k="feedCat" data-v="all">${ic('x', 11)}</button></span>` : ''}
             ${authFilter !== 'all' ? `<span class="feed-chip">Authority: ${esc(FEED_AUTHORITIES[authFilter]?.short || authFilter)} <button data-a="set" data-k="feedAuth" data-v="all">${ic('x', 11)}</button></span>` : ''}
             <button class="btn btn-ghost btn-xs" data-a="clearFeedFilters" style="font-size:11px;padding:2px 6px">Clear all</button>
@@ -346,6 +348,24 @@ function renderFeedList(items) {
             <td>
               <div style="font-weight:600;font-size:13px;color:var(--text);line-height:1.35;cursor:pointer" data-a="openFeedDrawer" data-id="${item.id}" title="Inspect analysis">${esc(item.title)}</div>
               <div class="faint trunc" style="font-size:12px;max-width:520px;margin-top:2px">${esc(item.summary)}</div>
+              ${
+                (item.frameworks && item.frameworks.length) || (item.risks && item.risks.length) || (item.vendors && item.vendors.length)
+                  ? `<div class="row" style="gap:4px;margin-top:4px;flex-wrap:wrap">
+                      ${(item.frameworks || [])
+                        .slice(0, 2)
+                        .map(f => `<span class="pill mono feed-meta-tag" style="font-size:9.5px;padding:1px 5px">${ic('file-text', 9)} ${esc(f)}</span>`)
+                        .join('')}
+                      ${(item.risks || [])
+                        .slice(0, 1)
+                        .map(r => `<span class="pill mono feed-meta-tag" style="font-size:9.5px;padding:1px 5px">${ic('alert-triangle', 9)} ${esc(r)}</span>`)
+                        .join('')}
+                      ${(item.vendors || [])
+                        .slice(0, 1)
+                        .map(v => `<span class="pill mono feed-meta-tag" style="font-size:9.5px;padding:1px 5px">${ic('building-2', 9)} ${esc(v)}</span>`)
+                        .join('')}
+                    </div>`
+                  : ''
+              }
             </td>
             <td>
               <span class="pill mono" style="font-size:11px">

@@ -22,6 +22,7 @@ import {
   control,
   policy,
   feedItem,
+  regulation,
   findSectionAndRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
@@ -1226,6 +1227,16 @@ A.openRegInReader = el => {
   }
   if (!targetRegId && !targetSecId) return;
 
+  // Normalize targetRegId against registry (e.g. reg-sfs-2007-528 -> sfs-2007-528 or vice versa)
+  if (targetRegId && !regulation(targetRegId)) {
+    const stripped = targetRegId.replace(/^reg-/, '');
+    if (regulation(stripped)) {
+      targetRegId = stripped;
+    } else if (regulation(`reg-${targetRegId}`)) {
+      targetRegId = `reg-${targetRegId}`;
+    }
+  }
+
   S.ui.route = 'regulations';
   if (targetRegId) {
     S.ui.regSel = targetRegId;
@@ -1348,8 +1359,22 @@ A.closeFeedDrawer = () => {
   render();
 };
 
+function ensureMutableFeedItem(id) {
+  if (!D().feed) {
+    D().feed = [];
+  }
+  let existing = D().feed.find(f => f.id === id);
+  if (!existing) {
+    const seed = feedItem(id);
+    if (!seed) return null;
+    existing = { ...seed };
+    D().feed.push(existing);
+  }
+  return existing;
+}
+
 A.ackFeedItem = el => {
-  const f = feedItem(el.dataset.id);
+  const f = ensureMutableFeedItem(el.dataset.id);
   if (f) {
     f.status = 'ACKNOWLEDGED';
     f.acknowledgedAt = Date.now();
@@ -1362,7 +1387,7 @@ A.ackFeedItem = el => {
 };
 
 A.createTaskFromFeed = el => {
-  const f = feedItem(el.dataset.id);
+  const f = ensureMutableFeedItem(el.dataset.id);
   if (!f) return;
   if (f.taskId && task(f.taskId)) {
     A.editTask({ dataset: { id: f.taskId } });

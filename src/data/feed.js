@@ -14,6 +14,7 @@ export const FEED_AUTHORITIES = {
   fi: { id: 'fi', label: 'Finansinspektionen (Swedish FSA)', short: 'FI', flag: '🇸🇪', icon: 'landmark', jur: 'SE' },
   riksdagen: { id: 'riksdagen', label: 'Swedish Parliament (Sveriges Riksdag)', short: 'Riksdagen', flag: '🇸🇪', icon: 'scale', jur: 'SE' },
   fiva: { id: 'fiva', label: 'FIN-FSA (Financial Supervisory Authority)', short: 'FIN-FSA', flag: '🇫🇮', icon: 'shield-check', jur: 'FI' },
+  'fin-fsa': { id: 'fin-fsa', label: 'FIN-FSA (Financial Supervisory Authority)', short: 'FIN-FSA', flag: '🇫🇮', icon: 'shield-check', jur: 'FI' },
   eba: { id: 'eba', label: 'European Banking Authority', short: 'EBA', flag: '🇪🇺', icon: 'building-2', jur: 'EU' },
   esma: { id: 'esma', label: 'European Securities and Markets Authority', short: 'ESMA', flag: '🇪🇺', icon: 'activity', jur: 'EU' },
   konsumentverket: { id: 'konsumentverket', label: 'Swedish Consumer Agency', short: 'SCA', flag: '🇸🇪', icon: 'shopping-bag', jur: 'SE' },
