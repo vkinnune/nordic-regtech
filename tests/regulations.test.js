@@ -199,3 +199,25 @@ test('Regulations UI & View Engine: Swedish authority segmentation and ZERO Finn
   assert.ok(renderJs.includes("mytasks: 'Assigned'"), 'render.js must use single-word Assigned label');
   assert.ok(regJs.includes('export const FRAMEWORK_MAPPINGS'), 'regulations.js must export FRAMEWORK_MAPPINGS');
 });
+
+test('Complete Purge of rss-mapper-poc: strictly 100% regtech Swedish law dataset and zero feed artifacts', () => {
+  // 1. Verify files are completely deleted from filesystem
+  assert.ok(!fs.existsSync(path.join(ROOT, 'src/pages/feed.js')), 'src/pages/feed.js must be deleted');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'src/data/feed.js')), 'src/data/feed.js must be deleted');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'src/data/feed_items.json')), 'src/data/feed_items.json must be deleted');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'src/styles/views/feed.css')), 'src/styles/views/feed.css must be deleted');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'pipeline/ingest_rss_feed.py')), 'pipeline/ingest_rss_feed.py must be deleted');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'pipeline/tests/test_feed_ingest.py')), 'pipeline/tests/test_feed_ingest.py must be deleted');
+
+  // 2. Verify layout, router and index.css have no feed references
+  const layoutJs = fs.readFileSync(path.join(ROOT, 'src/shell/layout.js'), 'utf-8');
+  const renderJs = fs.readFileSync(path.join(ROOT, 'src/shell/render.js'), 'utf-8');
+  const indexCss = fs.readFileSync(path.join(ROOT, 'src/styles/index.css'), 'utf-8');
+  const packageJson = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8');
+
+  assert.ok(!layoutJs.includes('pageFeed'), 'layout.js must not reference pageFeed');
+  assert.ok(!layoutJs.includes("sItem('feed'"), 'layout.js must not contain feed sidebar item');
+  assert.ok(!renderJs.includes("feed: 'Feed'"), 'render.js must not register feed route name');
+  assert.ok(!indexCss.includes('feed.css'), 'index.css must not import feed.css');
+  assert.ok(!packageJson.includes('feed:ingest'), 'package.json must not have feed:ingest script');
+});

@@ -21,7 +21,6 @@ import {
   visibleProjects,
   control,
   policy,
-  feedItem,
   regulation,
   findSectionAndRegulation,
   resolveFrameworkToRegulation,
@@ -1251,7 +1250,6 @@ A.openRegInReader = el => {
   }
   S.ui.regView = 'reader';
   delete S.ui.govDrawer;
-  delete S.ui.feedDrawer;
   fxSet({ route: true, tabs: true });
   render();
 };
@@ -1283,7 +1281,6 @@ A.openRegFromFramework = el => {
     delete S.ui.pendingScrollSec;
   }
   delete S.ui.govDrawer;
-  delete S.ui.feedDrawer;
   fxSet({ route: true, tabs: true });
   render();
 };
@@ -1335,9 +1332,8 @@ IN.regLibQ = el => {
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
-  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.feedDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  if ((!S.ui.drawer && !S.ui.govDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   delete S.ui.drawer;
-  delete S.ui.feedDrawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
   fxSet({ drawer: true });
@@ -1376,65 +1372,6 @@ A.signOffPolicy = el => {
   }
 };
 
-/* ---------- regulatory monitoring feed ---------- */
-A.openFeedDrawer = el => {
-  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.feedDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
-  delete S.ui.drawer;
-  delete S.ui.govDrawer;
-  S.ui.feedDrawer = el.dataset.id;
-  S.ui.drawerFull = false;
-  fxSet({ drawer: true });
-  render();
-};
-
-A.closeFeedDrawer = () => {
-  delete S.ui.feedDrawer;
-  render();
-};
-
-function ensureMutableFeedItem(id) {
-  if (!D().feed) {
-    D().feed = [];
-  }
-  let existing = D().feed.find(f => f.id === id);
-  if (!existing) {
-    const seed = feedItem(id);
-    if (!seed) return null;
-    existing = { ...seed };
-    D().feed.push(existing);
-  }
-  return existing;
-}
-
-A.ackFeedItem = el => {
-  const f = ensureMutableFeedItem(el.dataset.id);
-  if (f) {
-    f.status = 'ACKNOWLEDGED';
-    f.acknowledgedAt = Date.now();
-    f.acknowledgedBy = D().me;
-    logAct('updated', null, `Acknowledged regulatory update: ${f.title}`);
-    toast('Regulatory update marked as assessed.');
-    save();
-    render();
-  }
-};
-
-A.clearFeedFilters = () => {
-  delete S.ui.feedQ;
-  delete S.ui.feedJuris;
-  delete S.ui.feedAuthSeg;
-  delete S.ui.feedScore;
-  delete S.ui.feedCat;
-  delete S.ui.feedAuth;
-  delete S.ui.feedLimit;
-  render();
-};
-
-A.moreFeedItems = () => {
-  S.ui.feedLimit = (S.ui.feedLimit || 24) + 24;
-  render();
-};
-
 function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage, onBeforeCommit }) {
   const newTask = createTask({
     key,
@@ -1451,7 +1388,6 @@ function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastM
   if (logMessage) logAct('created', newTask, logMessage);
   toast(toastMessage || `Update task ${newTask.key} created.`);
   delete S.ui.govDrawer;
-  delete S.ui.feedDrawer;
   S.ui.drawer = newId;
   save();
   render();
@@ -1507,26 +1443,6 @@ A.linkControlPick = el => {
     save();
   }
   closePop();
-  render();
-};
-
-IN.feedQ = el => {
-  S.ui.feedQ = el.value;
-  render();
-};
-
-IN.feedCat = el => {
-  S.ui.feedCat = el.value;
-  render();
-};
-
-IN.feedScore = el => {
-  S.ui.feedScore = el.value;
-  render();
-};
-
-IN.feedAuth = el => {
-  S.ui.feedAuth = el.value;
   render();
 };
 

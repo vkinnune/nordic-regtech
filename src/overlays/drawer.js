@@ -21,24 +21,8 @@ import {
   riskControls,
   riskExposureScore,
   regulationOfSection,
-  feedItem,
 } from '../core/store.js';
-import {
-  FT,
-  av,
-  diffBadge,
-  diffTokenHtml,
-  filePrev,
-  fileType,
-  fmtComment,
-  lbl,
-  progBar,
-  formatSecBadge,
-  feedScoreClass,
-  feedScoreLabel,
-  getFeedCat,
-  getFeedAuth,
-} from '../ui/helpers.js';
+import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
 
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
@@ -54,8 +38,6 @@ export function renderLayer() {
     h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeDrawer"></div>` : '') + drawerHtml(task(u.drawer));
   if (u.govDrawer)
     h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeGovDrawer"></div>` : '') + govDrawerHtml(u.govDrawer);
-  if (u.feedDrawer)
-    h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeFeedDrawer"></div>` : '') + feedDrawerHtml(u.feedDrawer);
   u.modals.forEach((m, i) => {
     const en = u.fx.modal === i + 1;
     h += `<div class="scrim${en ? ' enter' : ''}" data-a="closeModal" style="z-index:${60 + i * 2}"></div><div class="modal-wrap" data-a="closeModalBg" style="z-index:${61 + i * 2}">${en ? modalHtml(m).replace('class="modal ', 'class="modal enter ') : modalHtml(m)}</div>`;
@@ -544,166 +526,6 @@ export function govDrawerHtml(gov) {
             </div>`
           : ''
       }
-    </div>
-  </aside>`;
-}
-
-/* ---------------- REGULATORY MONITORING FEED DRAWER ---------------- */
-export function feedDrawerHtml(feedId) {
-  const item = feedItem(feedId);
-  const u = S.ui;
-  if (!item) return '';
-
-  const catMeta = getFeedCat(item.category);
-  const authMeta = getFeedAuth(item.authorityId, item.authority);
-  const scoreClass = feedScoreClass(item.score);
-  const scoreLabel = feedScoreLabel(item.score);
-
-  return `<aside class="drawer ${u.drawerFull ? 'full' : ''} ${u.fx.drawer ? 'enter' : ''}" role="dialog" aria-modal="${u.drawerFull}" aria-labelledby="feed-d-h" tabindex="-1">
-    <div class="drawer-h">
-      <div class="row" style="gap:6px">
-        <span class="pill mono" style="font-size:11px;padding:2px 8px;border-color:var(--border-strong)">
-          ${ic(catMeta.icon, 12)} ${esc(catMeta.label)}
-        </span>
-        <span class="feed-score-pill ${scoreClass}">
-          ${ic('zap', 11)} ${esc(scoreLabel)} (${item.score}/5)
-        </span>
-      </div>
-      <span class="sp"></span>
-      <button class="ibtn ibtn-sm hide-m" data-a="toggleDrawerFull" data-tip="${u.drawerFull ? 'Side panel' : 'Full page'}" aria-label="Toggle full page">${ic(u.drawerFull ? 'minimize-2' : 'maximize-2', 15)}</button>
-      <button class="ibtn ibtn-sm" data-a="closeFeedDrawer" data-tip="Close  Esc" aria-label="Close">${ic('x', 16)}</button>
-    </div>
-
-    <div class="drawer-b">
-      <div class="feed-drawer-meta">
-        <span class="feed-auth-pill">
-          <span>${authMeta.flag}</span>
-          <b>${esc(authMeta.short || item.authority)}</b>
-        </span>
-        <span class="muted mono" style="font-size:11.5px">·</span>
-        <span class="pill mono" style="font-size:10.5px">${esc(item.jurisdiction)}</span>
-        <span class="muted mono" style="font-size:11.5px">·</span>
-        <span class="muted" style="font-size:12px">${esc(item.relativeTime)}</span>
-        ${item.status === 'ACKNOWLEDGED' ? `<span class="pill mono" style="font-size:10.5px;color:var(--green)">${ic('check', 11)} Acknowledged</span>` : ''}
-      </div>
-
-      <h2 id="feed-d-h" style="font-size:19px;font-weight:700;color:var(--text);margin:8px 0 6px;line-height:1.35">${esc(item.title)}</h2>
-      ${item.originalTitle ? `<div class="faint" style="font-size:12.5px;font-style:italic;margin-bottom:14px">${esc(item.originalTitle)}</div>` : ''}
-
-      <div class="feed-summary-box">
-        <div style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-3);margin-bottom:6px">Summary</div>
-        <p style="margin:0;font-size:13.5px;line-height:1.55;color:var(--text)">${esc(item.summary)}</p>
-      </div>
-
-      <!-- Authentic Compliance Impact & Relevance from rss-mapper-poc -->
-      ${
-        item.explanation
-          ? `<div class="dsec" style="margin-top:20px">
-              <div class="dsec-h"><h3>Compliance & Supervisory Impact</h3></div>
-              <div class="feed-explanation-box">
-                ${esc(item.explanation)}
-              </div>
-            </div>`
-          : ''
-      }
-
-      <!-- Detected Compliance Frameworks (AI Extraction from rss-mapper-poc) -->
-      ${
-        item.frameworks && item.frameworks.length
-          ? `<div class="dsec" style="margin-top:20px">
-              <div class="dsec-h"><h3>Detected Compliance Frameworks (${item.frameworks.length})</h3></div>
-              <div class="row" style="gap:6px;flex-wrap:wrap">
-                ${item.frameworks
-                  .map(
-                    fw => `<button class="pill mono feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(fw)}" style="padding:4px 9px;font-size:11.5px;cursor:pointer;border:1px solid var(--border);background:var(--surface-2)" title="Inspect regulation for ${esc(fw)}">
-                      ${ic('file-check', 11)} ${esc(fw)} ➔
-                    </button>`,
-                  )
-                  .join('')}
-              </div>
-            </div>`
-          : ''
-      }
-
-      <!-- Supervised Market Entities & Firms -->
-      ${
-        item.vendors && item.vendors.length
-          ? `<div class="dsec" style="margin-top:20px">
-              <div class="dsec-h"><h3>Market Participants & Entities Involved (${item.vendors.length})</h3></div>
-              <div class="row" style="gap:6px;flex-wrap:wrap">
-                ${item.vendors
-                  .map(
-                    v => `<span class="pill mono" style="padding:4px 8px;font-size:11.5px;background:var(--surface-2)">
-                      ${ic('building-2', 11)} ${esc(v)}
-                    </span>`,
-                  )
-                  .join('')}
-              </div>
-            </div>`
-          : ''
-      }
-
-      <!-- Classified Compliance & Operational Risks -->
-      ${
-        item.risks && item.risks.length
-          ? `<div class="dsec" style="margin-top:20px">
-              <div class="dsec-h"><h3>Classified Compliance & Operational Risks (${item.risks.length})</h3></div>
-              <div class="col" style="gap:6px">
-                ${item.risks
-                  .map(
-                    r => `<div class="row" style="gap:6px;align-items:flex-start;padding:6px 10px;background:var(--surface-2);border-radius:4px;font-size:12px;color:var(--text)">
-                      <span style="color:var(--amber);margin-top:1px">${ic('alert-triangle', 12)}</span>
-                      <span>${esc(r)}</span>
-                    </div>`,
-                  )
-                  .join('')}
-              </div>
-            </div>`
-          : ''
-      }
-
-      <!-- Official Supervisory Source -->
-      <div class="dsec" style="margin-top:20px">
-        <div class="dsec-h"><h3>Official Supervisory Source</h3></div>
-        <div class="row" style="justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
-          <div>
-            <div class="row" style="gap:6px;align-items:center">
-              ${ic('landmark', 14)}
-              <span class="mono" style="font-weight:600;font-size:13px">${esc(item.source || authMeta.short || item.authority)}</span>
-            </div>
-            <div class="muted" style="font-size:11.5px;margin-top:2px">Official supervisory publication verified by crawler</div>
-          </div>
-          ${
-            item.sourceUrl
-              ? `<a class="btn btn-sm btn-secondary" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">
-                  ${ic('external-link', 13)} View official notice ↗
-                </a>`
-              : ''
-          }
-        </div>
-      </div>
-
-      <!-- Action Footer -->
-      <div class="dsec" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--divider)">
-        <div class="row" style="gap:8px;flex-wrap:wrap">
-          ${
-            item.status !== 'ACKNOWLEDGED'
-              ? `<button class="btn btn-primary" data-a="ackFeedItem" data-id="${item.id}">
-                  ${ic('check', 14)} Mark as Assessed
-                </button>`
-              : `<span class="pill mono" style="padding:6px 12px;font-size:12px;color:var(--green)">
-                  ${ic('check-circle', 13)} Assessed by Compliance
-                </span>`
-          }
-          ${
-            item.sourceUrl
-              ? `<a class="btn btn-ghost" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">
-                  ${ic('external-link', 14)} View Official Source
-                </a>`
-              : ''
-          }
-        </div>
-      </div>
     </div>
   </aside>`;
 }

@@ -13,8 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "pipeline:export": "python3 pipeline/export_to_ui.py",
-    "pipeline:test": "cd pipeline && uv run pytest",
-    "feed:ingest": "python3 pipeline/ingest_rss_feed.py"
+    "pipeline:test": "cd pipeline && uv run pytest"
   },
   "engines": {
     "node": ">=18"

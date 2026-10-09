@@ -134,11 +134,6 @@ document.addEventListener('keydown', e => {
       A.closeGovDrawer();
       return;
     }
-    if (S.ui.feedDrawer) {
-      if (typing) t.blur();
-      A.closeFeedDrawer();
-      return;
-    }
     if (S.ui.drawer) {
       if (typing) t.blur();
       A.closeDrawer();

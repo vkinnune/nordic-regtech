@@ -24,7 +24,6 @@ import { pageWsTimeline } from '../views/timeline.js';
 import { pageSettings } from '../pages/settings.js';
 import { pageStates, pageSystem } from '../pages/design-system.js';
 import { pageArchive } from '../features/archive.js';
-import { pageFeed } from '../pages/feed.js';
 import { pageRegulations } from '../pages/regulations.js';
 import { pagePolicies } from '../pages/policies.js';
 import { pageControls } from '../pages/controls.js';
@@ -54,7 +53,6 @@ export function renderPage() {
       notifications: pageNotifications,
       search: pageSearch,
       overview: pageOverview,
-      feed: pageFeed,
       regulations: pageRegulations,
       policies: pagePolicies,
       controls: pageControls,
@@ -113,7 +111,6 @@ export function renderSidebar() {
       ${sItem('notifications', 'Notifications', 'bell', { ct: unreadAll || '' })}
       <div class="sgroup">
         <div class="sgroup-h">Governance</div>
-        ${sItem('feed', 'Feed', 'newspaper')}
         ${sItem('regulations', 'Regulations', 'scale')}
         ${sItem('policies', 'Policies', 'file-text')}
         ${sItem('controls', 'Controls', 'shield-check')}

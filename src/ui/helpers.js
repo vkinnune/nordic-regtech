@@ -2,7 +2,7 @@
 import { TODAY, diffD, esc, parse, relDate } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { LB, PR, PSTAT, ST } from '../core/constants.js';
-import { D, mem, pColor, FEED_CATEGORIES, FEED_AUTHORITIES } from '../core/store.js';
+import { D, mem, pColor } from '../core/store.js';
 
 export function av(id, cls = '', tip = true) {
   const m = mem(id);
@@ -153,40 +153,4 @@ export function formatSecBadge(secId) {
     }
   }
   return secId;
-}
-
-const FEED_SCORE_TIERS = [
-  { min: 5, cls: 'feed-score-5', label: 'Critical Impact' },
-  { min: 4, cls: 'feed-score-4', label: 'High Impact' },
-  { min: 3, cls: 'feed-score-3', label: 'Moderate Impact' },
-  { min: 2, cls: 'feed-score-2', label: 'Low Impact' },
-  { min: 1, cls: 'feed-score-1', label: 'Informational' },
-];
-
-export function getFeedScoreTier(score) {
-  return FEED_SCORE_TIERS.find(t => score >= t.min) || FEED_SCORE_TIERS[FEED_SCORE_TIERS.length - 1];
-}
-
-export function feedScoreClass(score) {
-  return getFeedScoreTier(score).cls;
-}
-
-export function feedScoreLabel(score) {
-  return getFeedScoreTier(score).label;
-}
-
-export function getFeedCat(catKey) {
-  return FEED_CATEGORIES[catKey] || { id: catKey, label: catKey, icon: 'newspaper' };
-}
-
-export function getFeedAuth(authKey, defaultAuth = '') {
-  return (
-    FEED_AUTHORITIES[authKey] || {
-      id: authKey,
-      label: defaultAuth || authKey,
-      short: defaultAuth || authKey,
-      flag: '🌐',
-      jur: 'EU',
-    }
-  );
 }
