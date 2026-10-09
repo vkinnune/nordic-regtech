@@ -288,8 +288,12 @@ export { FEED_ITEMS, FEED_CATEGORIES, FEED_AUTHORITIES } from '../data/feed.js';
 import { FEED_ITEMS } from '../data/feed.js';
 
 export function allFeedItems() {
-  if (!D().feed || !D().feed.length) {
-    D().feed = FEED_ITEMS.map(f => ({ ...f }));
+  if (!D().feed || !D().feed.length || D().feed.length < FEED_ITEMS.length) {
+    const existingMap = new Map((D().feed || []).map(f => [f.id, f]));
+    D().feed = FEED_ITEMS.map(f => {
+      const existing = existingMap.get(f.id);
+      return existing ? { ...f, ...existing } : { ...f };
+    });
   }
   return D().feed;
 }

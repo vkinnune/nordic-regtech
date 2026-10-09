@@ -43,10 +43,25 @@ export function pageFeed() {
       const matchSum = item.summary.toLowerCase().includes(q);
       const matchStat = item.statuteRef.toLowerCase().includes(q);
       const matchTags = (item.tags || []).some(t => t.toLowerCase().includes(q));
+      const matchFw = (item.frameworks || []).some(fw => fw.toLowerCase().includes(q));
+      const matchVendors = (item.vendors || []).some(v => v.toLowerCase().includes(q));
+      const matchRisks = (item.risks || []).some(r => r.toLowerCase().includes(q));
       const matchWhy = item.plainEnglish?.whyItMatters && item.plainEnglish.whyItMatters.toLowerCase().includes(q);
       const matchAct = item.plainEnglish?.actionRequired && item.plainEnglish.actionRequired.toLowerCase().includes(q);
 
-      if (!matchTitle && !matchOrig && !matchAuth && !matchSum && !matchStat && !matchTags && !matchWhy && !matchAct) {
+      if (
+        !matchTitle &&
+        !matchOrig &&
+        !matchAuth &&
+        !matchSum &&
+        !matchStat &&
+        !matchTags &&
+        !matchFw &&
+        !matchVendors &&
+        !matchRisks &&
+        !matchWhy &&
+        !matchAct
+      ) {
         return false;
       }
     }
@@ -63,6 +78,9 @@ export function pageFeed() {
   const euCount = allItems.filter(i => i.jurisdiction === 'EU').length;
   const unreviewedCount = allItems.filter(i => i.status === 'UNREVIEWED').length;
 
+  const feedLimit = u.feedLimit || 24;
+  const paged = filtered.slice(0, layout === 'list' ? feedLimit * 2 : feedLimit);
+
   let body;
   if (!allItems.length) {
     body = `<div class="panel">${empty('newspaper', 'No feed items', 'No regulatory updates currently tracked.')}</div>`;
@@ -74,9 +92,17 @@ export function pageFeed() {
       `<button class="btn btn-secondary btn-sm" data-a="clearFeedFilters">${ic('rotate-ccw', 13)} Reset all filters</button>`,
     )}</div>`;
   } else if (layout === 'list') {
-    body = `<div class="panel" style="overflow-x:auto">${renderFeedList(filtered)}</div>`;
+    body = `<div class="panel" style="overflow-x:auto">${renderFeedList(paged)}</div>`;
   } else {
-    body = renderFeedCards(filtered);
+    body = renderFeedCards(paged);
+  }
+
+  if (filtered.length > paged.length) {
+    body += `<div class="row" style="justify-content:center;margin-top:20px;margin-bottom:24px">
+      <button class="btn btn-secondary" data-a="moreFeedItems" style="padding:8px 24px;font-size:13px;font-weight:600">
+        ${ic('chevron-down', 14)} Show more updates (${paged.length} of ${filtered.length})
+      </button>
+    </div>`;
   }
 
   // Active filter count
@@ -233,7 +259,7 @@ function renderFeedCard(item) {
       </div>
     </div>
 
-    <!-- Category Pill -->
+    <!-- Category Pill & Status -->
     <div style="margin-bottom:8px">
       <span class="pill mono feed-cat-pill">
         ${ic(catMeta.icon, 11)} ${esc(catMeta.label)}
@@ -242,12 +268,35 @@ function renderFeedCard(item) {
       ${item.status === 'IN_MITIGATION' ? `<span class="pill mono feed-status-mit">${ic('clock', 10)} In Mitigation</span>` : ''}
     </div>
 
+    <!-- Compliance Frameworks (AI extraction) -->
+    ${
+      item.frameworks && item.frameworks.length
+        ? `<div class="row" style="gap:4px;margin-bottom:8px;flex-wrap:wrap">
+            ${item.frameworks
+              .slice(0, 3)
+              .map(fw => `<span class="pill mono feed-fw-pill" title="Compliance Framework: ${esc(fw)}">${esc(fw)}</span>`)
+              .join('')}
+            ${item.frameworks.length > 3 ? `<span class="faint mono" style="font-size:10px;align-self:center">+${item.frameworks.length - 3}</span>` : ''}
+          </div>`
+        : ''
+    }
+
     <!-- Card Title -->
     <h3 class="feed-card-title" data-a="openFeedDrawer" data-id="${item.id}">
       ${esc(item.title)}
     </h3>
 
     ${item.originalTitle ? `<div class="feed-card-orig">${esc(item.originalTitle)}</div>` : ''}
+
+    <!-- Supervised Entities / Market Participants -->
+    ${
+      item.vendors && item.vendors.length
+        ? `<div class="row" style="gap:4px;font-size:11.5px;color:var(--text-2);margin-bottom:8px;align-items:center">
+            ${ic('building-2', 11)}
+            <span class="trunc" style="max-width:320px" title="Entities involved: ${esc(item.vendors.join(', '))}">${esc(item.vendors.slice(0, 3).join(', '))}${item.vendors.length > 3 ? ` +${item.vendors.length - 3}` : ''}</span>
+          </div>`
+        : ''
+    }
 
     <!-- Summary -->
     <p class="feed-card-summary">

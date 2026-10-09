@@ -623,6 +623,61 @@ export function feedDrawerHtml(feedId) {
           : ''
       }
 
+      <!-- Detected Compliance Frameworks (AI Extraction from rss-mapper-poc) -->
+      ${
+        item.frameworks && item.frameworks.length
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Detected Compliance Frameworks (${item.frameworks.length})</h3></div>
+              <div class="row" style="gap:6px;flex-wrap:wrap">
+                ${item.frameworks
+                  .map(
+                    fw => `<span class="pill mono feed-fw-pill" style="padding:4px 8px;font-size:11.5px;max-width:none">
+                      ${ic('file-check', 11)} ${esc(fw)}
+                    </span>`,
+                  )
+                  .join('')}
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Supervised Market Entities & Firms -->
+      ${
+        item.vendors && item.vendors.length
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Market Participants & Entities Involved (${item.vendors.length})</h3></div>
+              <div class="row" style="gap:6px;flex-wrap:wrap">
+                ${item.vendors
+                  .map(
+                    v => `<span class="pill mono" style="padding:4px 8px;font-size:11.5px;background:var(--surface-2)">
+                      ${ic('building-2', 11)} ${esc(v)}
+                    </span>`,
+                  )
+                  .join('')}
+              </div>
+            </div>`
+          : ''
+      }
+
+      <!-- Classified Compliance & Operational Risks -->
+      ${
+        item.risks && item.risks.length
+          ? `<div class="dsec" style="margin-top:20px">
+              <div class="dsec-h"><h3>Classified Compliance & Operational Risks (${item.risks.length})</h3></div>
+              <div class="col" style="gap:6px">
+                ${item.risks
+                  .map(
+                    r => `<div class="row" style="gap:6px;align-items:flex-start;padding:6px 10px;background:var(--surface-2);border-radius:4px;font-size:12px;color:var(--text)">
+                      <span style="color:var(--amber);margin-top:1px">${ic('alert-triangle', 12)}</span>
+                      <span>${esc(r)}</span>
+                    </div>`,
+                  )
+                  .join('')}
+              </div>
+            </div>`
+          : ''
+      }
+
       <!-- Statutory Linkage -->
       <div class="dsec" style="margin-top:20px">
         <div class="dsec-h"><h3>Statutory Citation & Direct Reader Link</h3></div>

@@ -157,6 +157,19 @@
   color: var(--text-2);
 }
 
+.feed-fw-pill {
+  font-size: 10px;
+  padding: 1px 5px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .feed-status-ack {
   font-size: 10.5px;
   padding: 2px 6px;

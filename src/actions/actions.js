@@ -1396,6 +1396,12 @@ A.clearFeedFilters = () => {
   delete S.ui.feedScore;
   delete S.ui.feedCat;
   delete S.ui.feedAuth;
+  delete S.ui.feedLimit;
+  render();
+};
+
+A.moreFeedItems = () => {
+  S.ui.feedLimit = (S.ui.feedLimit || 24) + 24;
   render();
 };
 

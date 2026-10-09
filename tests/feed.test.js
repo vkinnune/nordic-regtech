@@ -82,3 +82,30 @@ test('Regulatory Feed Review Standards: input handlers, helpers, and escape hand
   assert.ok(!feedJs.includes('export function feedScoreClass'), 'feed.js must not export presentation helpers');
   assert.ok(!feedJs.includes('export function feedScoreLabel'), 'feed.js must not export presentation helpers');
 });
+
+test('Regulatory Feed Pipeline Connection: real RSS articles from rss-mapper-poc', () => {
+  const feedItemsPath = path.join(ROOT, 'src/data/feed_items.json');
+  assert.ok(fs.existsSync(feedItemsPath), 'src/data/feed_items.json must exist');
+
+  const items = JSON.parse(fs.readFileSync(feedItemsPath, 'utf-8'));
+  assert.ok(items.length >= 200, `Must contain rich real article dataset (found ${items.length})`);
+
+  // Verify real articles from key Nordic authorities
+  const authorities = new Set(items.map(i => i.authorityId));
+  assert.ok(authorities.has('fi'), 'Must contain Finansinspektionen items');
+  assert.ok(authorities.has('traficom'), 'Must contain Traficom items');
+  assert.ok(authorities.has('imy'), 'Must contain IMY items');
+  assert.ok(authorities.has('konsumentverket'), 'Must contain Konsumentverket items');
+  assert.ok(authorities.has('eduskunta'), 'Must contain Eduskunta items');
+
+  // Verify presence of AI-extracted frameworks, vendors, risks, and real source URLs
+  const withFrameworks = items.filter(i => i.frameworks && i.frameworks.length > 0);
+  const withVendors = items.filter(i => i.vendors && i.vendors.length > 0);
+  const withRisks = items.filter(i => i.risks && i.risks.length > 0);
+  const withSourceUrl = items.filter(i => i.sourceUrl && i.sourceUrl.startsWith('http'));
+
+  assert.ok(withFrameworks.length > 50, 'Must have AI-extracted frameworks');
+  assert.ok(withVendors.length > 50, 'Must have identified market entities/vendors');
+  assert.ok(withRisks.length > 50, 'Must have classified compliance risks');
+  assert.ok(withSourceUrl.length > 100, 'Must have official source URLs');
+});
