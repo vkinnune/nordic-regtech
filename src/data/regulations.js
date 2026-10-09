@@ -788,7 +788,122 @@ export function allRegulations() {
 export function regulation(id) {
   if (!id) return null;
   ensureIndexes();
-  return _regIndex.get(id) || null;
+  const direct = _regIndex.get(id);
+  if (direct) return direct;
+
+  const low = String(id).toLowerCase().trim();
+  for (const [k, v] of _regIndex.entries()) {
+    if (k.toLowerCase() === low) return v;
+  }
+  if (low.startsWith('reg-')) {
+    const stripped = low.replace(/^reg-/, '');
+    for (const [k, v] of _regIndex.entries()) {
+      if (k.toLowerCase() === stripped) return v;
+    }
+  } else {
+    const prefixed = `reg-${low}`;
+    for (const [k, v] of _regIndex.entries()) {
+      if (k.toLowerCase() === prefixed) return v;
+    }
+  }
+  return null;
+}
+
+export function resolveFrameworkToRegulation(fw) {
+  if (!fw) return null;
+  const f = String(fw).toLowerCase().trim();
+
+  // Direct code or ID match
+  const direct = regulation(fw);
+  if (direct) return { regId: direct.id, view: 'reader' };
+
+  // DORA (Digital Operational Resilience Act)
+  if (f.includes('dora') || f.includes('2022/2554')) {
+    return { regId: 'reg-dora', secId: 'dora-art-28', view: 'reader' };
+  }
+  // AML / Anti-Money Laundering
+  if (f.includes('aml') || f.includes('penningtvatt') || f.includes('money laundering') || f.includes('2017:630')) {
+    return { regId: 'sfs-2017-630', secId: 'riksdagen_sfs-2017-630_k3_p1', view: 'reader' };
+  }
+  if (f.includes('444/2017') || f.includes('rahanpesu')) {
+    return { regId: 'reg-aml', secId: 'aml-2-1', view: 'reader' };
+  }
+  // Market Abuse / MAR
+  if (f.includes('mar') || f.includes('market abuse') || f.includes('2016:1306') || f.includes('marknadsmissbruk')) {
+    return { regId: 'sfs-2016-1306', secId: 'riksdagen_sfs-2016-1306_k1_p1', view: 'reader' };
+  }
+  // MiFID / Investment Services / Securities Market
+  if (f.includes('mifid') || f.includes('mifir') || f.includes('2007:528') || f.includes('vardepappersmarknad')) {
+    return { regId: 'sfs-2007-528', secId: 'riksdagen_sfs-2007-528_k1_p1', view: 'reader' };
+  }
+  if (f.includes('747/2012') || f.includes('investment services') || f.includes('sijoituspalvelu')) {
+    return { regId: 'reg-finlex-747-2012', secId: 'finlex-1-9', view: 'reader' };
+  }
+  // Funds / UCITS / AIFMD
+  if (f.includes('ucits') || f.includes('2004:46') || f.includes('vardepappersfonder') || f.includes('investeringsfond')) {
+    return { regId: 'sfs-2004-46', secId: 'riksdagen_sfs-2004-46_k1_p1', view: 'reader' };
+  }
+  if (f.includes('aif') || f.includes('2013:561')) {
+    return { regId: 'sfs-2013-561', secId: 'riksdagen_sfs-2013-561_k1_p1', view: 'reader' };
+  }
+  // Banking / Credit Institutions / CRD / CRR / Capital Requirements
+  if (
+    f.includes('2004:297') ||
+    f.includes('bank- och finansiering') ||
+    f.includes('kreditinstitut') ||
+    f.includes('crd') ||
+    f.includes('crr') ||
+    f.includes('kapitaltackning') ||
+    f.includes('consumer credit') ||
+    f.includes('konsumentkredit')
+  ) {
+    return { regId: 'sfs-2004-297', secId: 'riksdagen_sfs-2004-297_k1_p1', view: 'reader' };
+  }
+  if (f.includes('2014:968')) {
+    return { regId: 'sfs-2014-968', secId: 'riksdagen_sfs-2014-968_k1_p1', view: 'reader' };
+  }
+  // Payment Services / PSD2
+  if (f.includes('payment') || f.includes('psd2') || f.includes('2010:751') || f.includes('betaltjanst')) {
+    return { regId: 'sfs-2010-751', secId: 'riksdagen_sfs-2010-751_k1_p1', view: 'reader' };
+  }
+  // Insurance / Solvency II / IDD
+  if (f.includes('solvens') || f.includes('solvency') || f.includes('2010:2043') || f.includes('forsakringsrorelse')) {
+    return { regId: 'sfs-2010-2043', secId: 'riksdagen_sfs-2010-2043_k1_p1', view: 'reader' };
+  }
+  if (f.includes('idd') || f.includes('2018:1219') || f.includes('forsakringsdistribution')) {
+    return { regId: 'sfs-2018-1219', secId: 'riksdagen_sfs-2018-1219_k1_p1', view: 'reader' };
+  }
+  if (f.includes('iorp') || f.includes('2019:742') || f.includes('tjanstepension')) {
+    return { regId: 'sfs-2019-742', secId: 'riksdagen_sfs-2019-742_k1_p1', view: 'reader' };
+  }
+  // SFDR / Sustainability / ESG / Taxonomy
+  if (
+    f.includes('sfdr') ||
+    f.includes('2019/2088') ||
+    f.includes('taxonomy') ||
+    f.includes('greenwashing') ||
+    f.includes('sustainability') ||
+    f.includes('hallbarhet')
+  ) {
+    return { regId: 'reg-sfdr', secId: 'sfdr-art-4', view: 'reader' };
+  }
+  // FFFS regulation code matching (e.g. "FFFS 2014:12" or "FFFS 2019:21")
+  const fffsMatch = f.match(/fffs\s*(\d{4}):(\d+)/i);
+  if (fffsMatch) {
+    const fffsId = `fffs-${fffsMatch[1]}-${fffsMatch[2]}`;
+    const fffsReg = regulation(fffsId);
+    if (fffsReg) return { regId: fffsReg.id, view: 'reader' };
+  }
+  // SFS statute matching (e.g. "SFS 2017:630" or "Lag 2004:46" or "2017:630")
+  const sfsMatch = f.match(/sfs\s*(\d{4}):(\d+)/i) || f.match(/(\d{4}):(\d+)/);
+  if (sfsMatch) {
+    const sfsId = `sfs-${sfsMatch[1]}-${sfsMatch[2]}`;
+    const sfsReg = regulation(sfsId) || regulation(`reg-${sfsId}`);
+    if (sfsReg) return { regId: sfsReg.id, view: 'reader' };
+  }
+
+  // Fallback: search in library for this framework term
+  return { query: fw, view: 'library' };
 }
 
 export function findSectionAndRegulation(secId) {

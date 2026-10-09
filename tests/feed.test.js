@@ -181,3 +181,40 @@ test('Regulatory Feed Pipeline Connection & Data Integrity: FIN-FSA, anonymity, 
   assert.ok(withRisks.length > 50, 'Must have classified compliance risks');
   assert.ok(withSourceUrl.length > 100, 'Must have official source URLs');
 });
+
+test('Regulatory Feed Unslop & Regulation Navigation: pure real data, authentic explanations, and 1-click reader jumps', () => {
+  const feedItemsPath = path.join(ROOT, 'src/data/feed_items.json');
+  const items = JSON.parse(fs.readFileSync(feedItemsPath, 'utf-8'));
+  const drawerJs = fs.readFileSync(path.join(ROOT, 'src/overlays/drawer.js'), 'utf-8');
+  const feedPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/feed.js'), 'utf-8');
+  const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
+  const regulationsJs = fs.readFileSync(path.join(ROOT, 'src/data/regulations.js'), 'utf-8');
+
+  // 1. Zero synthetic mock kill-switch items
+  for (const item of items) {
+    assert.notEqual(item.id, 'feed-sfs-2026-916', 'Must not have mock anchor item feed-sfs-2026-916');
+    assert.ok(!item.summary.toLowerCase().includes('kill switch'), `Must not have fake kill-switch text in summary of ${item.id}`);
+    assert.ok(!item.title.toLowerCase().includes('automated kill switches'), `Must not have fake kill-switch text in title of ${item.id}`);
+  }
+
+  // 2. All items carry authentic compliance explanation from the upstream pipeline
+  const withExplanation = items.filter(i => i.explanation && i.explanation.trim().length > 10);
+  assert.ok(withExplanation.length >= 250, `Substantially all items must have authentic compliance explanation (found ${withExplanation.length})`);
+
+  // 3. Drawer HTML must be unslopped: Summary, Compliance & Supervisory Impact, clickable framework buttons
+  assert.ok(!drawerJs.includes('Supervisory Synopsis'), 'drawer.js must not contain "Supervisory Synopsis"');
+  assert.ok(!drawerJs.includes('feed-analysis-grid'), 'drawer.js must not contain the 3-box feed-analysis-grid boilerplate');
+  assert.ok(!drawerJs.includes('Executive Impact Assessment'), 'drawer.js must not contain fake "Executive Impact Assessment"');
+  assert.ok(drawerJs.includes('Summary'), 'drawer.js must contain clean Summary header');
+  assert.ok(drawerJs.includes('Compliance & Supervisory Impact'), 'drawer.js must contain Compliance & Supervisory Impact');
+  assert.ok(drawerJs.includes('feed-explanation-box'), 'drawer.js must use clean feed-explanation-box');
+  assert.ok(drawerJs.includes('data-a="openRegFromFramework"'), 'drawer.js must render clickable framework buttons');
+
+  // 4. Feed page cards and list view must have clickable framework buttons
+  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(primaryFramework)}"'), 'Feed cards must have clickable primaryFramework buttons');
+  assert.ok(feedPageJs.includes('data-a="openRegFromFramework" data-fw="${esc(f)}"'), 'Feed list must have clickable framework tag buttons');
+
+  // 5. Actions and Regulations mapping integrity
+  assert.ok(actionsJs.includes('A.openRegFromFramework'), 'actions.js must define A.openRegFromFramework');
+  assert.ok(regulationsJs.includes('export function resolveFrameworkToRegulation'), 'regulations.js must export resolveFrameworkToRegulation');
+});

@@ -47,6 +47,7 @@ export function pageFeed() {
       const matchFw = (item.frameworks || []).some(fw => fw.toLowerCase().includes(q));
       const matchVendors = (item.vendors || []).some(v => v.toLowerCase().includes(q));
       const matchRisks = (item.risks || []).some(r => r.toLowerCase().includes(q));
+      const matchExpl = item.explanation && item.explanation.toLowerCase().includes(q);
       const matchWhy = item.plainEnglish?.whyItMatters && item.plainEnglish.whyItMatters.toLowerCase().includes(q);
       const matchAct = item.plainEnglish?.actionRequired && item.plainEnglish.actionRequired.toLowerCase().includes(q);
 
@@ -60,6 +61,7 @@ export function pageFeed() {
         !matchFw &&
         !matchVendors &&
         !matchRisks &&
+        !matchExpl &&
         !matchWhy &&
         !matchAct
       ) {
@@ -279,7 +281,7 @@ function renderFeedCard(item) {
             </button>`
           : ''
       }
-      ${primaryFramework ? `<span class="pill mono feed-fw-pill" title="Compliance Framework: ${esc(primaryFramework)}">${esc(primaryFramework)}</span>` : ''}
+      ${primaryFramework ? `<button class="pill mono feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(primaryFramework)}" title="Jump to regulation for ${esc(primaryFramework)}" style="cursor:pointer;border:1px solid var(--border)">${ic('file-check', 11)} ${esc(primaryFramework)}</button>` : ''}
     </div>
 
     <footer class="feed-card-footer">
@@ -353,7 +355,10 @@ function renderFeedList(items) {
                   ? `<div class="row" style="gap:4px;margin-top:4px;flex-wrap:wrap">
                       ${(item.frameworks || [])
                         .slice(0, 2)
-                        .map(f => `<span class="pill mono feed-meta-tag" style="font-size:9.5px;padding:1px 5px">${ic('file-text', 9)} ${esc(f)}</span>`)
+                        .map(
+                          f =>
+                            `<button class="pill mono feed-meta-tag feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(f)}" style="font-size:9.5px;padding:1px 5px;cursor:pointer;border:1px solid var(--border)" title="Jump to regulation for ${esc(f)}">${ic('file-text', 9)} ${esc(f)}</button>`,
+                        )
                         .join('')}
                       ${(item.risks || [])
                         .slice(0, 1)

@@ -596,28 +596,17 @@ export function feedDrawerHtml(feedId) {
       ${item.originalTitle ? `<div class="faint" style="font-size:12.5px;font-style:italic;margin-bottom:14px">${esc(item.originalTitle)}</div>` : ''}
 
       <div class="feed-summary-box">
-        <div style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-3);margin-bottom:6px">Supervisory Synopsis</div>
+        <div style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-3);margin-bottom:6px">Summary</div>
         <p style="margin:0;font-size:13.5px;line-height:1.55;color:var(--text)">${esc(item.summary)}</p>
       </div>
 
-      <!-- Plain English Deep Breakdown -->
+      <!-- Authentic Compliance Impact & Relevance from rss-mapper-poc -->
       ${
-        item.plainEnglish
+        item.explanation || (item.plainEnglish && item.plainEnglish.whyItMatters)
           ? `<div class="dsec" style="margin-top:20px">
-              <div class="dsec-h"><h3>Executive Impact Assessment</h3></div>
-              <div class="feed-analysis-grid">
-                <div class="feed-analysis-card">
-                  <div class="feed-card-h">${ic('info', 13)} Why It Matters</div>
-                  <p>${esc(item.plainEnglish.whyItMatters)}</p>
-                </div>
-                <div class="feed-analysis-card">
-                  <div class="feed-card-h">${ic('file-diff', 13)} Before vs. After</div>
-                  <p>${esc(item.plainEnglish.beforeAfter)}</p>
-                </div>
-                <div class="feed-analysis-card highlight">
-                  <div class="feed-card-h">${ic('alert-circle', 13)} Immediate Action Required</div>
-                  <p>${esc(item.plainEnglish.actionRequired)}</p>
-                </div>
+              <div class="dsec-h"><h3>Compliance & Supervisory Impact</h3></div>
+              <div class="feed-explanation-box">
+                ${esc(item.explanation || item.plainEnglish.whyItMatters)}
               </div>
             </div>`
           : ''
@@ -631,9 +620,9 @@ export function feedDrawerHtml(feedId) {
               <div class="row" style="gap:6px;flex-wrap:wrap">
                 ${item.frameworks
                   .map(
-                    fw => `<span class="pill mono feed-fw-pill" style="padding:4px 8px;font-size:11.5px;max-width:none">
-                      ${ic('file-check', 11)} ${esc(fw)}
-                    </span>`,
+                    fw => `<button class="pill mono feed-fw-pill clickable" data-a="openRegFromFramework" data-fw="${esc(fw)}" style="padding:4px 9px;font-size:11.5px;cursor:pointer;border:1px solid var(--border);background:var(--surface-2)" title="Inspect regulation for ${esc(fw)}">
+                      ${ic('file-check', 11)} ${esc(fw)} ➔
+                    </button>`,
                   )
                   .join('')}
               </div>
@@ -681,9 +670,9 @@ export function feedDrawerHtml(feedId) {
       <!-- Statutory Linkage -->
       <div class="dsec" style="margin-top:20px">
         <div class="dsec-h"><h3>Statutory Citation & Direct Reader Link</h3></div>
-        <div class="row" style="justify-content:space-between;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
+        <div class="row clickable" style="justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;cursor:pointer" data-a="openRegInReader" data-id="${item.statuteId}" data-sec="${item.statuteSec}" title="Jump to ${esc(item.statuteRef)} in regulation reader">
           <div>
-            <div class="row" style="gap:6px">
+            <div class="row" style="gap:6px;align-items:center">
               ${ic('scale', 14)}
               <span class="mono" style="font-weight:700;font-size:13px">${esc(item.statuteRef)}</span>
             </div>

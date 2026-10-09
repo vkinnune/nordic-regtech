@@ -24,6 +24,7 @@ import {
   feedItem,
   regulation,
   findSectionAndRegulation,
+  resolveFrameworkToRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
 import { effectiveDark } from '../core/theme.js';
@@ -1254,6 +1255,42 @@ A.openRegInReader = el => {
   fxSet({ route: true, tabs: true });
   render();
 };
+A.openRegFromFramework = el => {
+  const fw = el.dataset.fw || el.dataset.id;
+  if (!fw) return;
+  const res = resolveFrameworkToRegulation(fw);
+  if (!res) return;
+
+  S.ui.route = 'regulations';
+  if (res.view === 'reader' && res.regId) {
+    S.ui.regSel = res.regId;
+    if (res.secId) {
+      S.ui.regSec = res.secId;
+      S.ui.pendingScrollSec = res.secId;
+    } else {
+      delete S.ui.regSec;
+      delete S.ui.pendingScrollSec;
+    }
+    S.ui.regView = 'reader';
+  } else {
+    // Open library view filtered by domain or search query
+    S.ui.regView = 'library';
+    if (!S.ui.regFilter) S.ui.regFilter = {};
+    if (res.domain) {
+      S.ui.regFilter.domain = res.domain;
+    }
+    if (res.query) {
+      S.ui.regSearch = res.query;
+    }
+    delete S.ui.regSec;
+    delete S.ui.pendingScrollSec;
+  }
+  delete S.ui.govDrawer;
+  delete S.ui.feedDrawer;
+  fxSet({ route: true, tabs: true });
+  render();
+};
+A.openFrameworkReg = A.openRegFromFramework;
 A.setRegView = el => {
   S.ui.regView = el.dataset.view || 'library';
   fxSet({ route: true, tabs: true });
