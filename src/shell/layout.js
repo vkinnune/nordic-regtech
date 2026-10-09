@@ -204,7 +204,7 @@ export function crumbs() {
     out.push(c('Settings', '', true));
   } else if (r === 'regulations') {
     if (u.regView === 'reader') {
-      const curAct = regulation(u.regSel || 'reg-finlex-747-2012');
+      const curAct = regulation(u.regSel || 'sfs-2004-46');
       out.push(c('Regulations', 'data-a="setRegView" data-view="library"'));
       if (curAct) {
         out.push(c(curAct.shortTitle || curAct.code, '', true));

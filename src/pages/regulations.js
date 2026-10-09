@@ -258,7 +258,7 @@ function renderRegulationsList(decoratedActs) {
    2. SECOND SCREEN: FINLEX DOCUMENT READER VIEW
    ============================================================ */
 function renderRegulationsReader(u) {
-  const selActId = u.regSel || 'reg-finlex-747-2012';
+  const selActId = u.regSel || 'sfs-2004-46';
   const curAct = regulation(selActId) || REGULATIONS[0];
   const q = (u.regQ || '').toLowerCase().trim();
   const showPlain = u.regPlain !== false;

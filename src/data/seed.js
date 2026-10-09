@@ -117,9 +117,9 @@ export function seed() {
       start: dOff(-60),
       fav: true,
       members: ['m1', 'm2', 'm3', 'm4', 'm6', 'm7'],
-      desc: 'Swedish statutory framework for UCITS funds and fund management companies. Tracking legislative amendments via Riksdagen SFS 2026:916 and Finansinspektionen FFFS circulars.',
+      desc: 'Swedish statutory framework for UCITS funds and fund management companies. Tracking legislative amendments via Riksdagen and Finansinspektionen FFFS circulars.',
       milestones: [
-        { name: 'SFS 2026:916 In-force Date', date: dOff(14) },
+        { name: 'SFS 2004:46 Statutory Review', date: dOff(14) },
         { name: 'FI Quarterly Fund Return Filing', date: dOff(45) },
       ],
       last: 8,
@@ -256,143 +256,144 @@ export function seed() {
     );
   };
 
-  /* ---- SFS 2004:46 Tasks & Statutory Diffs ---- */
-  t('p1', 'SFS 2026:916 § 1 kap. 100 § · AI & Algorithmic Trading Supervision', 'review', 'm6', 'urgent', 2, ['fi', 'funds', 'risk'], {
-    key: 'SFS 1:100',
+  /* ---- Swedish Statutory Tasks & Regulatory Diffs ---- */
+  t('p1', 'SFS 2007:528 § 14 kap. 1 § · Algorithmic Trading Surveillance & Controls', 'review', 'm6', 'urgent', 2, ['fi', 'funds', 'risk'], {
+    key: 'SFS 14:1',
     fav: true,
     est: '2 weeks',
     len: 7,
     age: 18,
     upd: 3,
-    desc: '<p><b>Riksdagen legislative amendment SFS 2026:916</b> introduces a statutory requirement for Swedish fund management companies utilizing artificial intelligence or automated execution algorithms.</p><p>Requires real-time risk profile surveillance, continuous human-in-the-loop controls, and complete algorithmic decision reconstruction during Finansinspektionen audits.</p>',
+    desc: '<p><b>Swedish Securities Market Act (SFS 2007:528) 14 kap. 1 §</b> establishes statutory requirements for market participants engaging in automated and algorithmic execution on regulated trading venues.</p><p>Requires effective pre-trade risk controls, real-time error filters, continuous human oversight, and complete algorithmic decision reconstruction during Finansinspektionen audits.</p>',
     diff: {
-      identifier: '1 kap. 100 §',
-      regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
-      amendingAct: 'SFS 2026:916',
-      heading: 'Tillsyn över artificiell intelligens och algoritmer',
-      status: 'ADDED',
-      additions_count: 30,
+      identifier: '14 kap. 1 §',
+      regulation: 'SFS 2007:528 (Lag om värdepappersmarknaden)',
+      amendingAct: 'SFS 2024:114',
+      heading: 'Krav på den som deltar i handeln på en reglerad marknad',
+      status: 'MODIFIED',
+      additions_count: 15,
       deletions_count: 0,
       tokens: [
         {
+          type: 'equal',
+          text: 'En börs skall ha regler för vilka som får delta i handeln på en reglerad marknad.',
+        },
+        {
           type: 'insert',
-          text: '100 § Ett fondbolag som använder artificiell intelligens eller helautomatiserade handelsalgoritmer vid förvaltningen av en värdepappersfond ska säkerställa att systemen är underkastade kontinuerlig mänsklig tillsyn, att fondens riskprofil övervakas i realtid, samt att samtliga förvaltnings- och allokeringsbeslut kan rekonstrueras i efterhand på begäran av Finansinspektionen.',
+          text: ' En deltagare som tillämpar algoritmisk handel ska ha effektiva system och riskkontroller.',
         },
       ],
       authority: 'Finansinspektionen & Riksdagen',
-      inForce: '2026-11-01',
+      inForce: '2024-07-01',
       plainEnglish: {
         summary:
-          'Fund management companies using AI or automated trading algorithms must ensure continuous human supervision, real-time risk surveillance, and complete audit trails to reconstruct every decision for Finansinspektionen.',
+          'Market participants utilizing algorithmic trading systems must maintain effective pre-trade risk controls, continuous oversight, and comprehensive audit trails for Finansinspektionen.',
         points: [
-          'Human-in-the-loop oversight: A qualified person must always oversee algorithms and have the authority to intervene or pause trading.',
-          'Real-time risk monitoring: Live surveillance of fund risk parameters while algorithms execute in production.',
-          'Audit reconstruction: Every trade recommendation and allocation decision must be stored so regulators can reconstruct it in hindsight.',
+          'Pre-trade error filters: Automated controls must prevent erroneous order submission and price disruption.',
+          'Surveillance & kill switch: Real-time monitoring with the ability to pause or halt runaway algorithmic execution.',
+          'Audit reconstruction: Five-year parameter retention so regulators can reconstruct order flow in hindsight.',
         ],
-        whyItMatters: 'Mandatory statutory requirement under SFS 2026:916. Violations risk Tier 1 regulatory fines and trading suspension.',
+        whyItMatters: 'Mandatory statutory requirement under SFS 2007:528. Violations risk supervisory sanctions and trading suspension.',
         beforeAfter: {
-          before: 'No explicit statutory rule for AI or automated trading algorithms in Swedish fund law.',
-          after:
-            'Mandatory continuous human oversight, real-time risk surveillance, and complete audit trail to reconstruct every decision for Finansinspektionen.',
+          before: 'General participant rules without granular automated pre-trade error filtering thresholds.',
+          after: 'Mandatory pre-trade filters, automated risk limits, and verifiable kill switches for algorithmic market participants.',
         },
         translation:
-          '100 § A fund management company that uses artificial intelligence or fully automated trading algorithms in managing an investment fund shall ensure that systems are subject to continuous human oversight, that the fund risk profile is monitored in real time, and that all management and asset allocation decisions can be reconstructed in hindsight upon request by Finansinspektionen.',
+          '1 § A regulated market shall establish rules for those who may participate in trading on the market. A participant utilizing algorithmic trading shall maintain effective systems and risk controls.',
       },
     },
     subtasks: [
       { id: 's1', title: 'Draft algorithmic governance policy matching FI supervisory expectations', done: true },
       { id: 's2', title: 'Establish pre-trade kill switch architecture for high-frequency execution', done: true },
-      { id: 's3', title: 'Implement automated audit reconstruction ledger for AI trading decisions', done: false },
+      { id: 's3', title: 'Implement automated audit reconstruction ledger for algorithmic trading decisions', done: false },
       { id: 's4', title: 'Submit 2nd LoD compliance opinion to the Risk Committee', done: false },
     ],
     attachments: [
-      { id: 'a1', name: 'SFS_2026_916_Amending_Act_Riksdagen.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180) },
+      { id: 'a1', name: 'SFS_2007_528_Lag_om_vardepappersmarknaden.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180) },
       { id: 'a2', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400) },
     ],
   });
 
-  t('p1', 'SFS 2026:916 § 1 kap. 1 § · DORA Scope Harmonization in Swedish Fund Law', 'progress', 'm1', 'high', 5, ['fi', 'dora', 'funds'], {
-    key: 'SFS 1:1',
+  t('p1', 'SFS 2024:1284 § 6 kap. 2 a § · DORA Implementation in Swedish Credit Institutions', 'progress', 'm1', 'high', 5, ['fi', 'dora', 'funds'], {
+    key: 'SFS 6:2a',
     est: '1 week',
     len: 5,
     age: 15,
     upd: 12,
-    desc: '<p>Direct statutory amendment explicitly harmonizing definitions in 1 kap. 1 § with Regulation (EU) 2022/2554 (DORA). Mandates that operational risk rules apply to all authorized UCITS management entities under DORA standards.</p>',
+    desc: '<p>Direct statutory amendment explicitly transposing Regulation (EU) 2022/2554 (DORA) into Swedish banking law (SFS 2004:297 6 kap. 2 a §). Mandates that network and information systems meet DORA digital operational resilience standards.</p>',
     diff: {
-      identifier: '1 kap. 1 §',
-      regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
-      amendingAct: 'SFS 2026:916',
-      heading: 'Definitioner (DORA-anpassning)',
-      status: 'MODIFIED',
-      additions_count: 4,
+      identifier: '6 kap. 2 a §',
+      regulation: 'SFS 2004:297 (Lag om bank- och finansieringsrörelse)',
+      amendingAct: 'SFS 2024:1284',
+      heading: 'Nätverks- och informationssystem',
+      status: 'ADDED',
+      additions_count: 22,
       deletions_count: 0,
       tokens: [
-        { type: 'equal', text: 'I denna lag betyder' },
-        { type: 'insert', text: ' (med beaktande av DORA-kraven)' },
         {
-          type: 'equal',
-          text: '\n\n1. alternativ investeringsfond: detsamma som i 1 kap. 2 § lagen (2013:561) om förvaltare av alternativa investeringsfonder,\n\n2. behörig myndighet: utländsk myndighet som har behörighet att utöva tillsyn över fondföretag eller förvaltningsbolag,\n\n3. derivatinstrument: optioner, terminer och swappar samt andra likartade finansiella instrument,\n\n4. EES: Europeiska ekonomiska samarbetsområdet,\n\n5. egna medel: detsamma som i artikel 2.1 l i Europaparlamentets och rådets direktiv 2009/65/EG…',
+          type: 'insert',
+          text: '2 a § Ett kreditinstituts nätverks- och informationssystem ska uppfylla kraven i Europaparlamentets och rådets förordning (EU) 2022/2554 av den 14 december 2022 om digital operativ motståndskraft för finanssektorn (DORA).',
         },
       ],
-      authority: 'Finansdepartementet / Finansinspektionen',
-      inForce: '2026-11-01',
+      authority: 'Finansinspektionen & Riksdagen',
+      inForce: '2025-01-17',
       plainEnglish: {
-        summary: 'Formally incorporates EU DORA cybersecurity and operational resilience definitions directly into the Swedish Investment Funds Act.',
+        summary: 'Formally incorporates EU DORA cybersecurity and operational resilience obligations directly into Swedish statutory banking law.',
         points: [
-          'Scope alignment: Binds Swedish UCITS fund managers directly to EU DORA resilience standards.',
-          'Harmonized terminology: Definitions aligned with EU directives and European Supervisory Authority (ESA) rules.',
+          'Direct statutory scope: Binds Swedish financial institutions directly to EU DORA resilience and third-party risk rules.',
+          'ICT provider register: Requires maintaining comprehensive registers of critical ICT third-party service providers.',
+          'Operational testing: Mandates threat-led resilience testing and business continuity architectures.',
         ],
-        whyItMatters: 'Removes legal ambiguity regarding Swedish fund compliance with EU-wide IT resilience mandates.',
+        whyItMatters: 'Mandatory statutory law under SFS 2024:1284. Non-compliance exposes institutions to Finansinspektionen administrative fines.',
         beforeAfter: {
-          before: 'Referred to EU UCITS directives without explicit DORA operational resilience requirements.',
-          after: 'Direct statutory clause incorporating EU DORA rules into Swedish fund company definitions.',
+          before: 'General IT guidelines without direct statutory DORA penalties in Swedish law.',
+          after: 'Statutory mandate under SFS 2004:297 6 kap. 2 a § enforcing DORA operational resilience.',
         },
         translation:
-          '1 § In this Act, alternative investment fund, competent authority, derivative instrument, EEA, own funds, and management company have the meanings stated in Directive 2009/65/EC (taking into account DORA requirements)...',
+          "2 a § A credit institution's network and information systems shall comply with the requirements of Regulation (EU) 2022/2554 of the European Parliament and of the Council on digital operational resilience for the financial sector (DORA).",
       },
     },
     subtasks: [
-      { id: 's5', title: 'Cross-reference statutory definitions against internal fund taxonomy', done: true },
+      { id: 's5', title: 'Cross-reference statutory definitions against internal ICT taxonomy', done: true },
       { id: 's6', title: 'Update internal compliance manual section 2.1', done: false },
     ],
   });
 
-  t('p1', 'SFS 2026:916 § 1 kap. 99 § · Repeal of Grandfathering Clauses for Older UCITS', 'done', 'm6', 'medium', -4, ['fi', 'legal'], {
-    key: 'SFS 1:99',
+  t('p1', 'SFS 2016:892 § 2 kap. 17 c § · Risk Management & Remuneration Policy Governance', 'done', 'm6', 'medium', -4, ['fi', 'legal'], {
+    key: 'SFS 2:17c',
     est: '3 days',
     age: 24,
-    desc: '<p>Statutory deletion of transitional provisions from 2012. All funds must now operate strictly under uniform supervisory standards without historic legacy carve-outs.</p>',
+    desc: '<p>Statutory requirement under SFS 2004:46 2 kap. 17 c § mandating that fund management companies establish remuneration and risk systems promoting sound risk management.</p>',
     diff: {
-      identifier: '1 kap. 99 §',
+      identifier: '2 kap. 17 c §',
       regulation: 'SFS 2004:46 (Lag om värdepappersfonder)',
-      amendingAct: 'SFS 2026:916',
-      heading: 'Övergångsbestämmelser för äldre fondbolag',
-      status: 'DELETED',
-      additions_count: 0,
-      deletions_count: 8,
+      amendingAct: 'SFS 2016:892',
+      heading: 'Krav på organisation av verksamheten',
+      status: 'MODIFIED',
+      additions_count: 14,
+      deletions_count: 0,
       tokens: [
         {
-          type: 'delete',
-          text: '99 § Bestämmelserna i detta kapitel ska inte tillämpas på fondbolag som erhållit auktorisation före den 1 januari 2012 vad avser äldre förvaltningsrutiner.',
+          type: 'insert',
+          text: '17 c § Ett fondbolag ska ha ett ersättningssystem som främjar en sund och effektiv riskhantering. Inom ramen för ersättningssystemet ska fondbolaget upprätta och tillämpa en ersättningspolicy.',
         },
       ],
-      authority: 'Riksdagen',
-      inForce: '2026-11-01',
+      authority: 'Riksdagen & Finansinspektionen',
+      inForce: '2016-11-01',
       plainEnglish: {
-        summary:
-          'Repeals historic transitional exemptions dating back to 2012, requiring all fund companies to operate under the same modern regulatory standards.',
+        summary: 'Fund management companies must operate remuneration systems and policies that promote sound and effective risk management.',
         points: [
-          'Repeals legacy exemptions dating back to 2012.',
-          'All fund managers now follow identical supervisory and operational rules.',
-          'Legacy management routines must be upgraded to current statutory baselines.',
+          'Sound risk alignment: Compensation structures must not encourage excessive risk-taking.',
+          'Board-approved policy: Management companies must formally maintain and apply a written remuneration policy.',
+          'Supervisory compliance: Regular reporting and audit verification for Finansinspektionen.',
         ],
-        whyItMatters: 'Closes historic loopholes; older funds cannot cite legacy carve-outs during regulatory reviews.',
+        whyItMatters: 'Mandatory statutory requirement under SFS 2004:46. Governs executive risk incentives and fund stability.',
         beforeAfter: {
-          before: 'Older fund companies authorized before 2012 enjoyed grandfathering exemptions.',
-          after: 'Transitional exemptions repealed. All fund companies must meet uniform modern standards.',
+          before: 'General organizational principles without explicit remuneration policy requirements.',
+          after: 'Statutory mandate requiring formal remuneration policy promoting sound risk management.',
         },
         translation:
-          '99 § The provisions of this chapter shall not apply to fund companies that obtained authorization before January 1, 2012 with regard to older management routines. [REPEALED]',
+          '17 c § A fund management company shall maintain a remuneration system that promotes sound and effective risk management. Within the framework of the remuneration system, the fund company shall establish and apply a remuneration policy.',
       },
     },
   });
@@ -575,7 +576,7 @@ export function seed() {
       task: 't1',
       by: 'm6',
       at: minsAgo(85),
-      text: 'Riksdagen passed SFS 2026:916 with immediate effect on Section 100. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement to reconstruct execution steps on demand.',
+      text: 'Riksdagen updated SFS 2007:528 on market participant controls. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement to reconstruct execution steps on demand.',
       re: { '👍': ['m1', 'm3'] },
     },
     {
@@ -583,7 +584,7 @@ export function seed() {
       task: 't1',
       by: 'm1',
       at: minsAgo(40),
-      text: 'Verified. The Python parser and diff engine in the Nordic RegTech core already capture token-level changes for 1 kap. 100 §. Working with engineering to log audit decision states to PostgreSQL with pgvector.',
+      text: 'Verified. The Python parser and diff engine in the Nordic RegTech core already capture token-level changes for 14 kap. 1 §. Working with engineering to log audit decision states to PostgreSQL with pgvector.',
       re: { '🚀': ['m6', 'm2'] },
     },
     {
@@ -626,7 +627,7 @@ export function seed() {
       task: 't1',
       text: 'mentioned you in',
       snippet:
-        'Riksdagen passed SFS 2026:916 with immediate effect on Section 100. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement…',
+        'Riksdagen updated SFS 2007:528 on market participant controls. @Workspace Owner please ensure our algorithmic risk framework addresses the requirement…',
       at: minsAgo(85),
       read: false,
     },
@@ -646,7 +647,7 @@ export function seed() {
       by: 'm3',
       task: 't2',
       text: 'assigned you',
-      snippet: 'SFS 2026:916 § 1 kap. 1 § · DORA Scope Harmonization in Swedish Fund Law',
+      snippet: 'SFS 2024:1284 § 6 kap. 2 a § · DORA Implementation in Swedish Credit Institutions',
       at: minsAgo(260),
       read: false,
     },
@@ -683,7 +684,7 @@ export function seed() {
   ];
 
   const files = [
-    { id: 'f1', project: 'p1', name: 'SFS_2026_916_Amending_Act_Riksdagen.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180), task: 't1' },
+    { id: 'f1', project: 'p1', name: 'SFS_2007_528_Lag_om_vardepappersmarknaden.pdf', type: 'pdf', size: '420 KB', by: 'm6', at: minsAgo(180), task: 't1' },
     { id: 'f2', project: 'p1', name: 'Algorithmic_Supervision_Policy_v1.2.docx', type: 'doc', size: '1.4 MB', by: 'm1', at: minsAgo(400), task: 't1' },
     { id: 'f3', project: 'p2', name: 'DORA_Regulation_EU_2022_2554_Official_Journal.pdf', type: 'pdf', size: '3.4 MB', by: 'm4', at: minsAgo(5000) },
     { id: 'f4', project: 'p2', name: 'DORA_RTS_ICT_Risk_Management_Framework.pdf', type: 'pdf', size: '1.8 MB', by: 'm4', at: minsAgo(1200), task: 't6' },
@@ -695,7 +696,7 @@ export function seed() {
   ];
 
   const events = [
-    { id: 'e1', title: 'Finansinspektionen Supervisory Dialogue · SFS 2026:916', date: dOff(2), time: '10:00', project: 'p1' },
+    { id: 'e1', title: 'Finansinspektionen Supervisory Dialogue · SFS 2007:528 & DORA', date: dOff(2), time: '10:00', project: 'p1' },
     { id: 'e2', title: 'DORA Steering Committee & CTPP Freeze', date: dOff(5), time: '13:30', project: 'p2' },
     { id: 'e3', title: 'Executive Board Compliance & GRA Attestation', date: dOff(8), time: '15:00', project: 'p3' },
     { id: 'e4', title: 'AIFM Annex IV Supervisory Filing Deadline', date: dOff(10), time: '17:00', project: 'p4' },
@@ -727,7 +728,7 @@ export function seed() {
     events,
     projOrder: projects.map(p => p.id),
     savedViews: [{ id: 'v1', project: 'p1', name: 'High Priority', type: 'list', filters: [{ f: 'priority', op: 'is', v: ['urgent', 'high'] }] }],
-    recentSearches: ['1 kap. 100 §', 'DORA', 'Penningtvätt', 'SFS 2026:916'],
+    recentSearches: ['14 kap. 1 §', 'DORA', 'Penningtvätt', 'SFS 2007:528'],
     sessions: [
       { id: 'se1', dev: 'MacBook Pro · Chrome (Helsinki)', loc: 'Helsinki, FI', at: 'Active now', cur: true },
       { id: 'se2', dev: 'Workstation · Linux', loc: 'Helsinki, FI', at: '15 minutes ago' },

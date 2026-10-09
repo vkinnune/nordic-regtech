@@ -513,7 +513,7 @@ export function govDrawerHtml(gov) {
                   .map(secId => {
                     const label = formatSecBadge(secId);
                     const reg = regulationOfSection(secId);
-                    const regId = reg ? reg.id : 'reg-finlex-747-2012';
+                    const regId = reg ? reg.id : 'sfs-2004-46';
                     return `<div class="row" style="justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px">
                       <span class="mono" style="font-size:12.5px;font-weight:600">${esc(label)}</span>
                       <button class="btn btn-sm btn-ghost" data-a="openRegInReader" data-id="${regId}" data-sec="${secId}" style="padding:2px 7px;font-size:11.5px">

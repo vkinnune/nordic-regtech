@@ -4,7 +4,7 @@ export const POLICIES = [
   {
     id: 'pol-alg-01',
     code: 'POL-ALG-01',
-    title: 'Algorithmic and AI-Driven Trading Governance Principles',
+    title: 'Algorithmic and Automated Trading Governance Principles',
     shortTitle: 'Algorithmic Trading Policy',
     category: 'Trading & Market Conduct',
     owner: 'Workspace Admin',
@@ -14,8 +14,8 @@ export const POLICIES = [
     lastReviewDate: '2025-11-15',
     nextReviewDue: '2026-05-01',
     summary:
-      'Defines mandatory testing requirements, pre-trade filters, risk limits, and 5-year order parameter retention for algorithmic and high-frequency trading.',
-    statuteSections: ['finlex-1-9', 'sfs-1-100'],
+      'Defines mandatory testing requirements, pre-trade filters, risk limits, and 5-year order parameter retention for algorithmic and automated execution under Swedish securities market law.',
+    statuteSections: ['riksdagen_sfs-2007-528_k14_p1', 'riksdagen_sfs-2007-528_k13_p7'],
     controlIds: ['ctl-alg-01', 'ctl-alg-02', 'ctl-alg-03'],
     riskIds: ['rsk-alg-01'],
     projectId: 'p5',
@@ -33,8 +33,8 @@ export const POLICIES = [
     lastReviewDate: '2026-01-10',
     nextReviewDue: '2026-06-30',
     summary:
-      'Sets mandatory obligations under DORA Regulation (EU) 2022/2554 for maintaining registers of critical ICT third-party providers, multi-cloud exit strategies, and threat-led penetration testing (TLPT).',
-    statuteSections: ['dora-28', 'sfs-1-1'],
+      'Sets mandatory obligations under Swedish statutory transposition SFS 2024:1284 and DORA for maintaining registers of critical ICT third-party providers, multi-cloud exit strategies, and digital operational testing.',
+    statuteSections: ['riksdagen_sfs-2004-297_k6_p2a', 'riksdagen_sfs-2004-46_k2_p17c'],
     controlIds: ['ctl-dora-01', 'ctl-dora-02'],
     riskIds: ['rsk-dora-01'],
     projectId: 'p1',
@@ -52,8 +52,8 @@ export const POLICIES = [
     lastReviewDate: '2026-02-01',
     nextReviewDue: '2027-02-01',
     summary:
-      'Defines customer due diligence (KYC), beneficial ownership identification, real-time PEP and sanctions screening procedures, and mandatory suspicious transaction reporting to the FIU.',
-    statuteSections: ['aml-3-1', 'aml-3-2'],
+      'Defines customer due diligence (KYC), beneficial ownership identification, real-time PEP and sanctions screening procedures, and mandatory suspicious transaction reporting under SFS 2017:630.',
+    statuteSections: ['riksdagen_sfs-2017-630_k3_p1', 'riksdagen_sfs-2017-630_k4_p1'],
     controlIds: ['ctl-aml-01', 'ctl-aml-02'],
     riskIds: ['rsk-aml-01'],
     projectId: 'p4',
@@ -71,12 +71,12 @@ export const CONTROLS = [
     frequency: 'Real-time / Transactional',
     owner: 'Workspace Admin',
     policyId: 'pol-alg-01',
-    statuteSections: ['finlex-1-9', 'sfs-1-100'],
+    statuteSections: ['riksdagen_sfs-2007-528_k14_p1', 'riksdagen_sfs-2007-528_k13_p7'],
     riskId: 'rsk-alg-01',
     taskId: 't1',
-    impactedByAmendment: 'SFS 2026:916 / 4.7.2025/526',
+    impactedByAmendment: 'SFS 2007:528 / FFFS 2023:12',
     amendmentAlert:
-      'Statutory amendment (4.7.2025/526 & SFS 2026:916) tightens latency thresholds for high-speed algorithmic order rejections. Current 12ms filter threshold must be updated to 5ms limit.',
+      'Finansinspektionen regulatory guidelines tighten algorithmic market surveillance and pre-trade limit enforcement. Real-time price deviation tolerances require calibration.',
     specification:
       'The system must automatically reject orders deviating more than 2.5% from the latest market price or exceeding 250,000 EUR in notional value.',
   },
@@ -90,11 +90,11 @@ export const CONTROLS = [
     frequency: 'Continuous / Automated Archival',
     owner: 'Workspace Admin',
     policyId: 'pol-alg-01',
-    statuteSections: ['finlex-1-9', 'sfs-1-100'],
+    statuteSections: ['riksdagen_sfs-2007-528_k14_p1', 'riksdagen_sfs-2007-528_k13_p7'],
     riskId: 'rsk-alg-01',
     taskId: null,
     specification:
-      'All versioned algorithm parameters, submitted order data, and executed trades must be preserved in immutable WORM storage for at least 5 years for supervisory audit.',
+      'All versioned algorithm parameters, submitted order data, and executed trades must be preserved in immutable WORM storage for at least 5 years for Finansinspektionen audits.',
   },
   {
     id: 'ctl-alg-03',
@@ -106,12 +106,12 @@ export const CONTROLS = [
     frequency: 'Quarterly Simulation',
     owner: 'Workspace Admin',
     policyId: 'pol-alg-01',
-    statuteSections: ['finlex-1-9', 'sfs-1-100'],
+    statuteSections: ['riksdagen_sfs-2007-528_k14_p1', 'riksdagen_sfs-2007-528_k13_p7'],
     riskId: 'rsk-alg-01',
     taskId: 't1',
-    impactedByAmendment: '4.7.2025/526',
+    impactedByAmendment: 'SFS 2007:528 22 kap. 1 §',
     amendmentAlert:
-      'Amending statute requires verifiable automated tripping mechanisms and physical kill switch execution tests under high-stress market conditions.',
+      'Statutory provisions require verified emergency market suspension protocols and operational halt procedures under high-stress market conditions.',
     specification:
       'Trading infrastructure must feature a centralized emergency kill switch capable of cancelling all open orders across active venues within 200 milliseconds.',
   },
@@ -125,12 +125,12 @@ export const CONTROLS = [
     frequency: 'Semi-annual Update',
     owner: 'Workspace Owner',
     policyId: 'pol-dora-01',
-    statuteSections: ['dora-28', 'sfs-1-1'],
+    statuteSections: ['riksdagen_sfs-2004-297_k6_p2a', 'riksdagen_sfs-2004-46_k2_p17c'],
     riskId: 'rsk-dora-01',
     taskId: 't2',
-    impactedByAmendment: 'DORA (EU) 2022/2554 Art. 28',
+    impactedByAmendment: 'SFS 2024:1284 / DORA',
     amendmentAlert:
-      'DORA Art. 28 mandates formal contractual audit clauses and standardized XML reporting of third-party registers to supervisory authorities.',
+      'Swedish statutory transposition SFS 2024:1284 (SFS 2004:297 6 kap. 2 a §) mandates formal contractual audit clauses and standardized registers of critical ICT third-party providers.',
     specification:
       'Audit rights, transition periods, and alternative providers must be mapped and board-approved for all ICT service contracts supporting critical or important business functions.',
   },
@@ -144,10 +144,10 @@ export const CONTROLS = [
     frequency: 'Annual',
     owner: 'Workspace Owner',
     policyId: 'pol-dora-01',
-    statuteSections: ['dora-28', 'sfs-1-1'],
+    statuteSections: ['riksdagen_sfs-2004-297_k6_p2a', 'riksdagen_sfs-2004-46_k2_p17c'],
     riskId: 'rsk-dora-01',
     taskId: null,
-    specification: 'Independent third-party Red Teaming testing across critical core systems conducted in accordance with TIBER-EU/TIS frameworks.',
+    specification: 'Independent third-party Red Teaming testing across critical core systems conducted in accordance with TIBER-SE frameworks.',
   },
   {
     id: 'ctl-aml-01',
@@ -159,11 +159,11 @@ export const CONTROLS = [
     frequency: 'Real-time & Daily Batch',
     owner: 'Aura Kujanpää',
     policyId: 'pol-aml-01',
-    statuteSections: ['aml-3-1', 'aml-3-2'],
+    statuteSections: ['riksdagen_sfs-2017-630_k3_p1', 'riksdagen_sfs-2017-630_k4_p1'],
     riskId: 'rsk-aml-01',
     taskId: null,
     specification:
-      'All counterparties, account owners, and beneficial owners screened against EU, UN, and OFAC sanctions lists prior to onboarding and re-screened daily.',
+      'All counterparties, account owners, and beneficial owners screened against EU, UN, and OFAC sanctions lists prior to onboarding and re-screened daily under SFS 2017:630 3 kap.',
   },
   {
     id: 'ctl-aml-02',
@@ -175,11 +175,11 @@ export const CONTROLS = [
     frequency: 'Real-time Alerting',
     owner: 'Aura Kujanpää',
     policyId: 'pol-aml-01',
-    statuteSections: ['aml-3-1', 'aml-3-2'],
+    statuteSections: ['riksdagen_sfs-2017-630_k3_p1', 'riksdagen_sfs-2017-630_k4_p1'],
     riskId: 'rsk-aml-01',
     taskId: null,
     specification:
-      'Rule-based anomaly detection flags unusual transaction volumes, velocity surges, or high-risk jurisdictions, triggering immediate investigative dossiers for the MLRO.',
+      'Rule-based anomaly detection flags unusual transaction volumes, velocity surges, or high-risk jurisdictions, triggering immediate investigative dossiers for the MLRO under SFS 2017:630 4 kap.',
   },
 ];
 
@@ -192,14 +192,14 @@ export const RISKS = [
     severity: 'CRITICAL', // CRITICAL, HIGH, MEDIUM, LOW
     likelihood: 'MEDIUM', // HIGH, MEDIUM, LOW
     exposureScore: 85,
-    authority: 'Financial Supervisory Authority (FIN-FSA) / Finansinspektionen',
+    authority: 'Finansinspektionen (FI)',
     consequence:
-      'Algorithmic market disruption or failure to notify supervisory authorities may result in public reprimands, administrative fines up to EUR 5,000,000, and temporary suspension of algorithmic trading authorization.',
-    statuteSections: ['finlex-1-9', 'sfs-1-100'],
+      'Algorithmic market disruption or failure to notify supervisory authorities may result in public reprimands, administrative fines up to 10% of turnover, and temporary suspension of algorithmic trading authorization under SFS 2007:528.',
+    statuteSections: ['riksdagen_sfs-2007-528_k14_p1', 'riksdagen_sfs-2007-528_k13_p7'],
     policyIds: ['pol-alg-01'],
     controlIds: ['ctl-alg-01', 'ctl-alg-02', 'ctl-alg-03'],
     gapStatus: 'OPEN_GAPS', // COVERED, OPEN_GAPS, AT_RISK
-    gapSummary: '2 controls require statutory amendment updates (SFS 2026:916 / 4.7.2025/526).',
+    gapSummary: '2 controls require review following updated market surveillance guidance.',
   },
   {
     id: 'rsk-dora-01',
@@ -209,14 +209,14 @@ export const RISKS = [
     severity: 'HIGH',
     likelihood: 'HIGH',
     exposureScore: 78,
-    authority: 'European Supervisory Authorities (ESAs) / FIN-FSA',
+    authority: 'Finansinspektionen (FI)',
     consequence:
-      'Unplanned service disruption in core banking or portfolio management without DORA-compliant redundancy leads to direct regulatory penalties and client liabilities.',
-    statuteSections: ['dora-28', 'sfs-1-1'],
+      'Unplanned service disruption in core banking or portfolio management without DORA-compliant redundancy leads to direct regulatory penalties and client liabilities under SFS 2004:297 6 kap. 2 a §.',
+    statuteSections: ['riksdagen_sfs-2004-297_k6_p2a', 'riksdagen_sfs-2004-46_k2_p17c'],
     policyIds: ['pol-dora-01'],
     controlIds: ['ctl-dora-01', 'ctl-dora-02'],
     gapStatus: 'OPEN_GAPS',
-    gapSummary: 'Multi-cloud exit strategies and DORA Art. 28 vendor register require completion.',
+    gapSummary: 'Multi-cloud exit strategies and ICT provider register require completion under SFS 2024:1284.',
   },
   {
     id: 'rsk-aml-01',
@@ -226,10 +226,10 @@ export const RISKS = [
     severity: 'CRITICAL',
     likelihood: 'LOW',
     exposureScore: 92,
-    authority: 'Financial Supervisory Authority (FIN-FSA)',
+    authority: 'Finansinspektionen (FI)',
     consequence:
-      'Deficiencies in sanctions screening or failure to verify beneficial owners exposes the firm to administrative fines of up to 10% of annual turnover and severe reputational harm.',
-    statuteSections: ['aml-3-1', 'aml-3-2'],
+      'Deficiencies in sanctions screening or failure to verify beneficial owners exposes the firm to administrative fines of up to 10% of annual turnover and severe reputational harm under SFS 2017:630.',
+    statuteSections: ['riksdagen_sfs-2017-630_k3_p1', 'riksdagen_sfs-2017-630_k4_p1'],
     policyIds: ['pol-aml-01'],
     controlIds: ['ctl-aml-01', 'ctl-aml-02'],
     gapStatus: 'COVERED',
