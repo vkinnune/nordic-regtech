@@ -1377,6 +1377,27 @@ A.selectSec = el => {
   const regId = S.ui.regSel || S.ui.params?.id || 'sfs-2004-46';
   go('regulations', { id: regId, sec: secId });
 };
+A.scrollToChap = el => {
+  const chapNum = el.dataset.chap;
+  if (!chapNum) return;
+  const target = document.getElementById(`chap-${chapNum}`);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    S.ui.activeChapId = chapNum;
+    render();
+  }
+};
+A.toggleRegTocExpand = () => {
+  S.ui.regTocExpanded = !S.ui.regTocExpanded;
+  render();
+};
+A.toggleChapExpand = el => {
+  const chapNum = el.dataset.chap;
+  if (!chapNum) return;
+  if (!S.ui.regChapExpanded) S.ui.regChapExpanded = {};
+  S.ui.regChapExpanded[chapNum] = !S.ui.regChapExpanded[chapNum];
+  render();
+};
 A.toggleDiffPlain = () => {
   S.ui.diffPlain = S.ui.diffPlain === false ? true : false;
   render();

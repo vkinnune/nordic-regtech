@@ -273,3 +273,29 @@ test('Regulations Feature: Zero mock controls or policies in header, cards, list
   assert.ok(!regPageJs.includes('Binding rule'), 'regulations.js must not contain Binding rule badge');
   assert.ok(regPageJs.includes('General Guidance · comply or explain'), 'regulations.js must preserve General Guidance badge for advisory rules');
 });
+
+test('Table of Contents: chapter outline, zero trailing hyphens, and intermediate heading deduplication', () => {
+  const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
+  const actionsJs = fs.readFileSync(path.join(ROOT, 'src/actions/actions.js'), 'utf-8');
+  const css = fs.readFileSync(path.join(ROOT, 'src/styles/views/finlex.css'), 'utf-8');
+
+  // Verify chapter and outline helpers
+  assert.ok(regPageJs.includes('formatChapterNo'), 'regulations.js must define formatChapterNo');
+  assert.ok(regPageJs.includes('formatChapterTitle'), 'regulations.js must define formatChapterTitle');
+  assert.ok(regPageJs.includes('finlex-outline-item'), 'regulations.js must render finlex-outline-item');
+  assert.ok(regPageJs.includes('finlex-mellanrubrik'), 'regulations.js must render finlex-mellanrubrik');
+
+  // Zero dumb trailing hyphens
+  assert.ok(!regPageJs.includes('${esc(ch.number)} - ${esc(ch.title)}'), 'Must not render trailing hyphen on chapters without titles');
+  assert.ok(!regPageJs.includes('${esc(s.number)} - ${esc(heading)}'), 'Must not render trailing hyphen on sections without headings');
+
+  // Interactive TOC outline navigation
+  assert.ok(actionsJs.includes('A.scrollToChap'), 'actions.js must register A.scrollToChap');
+  assert.ok(actionsJs.includes('A.toggleRegTocExpand'), 'actions.js must register A.toggleRegTocExpand');
+  assert.ok(actionsJs.includes('A.toggleChapExpand'), 'actions.js must register A.toggleChapExpand');
+
+  // CSS outline styles
+  assert.ok(css.includes('.finlex-outline-item'), 'finlex.css must define .finlex-outline-item');
+  assert.ok(css.includes('.finlex-outline-row'), 'finlex.css must define .finlex-outline-row');
+  assert.ok(css.includes('.finlex-mellanrubrik'), 'finlex.css must define .finlex-mellanrubrik');
+});

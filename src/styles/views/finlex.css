@@ -166,6 +166,155 @@
   font-weight: 600;
 }
 
+/* ---------- Finlex Chapter Outline ---------- */
+.finlex-toc-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finlex-toc-toggle-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 2px 7px;
+  border-radius: var(--r-xs);
+  transition:
+    color var(--dur),
+    background var(--dur),
+    border-color var(--dur);
+}
+.finlex-toc-toggle-btn:hover {
+  color: var(--text);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.finlex-outline-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+}
+
+.finlex-outline-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: var(--r-xs);
+  transition: background var(--dur);
+}
+.finlex-outline-header:hover {
+  background: var(--surface-3);
+}
+.finlex-outline-header.active {
+  background: var(--surface-3);
+}
+
+.finlex-outline-row {
+  display: flex;
+  align-items: baseline;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  padding: 6px 6px 6px 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-2);
+  cursor: pointer;
+  gap: 10px;
+  transition:
+    background var(--dur),
+    color var(--dur);
+}
+.finlex-outline-row:hover {
+  color: var(--text);
+}
+.finlex-outline-row.active {
+  border-left-color: var(--text);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.finlex-outline-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-3);
+  min-width: 26px;
+  flex-shrink: 0;
+}
+.finlex-outline-row.active .finlex-outline-num,
+.finlex-outline-row:hover .finlex-outline-num {
+  color: var(--text);
+}
+
+.finlex-outline-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.finlex-outline-expander {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-xs);
+  flex-shrink: 0;
+  transition: color var(--dur);
+}
+.finlex-outline-expander:hover {
+  color: var(--text);
+}
+
+.finlex-outline-secs {
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+  border-left: 1px solid var(--border);
+  margin-left: 16px;
+}
+
+.finlex-sec-tree-num {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.finlex-sec-tree-title {
+  font-size: 12px;
+  color: var(--text-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.finlex-mellanrubrik {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 32px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
 /* ---------- RIGHT MAIN CONTENT: Finlex Document Reader ---------- */
 .finlex-reader {
   flex: 1;

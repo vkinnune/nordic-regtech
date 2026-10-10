@@ -302,6 +302,15 @@ function renderRegulationsReader(u) {
               ${ic('book-open', 13)}
               <span>Table of Contents</span>
             </h2>
+            ${
+              chapters.length > 1
+                ? `<div class="finlex-toc-actions">
+                    <button class="finlex-toc-toggle-btn" data-a="toggleRegTocExpand" title="${u.regTocExpanded ? 'Collapse to chapter outline' : 'Expand all sections'}">
+                      ${u.regTocExpanded ? 'Collapse' : 'Expand'}
+                    </button>
+                  </div>`
+                : ''
+            }
           </div>
 
           <!-- Section Search -->
@@ -535,50 +544,112 @@ function renderRegulationsReader(u) {
   </div>`;
 }
 
+function formatChapterNo(raw) {
+  if (!raw) return '';
+  return String(raw)
+    .replace(/^Chapter\s+/i, '')
+    .replace(/\s+kap\.?$/i, '')
+    .trim();
+}
+
+function formatChapterTitle(ch) {
+  const num = formatChapterNo(ch.number);
+  const title = (ch.title || '').trim();
+  if (title) return title;
+  return num ? `${num} kap.` : ch.number || 'Kapitel';
+}
+
+function formatChapterFullLabel(ch) {
+  const num = formatChapterNo(ch.number);
+  const title = (ch.title || '').trim();
+  if (num && title) return `${num} kap. · ${title}`;
+  if (num) return `${num} kap.`;
+  return title || ch.number || 'Kapitel';
+}
+
 function renderFinlexTree(act, chapters, activeSecId, q) {
   let lastPart = null;
+  const hasMultipleChaps = chapters.length > 1;
+  const globalExpanded = Boolean(S.ui.regTocExpanded);
+  const chapExpandedMap = S.ui.regChapExpanded || {};
 
   return chapters
     .map(ch => {
       let partHtml = '';
       if (ch.partTitle && ch.partTitle !== lastPart) {
         lastPart = ch.partTitle;
+        const partLabel = ch.partNumber ? `${ch.partNumber} · ${ch.partTitle}` : ch.partTitle;
         partHtml = `<div class="finlex-tree-part">
           ${ic('chevron-down', 11)}
-          <span>${esc(ch.partNumber ? ch.partNumber + ' - ' : '')}${esc(ch.partTitle)}</span>
+          <span>${esc(partLabel)}</span>
         </div>`;
       }
 
       const matchingSecs = (ch.sections || []).filter(s => {
+        // Exclude dummy empty/symbol-only blocks from section list
+        if (!s.number || s.number === '§' || s.number.trim() === '') return false;
         if (!q) return true;
+        const ql = q.toLowerCase();
         return (
-          s.number.toLowerCase().includes(q) ||
-          s.heading.toLowerCase().includes(q) ||
-          (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
-          s.text.toLowerCase().includes(q) ||
-          (s.textEn && s.textEn.toLowerCase().includes(q))
+          s.number.toLowerCase().includes(ql) ||
+          (s.heading && s.heading.toLowerCase().includes(ql)) ||
+          (s.headingEn && s.headingEn.toLowerCase().includes(ql)) ||
+          (s.text && s.text.toLowerCase().includes(ql)) ||
+          (s.textEn && s.textEn.toLowerCase().includes(ql))
         );
       });
 
       if (q && !matchingSecs.length) return '';
 
-      const secItems = matchingSecs
-        .map(s => {
-          const isActive = s.id === activeSecId;
-          const heading = s.headingEn || s.heading;
-          return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)} ${esc(heading)}">
-          ${esc(s.number)} - ${esc(heading)}
-        </button>`;
-        })
-        .join('');
+      const cleanNum = formatChapterNo(ch.number);
+      const title = formatChapterTitle(ch);
+      const fullLabel = formatChapterFullLabel(ch);
+      const isChapActive = S.ui.activeChapId === cleanNum || matchingSecs.some(s => s.id === activeSecId);
+      const isExpanded = Boolean(q || globalExpanded || chapExpandedMap[cleanNum]);
+
+      let secItemsHtml = '';
+      if (isExpanded || !hasMultipleChaps) {
+        let lastSecHeading = null;
+        secItemsHtml = `<div class="finlex-outline-secs">
+          ${matchingSecs
+            .map(s => {
+              const isActive = s.id === activeSecId;
+              const rawHeading = (s.headingEn || s.heading || '').trim();
+              const showHeading = rawHeading && rawHeading !== lastSecHeading;
+              lastSecHeading = rawHeading;
+              const displayHeading = showHeading ? ` · ${rawHeading}` : '';
+
+              return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)}${esc(displayHeading)}">
+                <span class="finlex-sec-tree-num">${esc(s.number)}</span>
+                ${showHeading ? `<span class="finlex-sec-tree-title trunc">${esc(rawHeading)}</span>` : ''}
+              </button>`;
+            })
+            .join('')}
+        </div>`;
+      }
+
+      if (!hasMultipleChaps) {
+        return `${partHtml}${secItemsHtml}`;
+      }
 
       return `
         ${partHtml}
-        <div class="finlex-tree-chap">
-          ${ic('chevron-down', 11)}
-          <span>${esc(ch.number)} - ${esc(ch.title)}</span>
+        <div class="finlex-outline-item">
+          <div class="finlex-outline-header ${isChapActive ? 'active' : ''}">
+            <button class="finlex-outline-row ${isChapActive ? 'active' : ''}" data-a="scrollToChap" data-chap="${esc(cleanNum)}" title="${esc(fullLabel)}">
+              <span class="finlex-outline-num">${esc(cleanNum)}</span>
+              <span class="finlex-outline-title trunc">${esc(title)}</span>
+            </button>
+            ${
+              matchingSecs.length
+                ? `<button class="finlex-outline-expander" data-a="toggleChapExpand" data-chap="${esc(cleanNum)}" title="${isExpanded ? 'Collapse sections' : 'Expand sections'}">
+                    ${ic(isExpanded ? 'chevron-down' : 'chevron-right', 11)}
+                  </button>`
+                : ''
+            }
+          </div>
+          ${secItemsHtml}
         </div>
-        ${secItems}
       `;
     })
     .join('');
@@ -589,36 +660,58 @@ function renderFinlexSections(chapters, activeSecId, q, isFffs) {
     .map(ch => {
       const matchingSecs = (ch.sections || []).filter(s => {
         if (!q) return true;
+        const ql = q.toLowerCase();
         return (
-          s.number.toLowerCase().includes(q) ||
-          s.heading.toLowerCase().includes(q) ||
-          (s.headingEn && s.headingEn.toLowerCase().includes(q)) ||
-          s.text.toLowerCase().includes(q) ||
-          (s.textEn && s.textEn.toLowerCase().includes(q))
+          (s.number && s.number.toLowerCase().includes(ql)) ||
+          (s.heading && s.heading.toLowerCase().includes(ql)) ||
+          (s.headingEn && s.headingEn.toLowerCase().includes(ql)) ||
+          (s.text && s.text.toLowerCase().includes(ql)) ||
+          (s.textEn && s.textEn.toLowerCase().includes(ql))
         );
       });
 
       if (!matchingSecs.length) return '';
 
+      const cleanNum = formatChapterNo(ch.number);
+      const chapAnchor = cleanNum ? `chap-${cleanNum}` : '';
+
+      let lastHeading = null;
+      const renderedSecs = matchingSecs
+        .map(s => {
+          let mellanrubrikHtml = '';
+          const heading = (s.headingEn || s.heading || '').trim();
+          if (heading && heading !== lastHeading) {
+            lastHeading = heading;
+            mellanrubrikHtml = `<div class="finlex-mellanrubrik">${esc(heading)}</div>`;
+          }
+          return `${mellanrubrikHtml}${renderSectionBlock(s, activeSecId, isFffs, Boolean(heading))}`;
+        })
+        .join('');
+
       return `
-        <div class="finlex-chap-divider">
-          <h3 class="finlex-chap-no">${esc(ch.number)}</h3>
-          <h2 class="finlex-chap-name">${esc(ch.title)}</h2>
+        <div class="finlex-chap-divider" ${chapAnchor ? `id="${esc(chapAnchor)}"` : ''}>
+          ${
+            ch.title && ch.title.trim()
+              ? `<h3 class="finlex-chap-no">${esc(cleanNum ? cleanNum + ' kap.' : ch.number)}</h3>
+                 <h2 class="finlex-chap-name">${esc(ch.title.trim())}</h2>`
+              : `<h2 class="finlex-chap-name">${esc(cleanNum ? cleanNum + ' kap.' : ch.number || 'Kapitel')}</h2>`
+          }
         </div>
         <div class="finlex-chap-body">
-          ${matchingSecs.map(s => renderSectionBlock(s, activeSecId, isFffs)).join('')}
+          ${renderedSecs}
         </div>
       `;
     })
     .join('');
 }
 
-function renderSectionBlock(s, activeSecId, isFffs) {
+function renderSectionBlock(s, activeSecId, isFffs, headingRenderedAbove = false) {
   const isActive = s.id === activeSecId;
   const textToShow = s.textEn || s.text;
-  const headingToShow = s.headingEn || s.heading;
+  const headingToShow = headingRenderedAbove ? null : s.headingEn || s.heading;
   const hasParagraphs = Boolean(s.paragraphs && s.paragraphs.length);
   const isGuidanceSec = s.ruleType === 'guidance';
+  const hasRealSecNum = Boolean(s.number && s.number !== '§' && s.number.trim() !== '');
 
   const ch = s.change;
   const status = s.status || (ch ? ch.status : 'UNCHANGED');
@@ -632,7 +725,7 @@ function renderSectionBlock(s, activeSecId, isFffs) {
     <!-- Section Citation & Heading -->
     <header class="finlex-sec-head">
       <div class="finlex-sec-cite">
-        <span class="finlex-sec-num">${esc(s.number)}</span>
+        ${hasRealSecNum ? `<span class="finlex-sec-num">${esc(s.number)}</span>` : ''}
         ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${!statusBadge && inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>` : ''}
         ${s.inForceUntil ? `<span class="finlex-tag-badge past">In force until ${esc(s.inForceUntil)}</span>` : ''}
         ${statusBadge}
