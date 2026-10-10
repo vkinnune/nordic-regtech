@@ -25,6 +25,7 @@ import { pageSettings } from '../pages/settings.js';
 import { pageStates, pageSystem } from '../pages/design-system.js';
 import { pageArchive } from '../features/archive.js';
 import { pageRegulations } from '../pages/regulations.js';
+import { pageChanges } from '../pages/changes.js';
 import { pagePolicies } from '../pages/policies.js';
 import { pageControls } from '../pages/controls.js';
 import { pageRisks } from '../pages/risks.js';
@@ -54,6 +55,7 @@ export function renderPage() {
       search: pageSearch,
       overview: pageOverview,
       regulations: pageRegulations,
+      changes: pageChanges,
       policies: pagePolicies,
       controls: pageControls,
       risks: pageRisks,
@@ -112,6 +114,7 @@ export function renderSidebar() {
       <div class="sgroup">
         <div class="sgroup-h">Governance</div>
         ${sItem('regulations', 'Regulations', 'scale')}
+        ${sItem('changes', 'Changes', 'history')}
         ${sItem('policies', 'Policies', 'file-text')}
         ${sItem('controls', 'Controls', 'shield-check')}
         ${sItem('risks', 'Risks', 'alert-triangle')}

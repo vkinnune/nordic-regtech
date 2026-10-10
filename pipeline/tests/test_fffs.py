@@ -14,6 +14,16 @@ from regtech.sources.fffs_pdf import parse_regulation
 
 FIXTURES = Path(__file__).parent / "fixtures" / "fi_fffs"
 ITEM_IDS = ["fffs-2026-1", "fffs-2024-22", "fffs-2023-4", "fffs-2017-11", "fffs-2014-4"]
+OLDER_ITEM_IDS = [
+    "fffs-1991-12",
+    "fffs-1991-15",
+    "fffs-1991-16",
+    "fffs-1992-33",
+    "fffs-1993-17",
+    "fffs-1995-62",
+    "fffs-1998-22",
+    "fffs-2026-30",
+]
 REGISTER_URL = "https://www.fi.se/sv/vara-register/fffs/sok-fffs/"
 
 
@@ -26,8 +36,10 @@ class RecordingDownloader(OfflineDownloader):
         return super().download(url, dest)
 
 
-def source_for(downloader=None, raw_dir=FIXTURES):
-    return FffsSource(downloader or OfflineDownloader(), PyMuPdfReader(), raw_dir, RegexExtractor())
+def source_for(downloader=None, raw_dir=FIXTURES, numbers=None):
+    return FffsSource(
+        numbers, downloader or OfflineDownloader(), PyMuPdfReader(), raw_dir, RegexExtractor()
+    )
 
 
 @pytest.fixture(scope="module")
@@ -42,6 +54,15 @@ def section(doc, chunk_id):
 
 def test_list_ids_reads_every_register_row():
     assert source_for().list_ids() == ITEM_IDS
+
+
+def test_list_ids_keeps_only_given_numbers():
+    assert source_for(numbers=["2017:11", "2026:1"]).list_ids() == ["fffs-2017-11", "fffs-2026-1"]
+
+
+def test_number_missing_from_register_fails():
+    with pytest.raises(LookupError, match="FFFS 1999:1: not in the register"):
+        source_for(numbers=["1999:1"]).list_ids()
 
 
 def test_fetch_downloads_item_page_and_its_own_pdfs():
@@ -68,9 +89,16 @@ def test_base_regulation_with_consolidated_text(docs):
     assert doc.effective_date == date(2017, 8, 1)
     assert doc.latest_amendment == "FFFS 2024:4"
     assert doc.amends is None
+    assert doc.amendment_dates == {
+        "FFFS 2024:4": date(2024, 3, 26),
+        "FFFS 2021:37": date(2022, 1, 1),
+        "FFFS 2019:28": date(2020, 1, 1),
+    }
     assert doc.source_url == f"{REGISTER_URL}2017/201711/"
     assert doc.pdf_url.endswith("/fs1711k.pdf")
     assert doc.memo_url.endswith("/beslutspm_penningtv_fffs2017_11-16.pdf")
+    assert doc.local_pdf_path == "fi_fffs/fffs-2017-11/consolidated.pdf"
+    assert doc.local_memo_path == "fi_fffs/fffs-2017-11/memo.pdf"
     assert "B E S L U T S P R O M E M O R I A" in doc.memo_text
     assert doc.preamble.startswith("Finansinspektionen föreskriver följande med stöd av 18 och")
 
@@ -265,3 +293,68 @@ def test_signature_like_line_ends_the_text_only_on_the_last_page():
     _, [draft] = parse_regulation(lines, all_guidance=False)
 
     assert draft.lines_per_paragraph == [["Text om MIFID II och mer text."]]
+
+
+@pytest.fixture(scope="module")
+def older_docs():
+    source = source_for()
+    return {item_id: source.parse(item_id) for item_id in OLDER_ITEM_IDS}
+
+
+def test_footnotes_are_not_section_text(older_docs):
+    doc = older_docs["fffs-2026-30"]
+
+    assert all("skydd av finansiella instrument" not in s.full_text for s in doc.sections)
+
+
+def test_10_pt_body_text_is_read(older_docs):
+    doc = older_docs["fffs-1991-12"]
+
+    assert doc.sections == []
+    assert doc.preamble.startswith("Genom dessa föreskrifter upphör bankinspektionens föreskrifter")
+
+
+def test_number_line_ends_the_cover_when_there_is_no_date_line(older_docs):
+    doc = older_docs["fffs-1991-16"]
+
+    assert doc.sections == []
+    assert doc.preamble.startswith("Finansinspektionen föreskriver med stöd av 7 kap. 6 §")
+
+
+def test_letterhead_is_cover_and_dashes_end_the_text(older_docs):
+    doc = older_docs["fffs-1992-33"]
+
+    assert doc.preamble.startswith("Finansinspektionen beslutar att följande regler")
+    assert [s.heading for s in doc.sections] == [
+        "om krediter",
+        "om bankkontorsanmälan",
+        "om aktier i OTC-bolag",
+        "om kapitalsparfonder",
+    ]
+    assert doc.sections[-1].full_text.endswith("utfärdade av staten, m.m.")
+
+
+def test_capital_kap_chapters_and_plain_sections(older_docs):
+    doc = older_docs["fffs-1993-17"]
+
+    assert [s.chunk_id for s in doc.sections[:4]] == [
+        "fi_fffs_fffs-1993-17_k1_p1",
+        "fi_fffs_fffs-1993-17_k1_p2",
+        "fi_fffs_fffs-1993-17_k2_p1",
+        "fi_fffs_fffs-1993-17_k2_p2",
+    ]
+    assert doc.sections[0].chapter_title == "INLEDNING"
+    assert all(s.heading != "FFFS 1993:17" for s in doc.sections)
+
+
+def test_section_number_and_heading_on_one_line(older_docs):
+    doc = older_docs["fffs-1998-22"]
+
+    first = doc.sections[0]
+    assert (first.section, first.heading) == ("1", "Inledning")
+    assert first.full_text.startswith("De institut som står under Finansinspektionens tillsyn")
+
+
+@pytest.mark.parametrize("item_id", ["fffs-1991-15", "fffs-1995-62"])
+def test_repeal_titles_are_regulations(older_docs, item_id):
+    assert older_docs[item_id].document_type == "foreskrift"

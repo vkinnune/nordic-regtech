@@ -1,7 +1,8 @@
-/* ---------- STATUTORY REGULATIONS DATA MODEL ---------- */
 import swedishRegs from './swedish_regulations.json' with { type: 'json' };
+import changesFeed from './changes_feed.json' with { type: 'json' };
 
 export const REGULATIONS = swedishRegs;
+export const CHANGES_FEED = changesFeed;
 
 let _sectionIndex = null;
 let _regIndex = null;
@@ -31,6 +32,10 @@ function ensureIndexes() {
 
 export function allRegulations() {
   return REGULATIONS;
+}
+
+export function allChanges() {
+  return CHANGES_FEED;
 }
 
 export function regulation(id) {

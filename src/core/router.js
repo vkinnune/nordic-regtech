@@ -14,6 +14,7 @@ export const ROUTE_NAMES = {
   search: 'Search',
   overview: 'Overview',
   regulations: 'Regulations',
+  changes: 'Changes',
   policies: 'Policies',
   controls: 'Controls',
   risks: 'Risks',
@@ -173,6 +174,9 @@ export function hashToRoute(hash, options = {}) {
   // Singular convenience aliases for flat sidebar routes
   if (parts.length === 1 && SINGULAR_ROUTE_MAP[p0]) {
     return { route: SINGULAR_ROUTE_MAP[p0], params: {}, auth: null };
+  }
+  if (parts.length === 1 && (p0 === 'feed' || p0 === 'change')) {
+    return { route: 'changes', params: {}, auth: null };
   }
 
   // Known route names: reject unexpected deep paths on unparameterized routes

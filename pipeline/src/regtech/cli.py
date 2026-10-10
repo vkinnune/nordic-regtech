@@ -1,5 +1,6 @@
 import argparse
 import sys
+from datetime import date
 from pathlib import Path
 
 import httpx
@@ -7,7 +8,8 @@ from pydantic import TypeAdapter
 
 from regtech import linker, pipeline
 from regtech.citations.regex_extractor import RegexExtractor
-from regtech.document_numbers import SFS_NUMBER_RE
+from regtech.document_numbers import NUMBER_RE
+from regtech.download.base import Downloader
 from regtech.download.httpx_downloader import HttpxDownloader
 from regtech.download.offline_downloader import OfflineDownloader
 from regtech.models import LegalDocument
@@ -19,65 +21,49 @@ from regtech.storage.sqlite_storage import SqliteStorage
 
 DEFAULT_DATA_DIR = Path("data")
 DB_NAME = "regtech.db"
+RAW_DIR_NAME = "raw"
 DEFAULT_PORT = 8000
-VIEWER_HOST = "127.0.0.1"
-
-FINANCIAL_PRESETS: dict[str, list[str]] = {
-    "financial": [
-        "2007:528",  # Lag om värdepappersmarknaden (MiFID II)
-        "2007:572",  # Förordning om värdepappersmarknaden
-        "2017:630",  # Lag om åtgärder mot penningtvätt (AML)
-        "2018:1219", # Lag om försäkringsdistribution (IDD)
-        "2004:297",  # Lag om bank- och finansieringsrörelse
-        "2004:329",  # Förordning om bank- och finansieringsrörelse
-        "2013:561",  # Lag om förvaltare av alternativa investeringsfonder (AIFM)
-        "2004:46",   # Lag om värdepappersfonder (UCITS)
-        "2010:751",  # Lag om betaltjänster (PSD2)
-        "2010:2043", # Försäkringsrörelselag
-        "2014:968",  # Lag om särskild tillsyn över kreditinstitut och värdepappersbolag
-        "2015:1016", # Lag om resolution
-        "2015:1017", # Lag om förebyggande statligt stöd till kreditinstitut
-        "1995:1571", # Lag om insättningsgaranti
-        "1999:158",  # Lag om investerarskydd
-        "2016:1306", # Marknadsmissbruksförordningens kompletteringslag (MAR)
-        "2019:742",  # Lag om tjänstepensionsföretag (IORP II)
-    ],
-    "banking": ["2004:297", "2004:329", "2014:968", "2015:1016", "1995:1571"],
-    "funds": ["2004:46", "2013:561", "2019:742"],
-    "aml": ["2017:630"],
-    "insurance": ["2010:2043", "2018:1219"],
-}
+VIEWER_HOST = "0.0.0.0"
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="regtech")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    fetch_sfs = commands.add_parser(
-        "fetch-sfs", help="download and parse Acts and Ordinances from Riksdagen"
+    fetch = commands.add_parser(
+        "fetch",
+        help="download and parse SFS Acts and Ordinances (Riksdagen) or FFFS regulations (fi.se)",
     )
-    fetch_sfs.add_argument(
+    fetch.add_argument("source", choices=SOURCES)
+    picks = fetch.add_mutually_exclusive_group()
+    picks.add_argument(
         "--number",
-        type=_sfs_number,
+        type=_number,
         action="append",
-        help="SFS number such as 2007:528; repeat the flag for several laws",
+        help="number such as 2007:528; repeat the flag for several documents "
+        "(without it, fffs gets the whole register)",
     )
-    fetch_sfs.add_argument(
-        "--preset",
-        choices=list(FINANCIAL_PRESETS.keys()),
-        help="fetch a predefined collection of Swedish financial laws",
+    picks.add_argument(
+        "--all",
+        action="store_true",
+        help="sfs: every Ministry of Finance statute in force; fffs: the whole register",
     )
-    _add_download_flags(fetch_sfs)
-
-    crawl_fffs = commands.add_parser(
-        "crawl-fffs", help="download and parse all active FFFS regulations from fi.se"
+    picks.add_argument(
+        "--since",
+        type=_day,
+        help="sfs: Ministry of Finance statutes changed on or after this day (YYYY-MM-DD)",
     )
-    _add_download_flags(crawl_fffs)
+    fetch.add_argument(
+        "--offline", action="store_true", help="parse earlier downloads again, download nothing"
+    )
+    fetch.add_argument("--limit", type=_positive_int, help="only the first N items")
 
     commands.add_parser("link", help="resolve citations between all stored documents")
 
     serve = commands.add_parser("serve", help="start the browser viewer")
-    serve.add_argument("--host", default="0.0.0.0", help="host to listen on (default: 0.0.0.0)")
+    serve.add_argument(
+        "--host", default=VIEWER_HOST, help=f"address to listen on (default: {VIEWER_HOST})"
+    )
     serve.add_argument("--port", type=int, default=DEFAULT_PORT)
 
     for command in commands.choices.values():
@@ -89,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     args = parser.parse_args(argv)
-    handlers = {"fetch-sfs": _fetch_sfs, "crawl-fffs": _crawl_fffs, "link": _link, "serve": _serve}
+    handlers = {"fetch": _fetch, "link": _link, "serve": _serve}
     try:
         return handlers[args.command](args)
     except (LookupError, FileNotFoundError, RuntimeError, ValueError, httpx.HTTPError) as error:
@@ -97,50 +83,50 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
 
-def _add_download_flags(command: argparse.ArgumentParser) -> None:
-    command.add_argument(
-        "--offline", action="store_true", help="parse earlier downloads again, download nothing"
+def _sfs_source(
+    args: argparse.Namespace, downloader: Downloader, raw_base: Path, storage: SqliteStorage
+) -> Source:
+    if args.number is None and not args.all and args.since is None:
+        raise ValueError("fetch sfs needs --number, --all or --since")
+
+    raw_dir = raw_base / RiksdagenSource.name
+    stored_ids = {
+        summary.id for summary in storage.list_documents() if summary.source == RiksdagenSource.name
+    }
+    return RiksdagenSource(
+        args.number, downloader, raw_dir, RegexExtractor(), args.since, stored_ids
     )
-    command.add_argument("--limit", type=_positive_int, help="only the first N items")
 
 
-def _fetch_sfs(args: argparse.Namespace) -> int:
-    numbers: list[str] = list(args.number or [])
-    if args.preset:
-        for num in FINANCIAL_PRESETS.get(args.preset, []):
-            if num not in numbers:
-                numbers.append(num)
-    if not numbers:
-        print("regtech: either --number or --preset must be provided", file=sys.stderr)
-        return 2
+def _fffs_source(
+    args: argparse.Namespace, downloader: Downloader, raw_base: Path, storage: SqliteStorage
+) -> Source:
+    if args.since is not None:
+        raise ValueError("--since is for fetch sfs only")
 
+    raw_dir = raw_base / FffsSource.name
+    return FffsSource(args.number, downloader, PyMuPdfReader(), raw_dir, RegexExtractor())
+
+
+SOURCES = {"sfs": _sfs_source, "fffs": _fffs_source}
+
+
+def _fetch(args: argparse.Namespace) -> int:
     downloader = OfflineDownloader() if args.offline else HttpxDownloader()
-    raw_dir = args.data_dir / "raw" / RiksdagenSource.name
-    source = RiksdagenSource(numbers, downloader, raw_dir, RegexExtractor())
-    docs, failures = _run_source(source, args)
+    storage = SqliteStorage(args.data_dir / DB_NAME)
+    source = SOURCES[args.source](args, downloader, args.data_dir / RAW_DIR_NAME, storage)
+
+    json_dir = args.data_dir / "json" / source.name
+    # Riksdagen marks repealed laws itself; its list leaves out laws of other ministries.
+    mark_unlisted = args.source == "fffs" and args.limit is None and args.number is None
+    # Saved downloads parsed again differ from the stored version only where the parser changed.
+    compare_versions = not args.offline
+    docs, failures = pipeline.run(
+        source, storage, storage, json_dir, args.limit, mark_unlisted, compare_versions
+    )
 
     sys.stdout.buffer.write(TypeAdapter(list[LegalDocument]).dump_json(docs, indent=2) + b"\n")
-    return _report(failures)
 
-
-def _crawl_fffs(args: argparse.Namespace) -> int:
-    downloader = OfflineDownloader() if args.offline else HttpxDownloader()
-    raw_dir = args.data_dir / "raw" / FffsSource.name
-    source = FffsSource(downloader, PyMuPdfReader(), raw_dir, RegexExtractor())
-    _, failures = _run_source(source, args, remove_unlisted=args.limit is None)
-
-    return _report(failures)
-
-
-def _run_source(
-    source: Source, args: argparse.Namespace, remove_unlisted: bool = False
-) -> tuple[list[LegalDocument], list[str]]:
-    storage = SqliteStorage(args.data_dir / DB_NAME)
-    json_dir = args.data_dir / "json" / source.name
-    return pipeline.run(source, storage, json_dir, args.limit, remove_unlisted)
-
-
-def _report(failures: list[str]) -> int:
     for failure in failures:
         print(f"regtech: {failure}", file=sys.stderr)
     return 1 if failures else 0
@@ -164,16 +150,23 @@ def _serve(args: argparse.Namespace) -> int:
     from regtech.viewer.app import create_app
 
     storage = SqliteStorage(args.data_dir / DB_NAME)
-    app = create_app(storage, storage)
+    app = create_app(storage, storage, storage, args.data_dir / RAW_DIR_NAME)
     print(f"Viewer at http://{args.host}:{args.port}/ (Ctrl+C stops it)")
     uvicorn.run(app, host=args.host, port=args.port)
     return 0
 
 
-def _sfs_number(value: str) -> str:
-    if not SFS_NUMBER_RE.match(value):
-        raise argparse.ArgumentTypeError(f"not an SFS number like 2007:528: {value}")
+def _number(value: str) -> str:
+    if not NUMBER_RE.match(value):
+        raise argparse.ArgumentTypeError(f"not a number like 2007:528: {value}")
     return value
+
+
+def _day(value: str) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a day like 2026-10-01: {value}") from None
 
 
 def _positive_int(value: str) -> int:

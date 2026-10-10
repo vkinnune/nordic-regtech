@@ -1,21 +1,96 @@
 {% extends "base.html" %}
+{% import "icons.html" as icon %}
 {% block content %}
-{% for heading, documents in [("Acts and Ordinances (SFS)", sfs), ("FI regulations (FFFS)", fffs)] %}
-<section class="mb-8">
-  <h2 class="text-lg font-semibold mb-2">{{ heading }} <span class="text-slate-500 font-normal">{{ documents | length }}</span></h2>
-  {% if documents %}
-  <ul class="bg-white border border-slate-200 rounded divide-y divide-slate-100">
-    {% for d in documents %}
-    <li class="px-3 py-2">
-      <a href="/doc/{{ d.id }}" class="text-blue-700 hover:underline font-medium">{{ d.identifier }}</a>
-      <span class="ml-2">{{ d.title }}</span>
-      {% if d.amends %}<span class="ml-2 text-xs text-slate-500">amends {{ d.amends }}</span>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
+{% set tabs = [
+  ("all", "All", library),
+  ("lag", "Acts", library | selectattr("document_type", "equalto", "lag") | list),
+  ("forordning", "Ordinances", library | selectattr("document_type", "equalto", "forordning") | list),
+  (fffs_source, "FFFS", library | selectattr("source", "equalto", fffs_source) | list),
+] %}
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:py-12">
+  <h1 class="text-2xl font-semibold tracking-tight">Library</h1>
+  <p class="muted mt-1 text-sm">Swedish financial law and Finansinspektionen regulations, split into sections and linked by their citations.</p>
+
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div role="tablist" class="inline-flex self-start rounded-lg bg-slate-200/60 p-1 dark:bg-slate-800/60">
+      {% for key, label, documents in tabs %}
+      <button type="button" role="tab" data-tab="{{ key }}" aria-selected="{{ 'true' if loop.first else 'false' }}" class="tab">
+        {{ label }} <span class="ml-1 text-xs font-normal opacity-60">{{ documents | length }}</span>
+      </button>
+      {% endfor %}
+    </div>
+    <div class="relative sm:w-72">
+      {{ icon.search("pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400") }}
+      <input id="filter" type="search" aria-label="Filter documents" autocomplete="off"
+             placeholder="Filter by number or title" class="input">
+    </div>
+  </div>
+
+  {% if library %}
+  <div class="surface mt-4 overflow-hidden">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+        <tr>
+          <th class="px-4 py-2.5 font-medium">Number</th>
+          <th class="px-4 py-2.5 font-medium">Title</th>
+          <th class="hidden px-4 py-2.5 font-medium md:table-cell">Type</th>
+          <th class="hidden whitespace-nowrap px-4 py-2.5 font-medium lg:table-cell">In force from</th>
+          <th class="hidden whitespace-nowrap px-4 py-2.5 font-medium lg:table-cell">Latest amendment</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for d in library %}
+        <tr data-row data-kinds="all {{ d.document_type }} {{ d.source }}" data-text="{{ d.identifier }} {{ d.title }} {{ d.amends or '' }}"
+            onclick="location.href = '/doc/{{ d.id }}'" class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900">
+          <td class="whitespace-nowrap px-4 py-3 align-top">
+            <a href="/doc/{{ d.id }}" class="font-medium tabular-nums text-blue-700 dark:text-blue-400">{{ d.identifier }}</a>
+          </td>
+          <td class="px-4 py-3 align-top">
+            {{ d.title }}
+            {% if d.amends %}<p class="muted mt-0.5 text-xs">Amends {{ d.amends }}</p>{% endif %}
+            {% if d.source == fffs_source and d.repealed_on %}<p class="mt-1"><span class="badge badge-red">Not in the register since {{ d.repealed_on }}</span></p>
+            {% elif d.repealed_on or d.repealed_by %}<p class="mt-1"><span class="badge badge-red">Repealed{{ " from " ~ d.repealed_on if d.repealed_on }}</span></p>{% endif %}
+          </td>
+          <td class="hidden px-4 py-3 align-top md:table-cell"><span class="badge badge-neutral">{{ type_labels[d.document_type] }}</span></td>
+          <td class="muted hidden whitespace-nowrap px-4 py-3 align-top tabular-nums lg:table-cell">{{ d.effective_date or "–" }}</td>
+          <td class="muted hidden whitespace-nowrap px-4 py-3 align-top tabular-nums lg:table-cell">{{ d.latest_amendment or "–" }}</td>
+        </tr>
+        {% endfor %}
+        <tr id="no-match" hidden><td colspan="5" class="muted px-4 py-10 text-center">No documents match.</td></tr>
+      </tbody>
+    </table>
+  </div>
   {% else %}
-  <p class="text-slate-500 text-sm">None stored yet.</p>
+  <div class="mt-4 rounded-xl border border-dashed border-slate-300 px-6 py-16 text-center dark:border-slate-700">
+    <p class="font-medium">No documents stored yet</p>
+    <p class="muted mt-1 text-sm">Run <code>regtech fetch sfs</code> or <code>regtech fetch fffs</code>, then <code>regtech link</code>.</p>
+  </div>
   {% endif %}
-</section>
-{% endfor %}
+</div>
+
+<script>
+  const filterInput = document.getElementById("filter");
+  const tabs = [...document.querySelectorAll("[data-tab]")];
+  let activeTab = "all";
+
+  function applyFilter() {
+    const words = filterInput.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const row of document.querySelectorAll("[data-row]")) {
+      const text = row.dataset.text.toLowerCase();
+      row.hidden = !row.dataset.kinds.split(" ").includes(activeTab) || !words.every((word) => text.includes(word));
+      if (!row.hidden) shown++;
+    }
+    document.getElementById("no-match")?.toggleAttribute("hidden", shown > 0);
+  }
+
+  for (const tab of tabs) {
+    tab.addEventListener("click", () => {
+      activeTab = tab.dataset.tab;
+      tabs.forEach((t) => t.setAttribute("aria-selected", t === tab));
+      applyFilter();
+    });
+  }
+  filterInput.addEventListener("input", applyFilter);
+</script>
 {% endblock %}

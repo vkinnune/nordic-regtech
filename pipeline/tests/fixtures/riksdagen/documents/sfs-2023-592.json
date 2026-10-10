@@ -1,0 +1,78 @@
+{
+  "dokumentstatus": {
+    "dokument": {
+      "hangar_id": "",
+      "dok_id": "sfs-2023-592",
+      "rm": "2023",
+      "beteckning": "2023:592",
+      "typ": "sfs",
+      "subtyp": "sfst",
+      "tempbeteckning": "",
+      "organ": "Finansdepartementet",
+      "nummer": "592",
+      "slutnummer": "0",
+      "datum": "2023-10-12 00:00:00",
+      "publicerad": "2025-10-17 04:37:56",
+      "systemdatum": "2025-10-17 04:37:56",
+      "titel": "Förordning (2023:592) om fastställande av omräknat belopp för naturgrusskatt för år 2024",
+      "subtitel": "",
+      "status": "",
+      "text": "",
+      "html": "\n\n\n<style>\n.document div {\n    overflow: visible !important;\n    width: 550px !important;\n}\n</style>\n\n<b>SFS nr</b>:     \n2023:592<br />\n\n<b>Departement/myndighet</b>:   \nFinansdepartementet <br />  \n\n<b>Utfärdad</b>:   \n2023-10-12 <br />  \n\n\n<b>Författningen har upphävts genom</b>: \nutgår genom SFS 2023:783<br />\n\n\n<b>Ändringsregister</b>:   \n<a href=\"http://rkrattsbaser.gov.se/sfsr?bet=2023:592\">SFSR (Regeringskansliet)</a> <br />\n\n<b>Källa</b>: \n\n<a href=\"http://rkrattsbaser.gov.se/sfst?bet=2023:592\">Fulltext (Regeringskansliet)</a> \n\n\n<br />\n\n<hr />\n\n\n\n<div><p><a name=\"S1\"></a></p></div>",
+      "dokumentnamn": "Svensk författningssamling",
+      "avdelningar": {
+        "avdelning": [
+          "dokument"
+        ]
+      }
+    },
+    "dokumentuppgift": {
+      "uppgift": [
+        {
+          "kod": "artal",
+          "namn": "artal",
+          "text": "2023"
+        },
+        {
+          "kod": "utfardad",
+          "namn": "utfardad",
+          "text": "2023-10-12"
+        },
+        {
+          "kod": "upphnr",
+          "namn": "upphnr",
+          "text": "utgår genom SFS 2023:783"
+        },
+        {
+          "kod": "utdrag",
+          "namn": "utdrag",
+          "text": null
+        }
+      ]
+    },
+    "dokuppgift": {
+      "uppgift": [
+        {
+          "kod": "artal",
+          "namn": "artal",
+          "text": "2023"
+        },
+        {
+          "kod": "utfardad",
+          "namn": "utfardad",
+          "text": "2023-10-12"
+        },
+        {
+          "kod": "upphnr",
+          "namn": "upphnr",
+          "text": "utgår genom SFS 2023:783"
+        },
+        {
+          "kod": "utdrag",
+          "namn": "utdrag",
+          "text": null
+        }
+      ]
+    }
+  }
+}

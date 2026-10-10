@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """
 Exports Swedish regulations and citation graphs from regtech.db (SQLite)
-directly into src/data/swedish_regulations.json for Nordic RegTech Studio.
+directly into src/data/swedish_regulations.json and src/data/changes_feed.json
+for Nordic RegTech Studio.
 Preserves rich metadata: attachments (PDF, Besluts-PM memo, source URL),
 amendments lineage, authorizations (delegated authority), rule types (guidance vs binding),
-and bidirectional citation graphs.
+bidirectional citation graphs, section version diffs, and the change feed.
 """
 import json
 import sqlite3
-from collections import defaultdict
+import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 
 PIPELINE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(PIPELINE_DIR / "src"))
+from regtech.versions import text_diff
+
 DB_PATH = PIPELINE_DIR / "data" / "regtech.db"
 OUTPUT_PATH = PIPELINE_DIR.parent / "src" / "data" / "swedish_regulations.json"
+FEED_OUTPUT_PATH = PIPELINE_DIR.parent / "src" / "data" / "changes_feed.json"
 
 CHAINED_LINKS_SQL = """
 SELECT outer_link.document_id, outer_link.chunk_id, outer_link.citing_label,
@@ -40,12 +46,16 @@ def export():
     print(f"Exporting {len(doc_rows)} documents from SQLite...")
 
     id_to_ident = {}
+    id_to_title = {}
+    id_to_source = {}
     ident_to_id = {}
     amendments_by_target = defaultdict(list)
 
     for row in doc_rows:
         doc_id, source, identifier, title, amends, _ = row
         id_to_ident[doc_id] = identifier
+        id_to_title[doc_id] = title
+        id_to_source[doc_id] = source
         ident_to_id[identifier] = doc_id
         if amends:
             amendments_by_target[amends].append(
@@ -119,7 +129,69 @@ def export():
             else:
                 incoming_by_doc[target_doc_id].append(inc_entry)
 
-    # 3. Assemble document models
+    # 3. Fetch version changes
+    changes_map = {}
+    feed_events = []
+    has_changes_table = c.execute(
+        "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='changes'"
+    ).fetchone()[0]
+
+    if has_changes_table:
+        changes_rows = c.execute("""
+            SELECT id, document_id, level, chapter, section, upcoming, ordinal, status,
+                   old_text, new_text, amending_act, amended_date, fetched_at
+            FROM changes
+            ORDER BY id ASC
+        """).fetchall()
+        print(f"Loaded {len(changes_rows)} changes from changes table.")
+
+        for r in changes_rows:
+            cid, doc_id, level, chapter, section, upcoming, ordinal, status, old_text, new_text, amending_act, amended_date, fetched_at = r
+            diff_parts = []
+            if old_text and new_text:
+                diff_parts = [
+                    [op, text]
+                    for op, text in text_diff(old_text, new_text)
+                ]
+
+            ch_info = {
+                "id": cid,
+                "docId": doc_id,
+                "level": level,
+                "chapter": chapter,
+                "section": section,
+                "upcoming": bool(upcoming),
+                "ordinal": ordinal,
+                "status": status,
+                "amendingAct": amending_act,
+                "amendedDate": amended_date,
+                "fetchedAt": fetched_at,
+                "oldText": old_text,
+                "newText": new_text,
+                "diff": diff_parts,
+            }
+            changes_map[(doc_id, chapter, section, bool(upcoming), ordinal)] = ch_info
+
+            feed_events.append({
+                "id": cid,
+                "docId": doc_id,
+                "code": id_to_ident.get(doc_id, doc_id),
+                "title": id_to_title.get(doc_id, ""),
+                "source": id_to_source.get(doc_id, ""),
+                "level": level,
+                "chapter": chapter,
+                "section": section,
+                "upcoming": bool(upcoming),
+                "status": status,
+                "amendingAct": amending_act,
+                "amendedDate": amended_date,
+                "fetchedAt": fetched_at,
+                "oldText": old_text,
+                "newText": new_text,
+                "diff": diff_parts,
+            })
+
+    # 4. Assemble document models
     docs = []
 
     for row in doc_rows:
@@ -134,6 +206,7 @@ def export():
         # Group sections into chapters
         sections = data.get("sections", [])
         chapters_dict = {}
+        seen_sec_keys = Counter()
 
         for sec in sections:
             ch_num = sec.get("chapter") or "General"
@@ -183,6 +256,15 @@ def export():
             else:
                 sec_rule_type = None
 
+            sec_key = (sec.get("chapter"), sec.get("section"), bool(sec.get("upcoming")))
+            ordinal = seen_sec_keys[sec_key]
+            seen_sec_keys[sec_key] += 1
+            change_info = changes_map.get((doc_id, *sec_key, ordinal))
+
+            sec_status = change_info["status"] if change_info else "UNCHANGED"
+            amending_act = change_info["amendingAct"] if change_info else None
+            amended_date = change_info["amendedDate"] if change_info else None
+
             sec_data = {
                 "id": sec_id,
                 "number": sec_num,
@@ -190,8 +272,23 @@ def export():
                 "text": sec.get("full_text") or sec.get("text") or "",
                 "ruleType": sec_rule_type,
                 "crossRefs": sec_refs,
-                "status": "UNCHANGED",
+                "status": sec_status,
             }
+
+            if change_info:
+                sec_data["amendingAct"] = amending_act
+                sec_data["amendedDate"] = amended_date
+                sec_data["change"] = {
+                    "id": change_info["id"],
+                    "status": change_info["status"],
+                    "amendingAct": change_info["amendingAct"],
+                    "amendedDate": change_info["amendedDate"],
+                    "oldText": change_info["oldText"],
+                    "newText": change_info["newText"],
+                    "diff": change_info["diff"],
+                }
+                # Also link back chunkId to feed event
+                change_info["chunkId"] = sec_id
 
             if paras:
                 sec_data["paragraphs"] = [
@@ -203,10 +300,10 @@ def export():
                     for p in paras
                 ]
 
-            if sec.get("upcoming"):
+            if sec.get("upcoming") or (change_info and change_info.get("upcoming")):
                 sec_data["upcoming"] = True
-            if sec.get("in_force_from"):
-                sec_data["inForceFrom"] = sec.get("in_force_from")
+            if sec.get("in_force_from") or amended_date:
+                sec_data["inForceFrom"] = sec.get("in_force_from") or amended_date
             if sec.get("in_force_until"):
                 sec_data["inForceUntil"] = sec.get("in_force_until")
             if inc_refs:
@@ -326,6 +423,27 @@ def export():
 
     file_size_mb = OUTPUT_PATH.stat().st_size / (1024 * 1024)
     print(f"✅ Successfully exported {len(docs)} regulations ({file_size_mb:.2f} MB) to {OUTPUT_PATH}")
+
+    # Link chunkIds to feed_events from changes_map
+    for ev in feed_events:
+        matching_ch = changes_map.get((
+            ev["docId"],
+            ev["chapter"],
+            ev["section"],
+            ev["upcoming"],
+            ev.get("ordinal", 0)
+        ))
+        if matching_ch and "chunkId" in matching_ch:
+            ev["chunkId"] = matching_ch["chunkId"]
+
+    # Sort feed_events in descending event ID order (newest first)
+    feed_events.sort(key=lambda e: e["id"], reverse=True)
+
+    with open(FEED_OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(feed_events, f, ensure_ascii=False, indent=2)
+
+    feed_size_kb = FEED_OUTPUT_PATH.stat().st_size / 1024
+    print(f"✅ Successfully exported {len(feed_events)} change events ({feed_size_kb:.1f} KB) to {FEED_OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

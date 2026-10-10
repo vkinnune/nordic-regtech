@@ -1,16 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Search: {{ query }}{% endblock %}
+{% import "icons.html" as icon %}
+{% block title %}{{ query or "Search" }}{% endblock %}
 {% block content %}
-<h1 class="text-lg font-semibold mb-4">Results for “{{ query }}” <span class="text-slate-500 font-normal">{{ hits | length }}</span></h1>
-<ul class="space-y-3">
-  {% for hit in hits %}
-  <li class="bg-white border border-slate-200 rounded px-3 py-2">
-    <a href="/doc/{{ hit.document_id }}{% if hit.chunk_id %}#{{ hit.chunk_id }}{% endif %}"
-       class="text-blue-700 hover:underline font-medium">{{ hit.label }}</a>
-    <p class="text-sm mt-1 [&_mark]:bg-yellow-200">{{ hit.snippet | snippet }}</p>
-  </li>
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-8 lg:py-12">
+  <form action="/search" class="relative">
+    {{ icon.search("pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400") }}
+    <input name="q" value="{{ query }}" aria-label="Search" autocomplete="off" autofocus
+           placeholder="Search section text, titles and headings"
+           class="input h-12 pl-12 text-base">
+  </form>
+  <p class="muted mt-3 text-xs">Whole words match. End a word with * to match words starting with it, for example <code>penningtvätt*</code>.</p>
+
+  {% if query %}
+  <p class="mt-8 text-sm font-medium">
+    {{ 'First ' if hit_count == limit }}{{ hit_count }} match{{ '' if hit_count == 1 else 'es' }}
+    {% if hits_by_document %}<span class="muted font-normal">in {{ hits_by_document | length }} document{{ '' if hits_by_document | length == 1 else 's' }}</span>{% endif %}
+  </p>
+
+  {% for doc_id, hits in hits_by_document.items() %}
+  {% set d = documents[doc_id] %}
+  <section class="mt-6">
+    <a href="/doc/{{ doc_id }}" class="group flex items-baseline gap-3">
+      <span class="shrink-0 font-semibold tabular-nums text-blue-700 group-hover:underline dark:text-blue-400">{{ d.identifier }}</span>
+      <span class="muted min-w-0 truncate text-sm">{{ d.title }}</span>
+      <span class="badge badge-neutral ml-auto">{{ hits | length }}</span>
+    </a>
+    <ul class="surface mt-2 divide-y divide-slate-100 overflow-hidden dark:divide-slate-800">
+      {% for hit in hits %}
+      <li>
+        <a href="{{ hit | hit_href }}" class="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-900">
+          <p class="text-sm font-medium">{{ hit.label.removeprefix(d.identifier).strip() or "Title" }}</p>
+          <p class="muted mt-0.5 text-sm leading-6">{{ hit.snippet | snippet }}</p>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
   {% else %}
-  <li class="text-slate-500">No matches.</li>
+  <div class="mt-6 rounded-xl border border-dashed border-slate-300 px-6 py-16 text-center dark:border-slate-700">
+    <p class="font-medium">No matches</p>
+    <p class="muted mt-1 text-sm">Try fewer words, or end a word with * to match longer forms.</p>
+  </div>
   {% endfor %}
-</ul>
+  {% endif %}
+</div>
 {% endblock %}

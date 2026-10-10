@@ -1,4 +1,5 @@
 import json
+import shutil
 from datetime import date
 from pathlib import Path
 
@@ -6,13 +7,13 @@ import pytest
 
 from regtech.citations.regex_extractor import RegexExtractor
 from regtech.download.offline_downloader import OfflineDownloader
-from regtech.sources.riksdagen import RiksdagenSource
+from regtech.sources.riksdagen import RiksdagenSource, _in_force
 
 FIXTURES = Path(__file__).parent / "fixtures" / "riksdagen"
 
 
-def source_for(numbers: list[str], raw_dir: Path = FIXTURES):
-    return RiksdagenSource(numbers, OfflineDownloader(), raw_dir, RegexExtractor())
+def source_for(numbers: list[str] | None, raw_dir: Path = FIXTURES, **listing):
+    return RiksdagenSource(numbers, OfflineDownloader(), raw_dir, RegexExtractor(), **listing)
 
 
 @pytest.fixture(scope="module")
@@ -33,13 +34,58 @@ def test_search_finds_document_id():
     assert source_for(["2007:528", "2007:572"]).list_ids() == ["sfs-2007-528", "sfs-2007-572"]
 
 
+def test_ministry_list_keeps_laws_in_force():
+    assert source_for(None).list_ids() == ["sfs-2007-528", "sfs-2007-572"]
+
+
+def test_ministry_list_keeps_stored_repealed_laws():
+    ids = source_for(None, stored_ids={"sfs-1991-981"}).list_ids()
+
+    assert ids == ["sfs-2007-528", "sfs-2007-572", "sfs-1991-981"]
+
+
+def test_since_stops_at_the_first_older_change(tmp_path):
+    shutil.copytree(FIXTURES, tmp_path, dirs_exist_ok=True)
+    (tmp_path / "list" / "p2.json").unlink()
+
+    assert source_for(None, tmp_path, since=date(2026, 8, 19)).list_ids() == []
+    assert source_for(None, since=date(2026, 8, 18)).list_ids() == ["sfs-2007-528", "sfs-2007-572"]
+
+
+def test_repeal_with_a_later_date_is_still_in_force():
+    entry = {
+        "sokdata": {"statusrad": "<dl><dt>Författningen är upphävd</dt><dd>2027-01-01</dd></dl>"}
+    }
+
+    assert _in_force(entry, date(2026, 12, 31))
+    assert not _in_force(entry, date(2027, 1, 1))
+    assert not _in_force(
+        {"sokdata": {"statusrad": "<dl><dt>Författningen är upphävd</dt></dl>"}}, date(2026, 10, 10)
+    )
+
+
+def test_repeal_date_and_act():
+    later = source_for(None).parse("sfs-2018-1486")
+    lapsed = source_for(None).parse("sfs-2023-592")
+
+    assert (later.repealed_on, later.repealed_by) == (date(2027, 1, 1), "SFS 2026:1769")
+    assert (lapsed.repealed_on, lapsed.repealed_by) == (None, "SFS 2023:783")
+
+
 def test_act_header(act):
     assert act.document_type == "lag"
     assert act.identifier == "SFS 2007:528"
     assert act.issue_date == date(2007, 6, 14)
     assert act.effective_date == date(2007, 11, 1)
     assert act.latest_amendment == "SFS 2026:1066"
+    assert (act.repealed_on, act.repealed_by) == (None, None)
     assert act.source_url == "https://data.riksdagen.se/dokument/sfs-2007-528.html"
+
+
+def test_in_force_dates_of_amending_acts(act):
+    assert act.amendment_dates["SFS 2007:528"] == date(2007, 11, 1)
+    assert act.amendment_dates["SFS 2025:316"] == date(2025, 9, 29)
+    assert "SFS 2026:784" not in act.amendment_dates
 
 
 def test_act_sections(act):
@@ -257,3 +303,16 @@ def test_words_split_at_a_line_end_are_joined(act):
         "SFS 2005:551",
         "SFS 2018:672",
     ]
+
+
+def test_fetch_saves_the_page_for_the_viewer(tmp_path):
+    shutil.copytree(FIXTURES / "documents", tmp_path / "riksdagen" / "documents")
+    source = source_for(["2007:528"], tmp_path / "riksdagen")
+
+    source.fetch("sfs-2007-528")
+    doc = source.parse("sfs-2007-528")
+
+    assert doc.local_source_path == "riksdagen/documents/sfs-2007-528.html"
+    page = (tmp_path / doc.local_source_path).read_text(encoding="utf-8")
+    assert page.startswith('<!doctype html>\n<meta charset="utf-8">\n<title>Lag (2007:528)')
+    assert "1 kap." in page

@@ -9,7 +9,7 @@ FIXTURES = Path(__file__).parent / "fixtures" / "riksdagen"
 def test_link_prints_count_and_missing_statutes(tmp_path, capsysbinary):
     shutil.copytree(FIXTURES, tmp_path / "raw" / "riksdagen")
     main(
-        ["fetch-sfs", "--offline", "--number", "2007:528", "--number", "2007:572",
+        ["fetch", "sfs", "--offline", "--number", "2007:528", "--number", "2007:572",
          "--data-dir", str(tmp_path)]
     )  # fmt: skip
     capsysbinary.readouterr()

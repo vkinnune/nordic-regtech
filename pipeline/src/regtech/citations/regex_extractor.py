@@ -1,6 +1,6 @@
 import re
 
-from regtech.document_numbers import FFFS_NUMBER, FFFS_NUMBER_RE
+from regtech.document_numbers import AMENDMENT_NOTE_RE, FFFS_NUMBER, FFFS_NUMBER_RE
 from regtech.models import Citation, CitationTarget, CitationType
 
 # ponytail: a list of more than 50 numbers loses its first ones. Uncapped, a long list not
@@ -46,9 +46,6 @@ SECTION_PART_RE = re.compile(rf"({NUM_LIST})\s*(§§?)")
 # the last number before "§", the part after the last "," or "samt" before "§§".
 AFTER_SECTION_PART_RE = re.compile(r"(?:stycke\w*|mening\w*|§)\s+$")
 SECTIONS_LIST_SEP_RE = re.compile(r", *| +samt +")
-# Consolidated FFFS sections end with "(FFFS 2019:28, FFFS 2024:4)" naming the amending
-# regulations; a real reference never opens with a bracket right after a full stop.
-AMENDMENT_NOTE_RE = re.compile(rf"(?<=\.)\s*\({FFFS_NUMBER}(?:,\s*{FFFS_NUMBER})*\)")
 BRACKETED_SFS_NUMBER_RE = re.compile(r"\((\d{4}:\d+)\)")
 # "bestämmelser i <law> …:" leads in to a list of that law's provisions.
 SCOPE_RE = re.compile(

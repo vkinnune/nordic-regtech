@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup, Tag
 
 from regtech.citations.base import CitationExtractor
-from regtech.document_numbers import FFFS_NUMBER_RE
+from regtech.document_numbers import FFFS_NUMBER_RE, number_order
 from regtech.download.base import Downloader
 from regtech.models import Citation, LegalDocument
 from regtech.pdf.base import PdfLine, PdfReader
@@ -23,7 +23,9 @@ MEMO_FILE = "memo.pdf"
 
 CONSOLIDATED_LABEL_SUFFIX = " (konsoliderad version)"
 MEMO_MARK = "beslutsp"
+REPEAL_TITLE_START = "upphävande"
 ITEM_ID_RE = re.compile(r"fffs-\d{4}-\d+")
+ISO_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 EFFECTIVE_DATE_RE = re.compile(r"Gäller från (\d{4}-\d{2}-\d{2})")
 AUTHORIZATION_RE = re.compile(
     r"med stöd av (.+?)(?:, och (?:lämnar|beslutar)| att | i fråga om |\.(?=\s+[A-ZÅÄÖ]|$))"
@@ -36,11 +38,13 @@ class FffsSource:
 
     def __init__(
         self,
+        numbers: list[str] | None,
         downloader: Downloader,
         pdf_reader: PdfReader,
         raw_dir: Path,
         extractor: CitationExtractor,
     ):
+        self._numbers = numbers
         self._downloader = downloader
         self._pdf_reader = pdf_reader
         self._raw_dir = raw_dir
@@ -53,9 +57,12 @@ class FffsSource:
         for row in _soup(search_path).select("ul.fffs.searchresults > li > dl"):
             labels = [dt.get_text(strip=True) for dt in row.find_all("dt")]
             fields = dict(zip(labels, row.find_all("dd"), strict=True))
-            item_id = "fffs-" + fields["Nummer"].get_text(strip=True).replace(":", "-")
+            item_id = _item_id(fields["Nummer"].get_text(strip=True))
             self._item_urls[item_id] = urljoin(SITE_URL, fields["Rubrik"].a["href"])
-        return list(self._item_urls)
+
+        if self._numbers is None:
+            return list(self._item_urls)
+        return [self._search(number) for number in self._numbers]
 
     def fetch(self, item_id: str) -> None:
         if not ITEM_ID_RE.fullmatch(item_id):
@@ -99,11 +106,23 @@ class FffsSource:
             source_url=_https_url(soup.find("link", rel="canonical")["href"]),
             pdf_url=links[text_file],
             memo_url=links.get(MEMO_FILE),
+            local_pdf_path=self._local_path(item_dir / text_file),
+            local_memo_path=self._local_path(item_dir / MEMO_FILE) if MEMO_FILE in links else None,
             memo_text=memo_text,
             preamble=preamble or None,
             authorizations=self._authorizations(preamble, identifier),
+            amendment_dates=_amendment_dates(soup),
             sections=make_sections(drafts, f"{self.name}_{item_id}", identifier, self._extractor),
         )
+
+    def _search(self, number: str) -> str:
+        item_id = _item_id(number)
+        if item_id not in self._item_urls:
+            raise LookupError(f"FFFS {number}: not in the register of active regulations")
+        return item_id
+
+    def _local_path(self, path: Path) -> str:
+        return path.relative_to(self._raw_dir.parent).as_posix()
 
     def _read(self, pdf_path: Path) -> list[PdfLine]:
         return self._pdf_reader.read_lines(pdf_path)
@@ -115,6 +134,10 @@ class FffsSource:
 
         citations = self._extractor.extract(clause[1], identifier, None)
         return [citation for citation in citations if citation.citation_type in EXTERNAL_TYPES]
+
+
+def _item_id(number: str) -> str:
+    return "fffs-" + number.replace(":", "-")
 
 
 def _soup(html_path: Path) -> BeautifulSoup:
@@ -150,7 +173,7 @@ def _https_url(href: str) -> str | None:
 
 def _document_type(title: str) -> str:
     kind = title.partition(" om ")[0].lower()
-    if "föreskrifter" in kind:
+    if "föreskrifter" in kind or kind.startswith(REPEAL_TITLE_START):
         return "foreskrift"
     if "allmänna råd" in kind:
         return "allmanna_rad"
@@ -162,10 +185,19 @@ def _effective_date(soup: BeautifulSoup) -> date | None:
     return date.fromisoformat(match[1]) if match else None
 
 
+def _amendment_dates(soup: BeautifulSoup) -> dict[str, date]:
+    dates = {}
+    for row in soup.select("div.changes li > dl"):
+        fields = {_text(dt): _text(dt.find_next_sibling("dd")) for dt in row.find_all("dt")}
+        if ISO_DATE_RE.fullmatch(fields.get("Datum", "")):
+            dates[fields["Nummer"]] = date.fromisoformat(fields["Datum"])
+    return dates
+
+
 def _latest_amendment(soup: BeautifulSoup) -> str | None:
     changes = soup.select_one("div.changes")
     numbers = FFFS_NUMBER_RE.findall(changes.get_text()) if changes else []
     if not numbers:
         return None
 
-    return "FFFS " + max(numbers, key=lambda number: [int(part) for part in number.split(":")])
+    return "FFFS " + max(numbers, key=number_order)

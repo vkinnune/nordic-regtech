@@ -19,6 +19,7 @@ import {
 } from '../core/store.js';
 import { empty } from '../ui/helpers.js';
 import { applyRegView, viewOf, viewToolbar } from '../shell/view-engine.js';
+import { renderDiffHtml } from './changes.js';
 
 export function pageRegulations() {
   const u = S.ui;
@@ -574,14 +575,36 @@ function renderSectionBlock(s, activeSecId, isFffs) {
   const hasParagraphs = Boolean(s.paragraphs && s.paragraphs.length);
   const isGuidanceSec = s.ruleType === 'guidance';
 
+  const ch = s.change;
+  const status = s.status || (ch ? ch.status : 'UNCHANGED');
+  const isModified = status === 'MODIFIED';
+  const isAdded = status === 'ADDED';
+  const isRepealed = status === 'REPEALED';
+  const amendingAct = s.amendingAct || (ch ? ch.amendingAct : null);
+  const inForceDate = s.inForceFrom || s.amendedDate || (ch ? ch.amendedDate : null);
+
+  let statusBadge = '';
+  if (isModified) {
+    statusBadge = `<span class="finlex-tag-badge badge-amber" title="Statutory modification">Modified${amendingAct ? ` by ${esc(amendingAct)}` : ''}${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>`;
+  } else if (isAdded) {
+    statusBadge = `<span class="finlex-tag-badge badge-emerald" title="Newly added statutory provision">Added${amendingAct ? ` by ${esc(amendingAct)}` : ''}${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>`;
+  } else if (isRepealed) {
+    statusBadge = `<span class="finlex-tag-badge badge-red" title="Repealed provision">Repealed${amendingAct ? ` by ${esc(amendingAct)}` : ''}</span>`;
+  }
+
+  const hasDiff = Boolean(ch && ch.diff && ch.diff.length);
+  const diffCount = hasDiff ? ch.diff.filter(d => d[0] !== 'equal').length : 0;
+  const openDiff = isActive || Boolean(S.ui.params && S.ui.params.diff);
+
   return `<article class="finlex-sec ${isActive ? 'active' : ''} ${isGuidanceSec ? 'is-guidance' : ''}" id="sec-${s.id}">
     <!-- Section Citation & Heading -->
     <header class="finlex-sec-head">
       <div class="finlex-sec-cite">
         <span class="finlex-sec-num">${esc(s.number)}</span>
-        ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${s.inForceFrom ? `, in force ${esc(s.inForceFrom)}` : ''}</span>` : ''}
+        ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>` : ''}
         ${s.inForceUntil ? `<span class="finlex-tag-badge past">In force until ${esc(s.inForceUntil)}</span>` : ''}
-        ${s.amendingAct ? `<span class="finlex-sec-amendment">${esc(s.amendingAct)}</span>` : ''}
+        ${statusBadge}
+        ${amendingAct && !statusBadge ? `<span class="finlex-sec-amendment">${esc(amendingAct)}</span>` : ''}
       </div>
       ${headingToShow ? `<h3 class="finlex-sec-title">${esc(headingToShow)}</h3>` : ''}
     </header>
@@ -622,7 +645,37 @@ function renderSectionBlock(s, activeSecId, isFffs) {
               </div>`;
             })
             .join('')
-        : `<div class="finlex-body">${formatFinlexBody(textToShow, s.status)}</div>`
+        : `<div class="finlex-body">${formatFinlexBody(textToShow, status)}</div>`
+    }
+
+    <!-- REDLINE VERSION DIFF ACCORDION -->
+    ${
+      hasDiff
+        ? `
+      <details class="finlex-diff-details" ${openDiff ? 'open' : ''}>
+        <summary class="finlex-diff-summary">
+          ${ic('git-compare', 12)}
+          <span>Show changes ${s.upcoming ? 'against the text in force' : 'since previous version'}</span>
+          <span class="finlex-diff-stats">(${diffCount} changes)</span>
+        </summary>
+        <div class="finlex-diff-body diff-body">
+          ${renderDiffHtml(ch.diff)}
+        </div>
+      </details>
+    `
+        : isAdded && ch && ch.newText
+          ? `
+      <details class="finlex-diff-details" ${openDiff ? 'open' : ''}>
+        <summary class="finlex-diff-summary">
+          ${ic('plus-circle', 12)}
+          <span>View newly added statutory text</span>
+        </summary>
+        <div class="finlex-diff-body diff-body">
+          <ins class="diff-token-ins">${esc(ch.newText)}</ins>
+        </div>
+      </details>
+    `
+          : ''
     }
 
     <!-- OUTGOING CITATIONS -->

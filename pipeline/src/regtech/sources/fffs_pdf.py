@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 from dataclasses import replace
 
 from regtech.models import RuleType
@@ -7,19 +8,22 @@ from regtech.sections import LIST_LINE_RE, SectionDraft, hyphenated_prefixes, jo
 
 TITLE_MIN_SIZE_PT = 13.5
 CHAPTER_MIN_SIZE_PT = 11.5
-BODY_MIN_SIZE_PT = 9.5
+BODY_SIZE_MARGIN_PT = 0.5
+SAME_LINE_MAX_GAP_PT = 2
 HEADER_MAX_TOP_PT = 50
 FOOTER_MIN_TOP_PT = 780
 COVER_COLUMN_MIN_LEFT_PT = 400
 GUIDANCE_MIN_INDENT_PT = 15
 PARAGRAPH_MIN_GAP_PT = 18
 
-CHAPTER_RE = re.compile(r"^(\d+(?: ?[a-z])?) kap\.\s*(.*)$")
+CHAPTER_RE = re.compile(r"^(\d+(?: ?[a-z])?) (kap\.|KAP)\s*(.*)$")
+OLD_CHAPTER_WORD = "KAP"
 SECTION_RE = re.compile(r"^(\d+(?: ?[a-z])?) §\s*(.*)$")
-END_OF_TEXT_RE = re.compile(r"^_{5,}$")
+END_OF_TEXT_RE = re.compile(r"^(?:_{5,}|-{5,})$")
 SIGNATURE_RE = re.compile(r"^[A-ZÅÄÖÉÜ][A-ZÅÄÖÉÜ.\-]*(?: [A-ZÅÄÖÉÜ][A-ZÅÄÖÉÜ.\-]*)+(?<!\.)$")
 SENTENCE_END_RE = re.compile(r"[.:;]$")
-DECISION_DATE_RE = re.compile(r"^beslutade den \d{1,2} \w+ \d{4}\.?$")
+DECISION_DATE_RE = re.compile(r"^(?:beslut(?:ad|ade|at)|utfärdade) den \d{1,2} \w+ \d{4}\.?$")
+NUMBER_LINE_RE = re.compile(r"^FFFS \d{4}:\d+$")
 ITALIC_HEADING_RE = re.compile(r"^(?!FFFS)[A-ZÅÄÖ]")
 SPACE_BEFORE_CLOSING_PAREN_RE = re.compile(r"\s+\)")
 MISREAD_BULLET_RE = re.compile(r"^í\s")
@@ -27,42 +31,35 @@ GUIDANCE_HEADING = "Allmänna råd"
 
 
 def parse_regulation(lines: list[PdfLine], all_guidance: bool) -> tuple[str, list[SectionDraft]]:
-    body = _body(lines)
-    start = next((i for i, line in enumerate(body) if _starts_structure(line)), len(body))
+    body = _join_same_height(_body(lines))
+    plain_sections = not any(_is_bold_section(line) for line in body)
+    start = next(
+        (i for i, line in enumerate(body) if _starts_structure(line, plain_sections)), len(body)
+    )
     preamble = " ".join(" ".join(line.text for line in body[:start]).split())
-    return preamble, _Drafter(body[start:], all_guidance).drafts()
+    return preamble, _Drafter(body[start:], all_guidance, plain_sections).drafts()
 
 
 def _body(lines: list[PdfLine]) -> list[PdfLine]:
-    title_bottom = max(
-        (
-            line.top
-            for line in lines
-            if line.page == 1
-            and line.size >= TITLE_MIN_SIZE_PT
-            and line.left < COVER_COLUMN_MIN_LEFT_PT
-        ),
-        default=0,
+    cover_bottom = max(
+        (line.top for line in lines if line.page == 1 and _ends_cover(line)), default=0
     )
-    decision_date_bottom = max(
-        (
-            line.top
-            for line in lines
-            if line.page == 1 and DECISION_DATE_RE.match(line.text) is not None
-        ),
-        default=0,
-    )
-    cover_bottom = max(title_bottom, decision_date_bottom)
     last_page = max((line.page for line in lines), default=0)
 
-    body = []
-    for line in lines:
-        on_cover = line.page == 1 and (
-            line.top <= cover_bottom
-            or line.left >= COVER_COLUMN_MIN_LEFT_PT
+    text_lines = [
+        line
+        for line in lines
+        if not (
+            line.page == 1 and (line.top <= cover_bottom or line.left >= COVER_COLUMN_MIN_LEFT_PT)
         )
-        outside_text = line.top < HEADER_MAX_TOP_PT or line.top > FOOTER_MIN_TOP_PT
-        if on_cover or outside_text or line.size < BODY_MIN_SIZE_PT:
+        and HEADER_MAX_TOP_PT <= line.top <= FOOTER_MIN_TOP_PT
+        and NUMBER_LINE_RE.match(line.text) is None
+    ]
+    min_size = _body_size(text_lines) - BODY_SIZE_MARGIN_PT
+
+    body = []
+    for line in text_lines:
+        if line.size < min_size:
             continue
         signature = line.page == last_page and SIGNATURE_RE.match(line.text) is not None
         if END_OF_TEXT_RE.match(line.text) or signature:
@@ -71,24 +68,66 @@ def _body(lines: list[PdfLine]) -> list[PdfLine]:
     return body
 
 
+def _ends_cover(line: PdfLine) -> bool:
+    return (
+        (line.size >= TITLE_MIN_SIZE_PT and line.left < COVER_COLUMN_MIN_LEFT_PT)
+        or DECISION_DATE_RE.match(line.text) is not None
+        or NUMBER_LINE_RE.match(line.text) is not None
+    )
+
+
+def _body_size(lines: list[PdfLine]) -> float:
+    chars_per_size: Counter[float] = Counter()
+    for line in lines:
+        chars_per_size[line.size] += len(line.text)
+    return max(chars_per_size, key=chars_per_size.__getitem__, default=0)
+
+
+def _join_same_height(lines: list[PdfLine]) -> list[PdfLine]:
+    joined: list[PdfLine] = []
+    for line in lines:
+        previous = joined[-1] if joined else None
+        if (
+            previous is None
+            or previous.page != line.page
+            or abs(line.top - previous.top) > SAME_LINE_MAX_GAP_PT
+        ):
+            joined.append(line)
+            continue
+
+        joined[-1] = replace(
+            previous,
+            text=f"{previous.text} {line.text}",
+            bold=previous.bold and line.bold,
+            italic=previous.italic and line.italic,
+        )
+    return joined
+
+
 def _clean(text: str) -> str:
     text = SPACE_BEFORE_CLOSING_PAREN_RE.sub(")", text)
     # Some PDFs map the dash bullet to "í".
     return MISREAD_BULLET_RE.sub("– ", text)
 
 
-def _starts_structure(line: PdfLine) -> bool:
+def _is_bold_section(line: PdfLine) -> bool:
+    return line.starts_bold and SECTION_RE.match(line.text) is not None
+
+
+def _starts_structure(line: PdfLine, plain_sections: bool) -> bool:
     return (
         line.bold
-        or (line.starts_bold and SECTION_RE.match(line.text) is not None)
+        or _is_bold_section(line)
+        or (plain_sections and SECTION_RE.match(line.text) is not None)
         or (line.italic and line.text == GUIDANCE_HEADING)
     )
 
 
 class _Drafter:
-    def __init__(self, lines: list[PdfLine], all_guidance: bool):
+    def __init__(self, lines: list[PdfLine], all_guidance: bool, plain_sections: bool):
         self._lines = lines
         self._all_guidance = all_guidance
+        self._plain_sections = plain_sections
         self._margins: dict[int, float] = {}
         for line in lines:
             self._margins[line.page] = min(self._margins.get(line.page, line.left), line.left)
@@ -109,17 +148,26 @@ class _Drafter:
             chapter = CHAPTER_RE.match(line.text)
             section = SECTION_RE.match(line.text)
             chapter_size = line.bold and line.size >= CHAPTER_MIN_SIZE_PT
-            is_chapter = chapter_size and (chapter is not None or self._previous_was_chapter)
+            old_chapter = line.bold and chapter is not None and chapter[2] == OLD_CHAPTER_WORD
+            is_chapter = old_chapter or (
+                chapter_size and (chapter is not None or self._previous_was_chapter)
+            )
+            is_section = section is not None and (
+                line.starts_bold or (self._plain_sections and self._starts_paragraph(line))
+            )
             is_guidance = line.italic and line.text == GUIDANCE_HEADING
             is_heading = not is_guidance and (
                 line.bold or (line.italic and ITALIC_HEADING_RE.match(line.text) is not None)
             )
 
             if is_chapter and chapter:
-                self._start_chapter(chapter[1], chapter[2])
+                self._start_chapter(chapter[1], chapter[3])
             elif is_chapter:
                 self._chapter_title = f"{self._chapter_title or ''} {line.text}".strip()
-            elif line.starts_bold and section:
+            elif is_section and line.bold and section[2]:
+                self._heading = section[2]
+                self._start_section(section[1], "")
+            elif is_section:
                 self._start_section(section[1], section[2])
             elif is_guidance:
                 self._start_guidance()
@@ -129,7 +177,7 @@ class _Drafter:
                 self._add_text(line)
 
             self._previous_was_chapter = is_chapter
-            self._previous_was_heading = is_heading and not is_chapter and not section
+            self._previous_was_heading = is_heading and not is_chapter and not is_section
             self._previous = line
         return self._drafts
 
@@ -168,12 +216,7 @@ class _Drafter:
             self._current.add_text(line.text)
             return
 
-        previous = self._previous
-        new_paragraph = previous is None or (
-            line.top - previous.top > PARAGRAPH_MIN_GAP_PT
-            if previous.page == line.page
-            else SENTENCE_END_RE.search(previous.text) is not None
-        )
+        new_paragraph = self._starts_paragraph(line)
         is_item = LIST_LINE_RE.match(line.text) is not None
 
         if rule_type != self._current.rule_types[-1] or (new_paragraph and not is_item):
@@ -184,6 +227,14 @@ class _Drafter:
             self._current.add_text(line.text)
         else:
             self._continue_line(line.text)
+
+    def _starts_paragraph(self, line: PdfLine) -> bool:
+        previous = self._previous
+        return previous is None or (
+            line.top - previous.top > PARAGRAPH_MIN_GAP_PT
+            if previous.page == line.page
+            else SENTENCE_END_RE.search(previous.text) is not None
+        )
 
     def _continue_line(self, text: str) -> None:
         lines = self._current.lines_per_paragraph[-1]

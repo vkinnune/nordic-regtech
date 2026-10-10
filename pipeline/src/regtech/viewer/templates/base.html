@@ -1,25 +1,163 @@
+{% import "icons.html" as icon %}
+{% set active_id = doc.id if doc is defined else None %}
 <!doctype html>
 <html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}regtech{% endblock %}</title>
+  <title>{% block title %}Library{% endblock %} · regtech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: { extend: { fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] } } },
+    };
+  </script>
+  <script>
+    function storedTheme() {
+      try {
+        return localStorage.getItem("theme") || "system";
+      } catch {
+        return "system";
+      }
+    }
+    function applyTheme(theme) {
+      const dark = theme === "dark" || (theme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", dark);
+    }
+    applyTheme(storedTheme());
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      html { @apply scroll-pt-20 lg:scroll-pt-6; }
+      html.dark { color-scheme: dark; }
+      body { @apply bg-[#f5f7fb] text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100; }
+      mark { @apply rounded-sm bg-amber-200/80 px-0.5 text-inherit dark:bg-amber-400/30; }
+      summary { @apply list-none; }
+      summary::-webkit-details-marker { display: none; }
+      dialog::backdrop { @apply bg-slate-900/40 backdrop-blur-sm; }
+    }
+    @layer components {
+      .muted { @apply text-slate-500 dark:text-slate-400; }
+      .link { @apply text-blue-700 hover:underline dark:text-blue-400; }
+      .eyebrow { @apply text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500; }
+      .kbd { @apply rounded border border-slate-200 bg-white px-1.5 py-px font-sans text-[11px] text-slate-400 dark:border-slate-700 dark:bg-slate-800; }
+      .input { @apply w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-900; }
+      .nav-item { @apply flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white; }
+      .nav-item[aria-current="page"] { @apply bg-white text-blue-800 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-white dark:ring-slate-700; }
+      .tab { @apply rounded-md px-3 py-1 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white; }
+      .tab[aria-selected="true"] { @apply bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white; }
+      .badge { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset; }
+      .badge-neutral { @apply bg-slate-50 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700; }
+      .badge-violet { @apply bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-500/10 dark:text-violet-300 dark:ring-violet-500/30; }
+      .badge-amber { @apply bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30; }
+      .badge-emerald { @apply bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30; }
+      .badge-red { @apply bg-red-50 text-red-700 ring-red-200 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30; }
+      .diff ins { @apply rounded-sm bg-emerald-100 text-emerald-900 no-underline dark:bg-emerald-500/20 dark:text-emerald-200; }
+      .diff del { @apply rounded-sm bg-red-100 text-red-900 line-through dark:bg-red-500/20 dark:text-red-200; }
+      .pill { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset; }
+      .pill-linked { @apply bg-blue-50 text-blue-700 ring-blue-200 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-300 dark:ring-blue-500/30 dark:hover:bg-blue-500/20; }
+      .pill-unlinked { @apply cursor-help text-slate-500 ring-slate-200 dark:text-slate-400 dark:ring-slate-700; }
+      .surface { @apply rounded-xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgb(15_23_42/0.04),0_8px_24px_-12px_rgb(15_23_42/0.12)] dark:border-slate-800 dark:bg-transparent dark:shadow-none; }
+      .palette-item { @apply block rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200; }
+      .palette-item[data-selected] { @apply bg-slate-100 dark:bg-slate-800; }
+      .theme-choice { @apply rounded p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white; }
+      .theme-choice[aria-pressed="true"] { @apply bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white; }
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex gap-4 items-center">
-      <a href="/" class="font-semibold text-slate-800">regtech</a>
-      <form action="/search" class="flex-1">
-        <input name="q" value="{{ query | default('') }}" aria-label="Search"
-               placeholder="Search section text, titles and headings (penningtvätt, tvätt*)"
-               class="w-full border border-slate-300 rounded px-3 py-1.5 text-sm">
-      </form>
+<body>
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-[#eceff6] transition-transform dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0">
+    <div class="flex h-14 shrink-0 items-center gap-2.5 px-5">
+      <a href="/" class="flex items-center gap-2.5 font-semibold tracking-tight">
+        <span class="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-sm text-white shadow-sm shadow-blue-700/30">§</span>
+        regtech
+      </a>
+      <button type="button" data-sidebar-toggle aria-label="Close menu" class="muted ml-auto lg:hidden">{{ icon.close() }}</button>
     </div>
-  </header>
-  <main class="max-w-5xl mx-auto px-4 py-6">
-    {% block content %}{% endblock %}
-  </main>
+
+    <div class="px-3">
+      <button type="button" data-palette-open class="flex w-full items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-400 shadow-sm hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800">
+        {{ icon.search() }}<span>Search…</span><kbd data-shortcut class="kbd ml-auto">Ctrl K</kbd>
+      </button>
+    </div>
+
+    <nav class="mt-3 px-3">
+      <a href="/" class="nav-item" {% if request.url.path == "/" %}aria-current="page"{% endif %}>
+        {{ icon.library() }}Library<span class="muted ml-auto text-xs">{{ library | length }}</span>
+      </a>
+      <a href="/changes" class="nav-item" {% if request.url.path == "/changes" %}aria-current="page"{% endif %}>
+        {{ icon.clock() }}Changes
+      </a>
+    </nav>
+
+    <div id="sidebar-documents" class="relative mt-2 flex-1 overflow-y-auto px-3 pb-6">
+      {% for heading, source in [("Acts and ordinances", sfs_source), ("FFFS regulations", fffs_source)] %}
+      {% set documents = library | selectattr("source", "equalto", source) | list %}
+      {% if documents %}
+      <p class="eyebrow mb-1 mt-5 px-2">{{ heading }}</p>
+      <ul class="space-y-px">
+        {% for d in documents %}
+        <li>
+          <a href="/doc/{{ d.id }}" data-label="{{ d.identifier }}" data-title="{{ d.title }}" title="{{ d.title }}"
+             class="nav-item block" {% if d.id == active_id %}aria-current="page"{% endif %}>
+            <span class="block text-[13px] font-medium">{{ d.identifier }}</span>
+            <span class="muted block truncate text-xs">{{ d.title }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="shrink-0 border-t border-slate-200 px-5 py-3 dark:border-slate-800">
+      <div class="flex items-center justify-between">
+        <span class="muted text-xs">Theme</span>
+        <div class="inline-flex gap-0.5 rounded-md bg-slate-200/70 p-0.5 dark:bg-slate-800">
+          <button type="button" data-theme-choice="light" title="Light" aria-label="Light theme" class="theme-choice">{{ icon.sun("h-3.5 w-3.5") }}</button>
+          <button type="button" data-theme-choice="dark" title="Dark" aria-label="Dark theme" class="theme-choice">{{ icon.moon("h-3.5 w-3.5") }}</button>
+          <button type="button" data-theme-choice="system" title="Same as the computer" aria-label="Theme of the computer" class="theme-choice">{{ icon.computer("h-3.5 w-3.5") }}</button>
+        </div>
+      </div>
+      <p class="muted mt-2 text-[11px]">Data from Riksdagen and Finansinspektionen</p>
+    </div>
+  </aside>
+  <div id="scrim" hidden class="fixed inset-0 z-30 bg-slate-900/30 lg:hidden"></div>
+
+  <div class="lg:pl-72">
+    <header class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-[#f5f7fb]/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 lg:hidden">
+      <button type="button" data-sidebar-toggle aria-label="Open menu" class="muted">{{ icon.menu() }}</button>
+      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
+        <span class="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-700 text-xs text-white">§</span>regtech
+      </a>
+      <button type="button" data-palette-open aria-label="Search" class="muted ml-auto">{{ icon.search("h-5 w-5") }}</button>
+    </header>
+
+    <main class="relative isolate">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-b from-blue-100/60 via-indigo-50/30 to-transparent dark:hidden"></div>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <dialog id="palette" aria-label="Search" class="mt-[12vh] w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+    <div class="flex items-center gap-3 border-b border-slate-200 px-4 dark:border-slate-700">
+      {{ icon.search("h-5 w-5 text-slate-400") }}
+      <input id="palette-input" autocomplete="off" aria-label="Search" placeholder="Search laws, regulations and sections"
+             class="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-slate-400">
+      <kbd class="kbd">Esc</kbd>
+    </div>
+    <div id="palette-results" class="max-h-[60vh] overflow-y-auto p-2"></div>
+    <div class="muted flex gap-4 border-t border-slate-200 px-4 py-2.5 text-xs dark:border-slate-700">
+      <span><kbd class="kbd">↑</kbd> <kbd class="kbd">↓</kbd> move</span>
+      <span><kbd class="kbd">↵</kbd> open</span>
+      <span class="ml-auto">Numbers like 2017:630 · words like penningtvätt*</span>
+    </div>
+  </dialog>
+
   <script>
     function openTarget() {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -29,6 +167,149 @@
     }
     addEventListener("hashchange", openTarget);
     addEventListener("DOMContentLoaded", openTarget);
+
+    const themeButtons = document.querySelectorAll("[data-theme-choice]");
+    function showTheme(theme) {
+      themeButtons.forEach((b) => b.setAttribute("aria-pressed", b.dataset.themeChoice === theme));
+    }
+    themeButtons.forEach((b) =>
+      b.addEventListener("click", () => {
+        try {
+          localStorage.setItem("theme", b.dataset.themeChoice);
+        } catch {}
+        applyTheme(b.dataset.themeChoice);
+        showTheme(b.dataset.themeChoice);
+      }),
+    );
+    showTheme(storedTheme());
+    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => applyTheme(storedTheme()));
+
+    const sidebar = document.getElementById("sidebar");
+    const scrim = document.getElementById("scrim");
+    function toggleSidebar() {
+      sidebar.classList.toggle("-translate-x-full");
+      scrim.hidden = !scrim.hidden;
+    }
+    document.querySelectorAll("[data-sidebar-toggle]").forEach((b) => b.addEventListener("click", toggleSidebar));
+    scrim.addEventListener("click", toggleSidebar);
+
+    const sidebarDocuments = document.getElementById("sidebar-documents");
+    const activeDocument = sidebarDocuments.querySelector("[aria-current]");
+    if (activeDocument) sidebarDocuments.scrollTop = activeDocument.offsetTop - sidebarDocuments.clientHeight / 2;
+
+    const palette = document.getElementById("palette");
+    const paletteInput = document.getElementById("palette-input");
+    const paletteResults = document.getElementById("palette-results");
+    const libraryDocuments = [...sidebarDocuments.querySelectorAll("a[data-title]")].map((a) => ({
+      href: a.getAttribute("href"),
+      label: a.dataset.label,
+      title: a.dataset.title,
+      text: `${a.dataset.label} ${a.dataset.title}`.toLowerCase(),
+    }));
+    let selected = 0;
+    let searchRun = 0;
+    let searchTimer;
+
+    function paletteItem(href, label, detail, detailHtml) {
+      const item = document.createElement("a");
+      item.href = href;
+      item.className = "palette-item";
+      const top = document.createElement("span");
+      top.className = "block text-sm font-medium";
+      top.textContent = label;
+      const bottom = document.createElement("span");
+      bottom.className = "muted line-clamp-2 block text-xs";
+      // The snippet arrives escaped from the server, with only <mark> tags added.
+      if (detailHtml) bottom.innerHTML = detailHtml;
+      else bottom.textContent = detail;
+      item.append(top, bottom);
+      return item;
+    }
+
+    function paletteGroup(title, items) {
+      if (!items.length) return;
+      const heading = document.createElement("p");
+      heading.className = "eyebrow px-3 pb-1 pt-3";
+      heading.textContent = title;
+      paletteResults.append(heading, ...items);
+    }
+
+    function renderPalette(query, hits) {
+      const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+      paletteResults.replaceChildren();
+      if (!words.length) {
+        const hint = document.createElement("p");
+        hint.className = "muted px-3 py-8 text-center text-sm";
+        hint.textContent = "Type a law number or a few words from the text.";
+        paletteResults.append(hint);
+        return;
+      }
+      const documents = libraryDocuments.filter((d) => words.every((word) => d.text.includes(word))).slice(0, 5);
+      paletteGroup("Documents", documents.map((d) => paletteItem(d.href, d.label, d.title)));
+      paletteGroup("Sections", hits.map((hit) => paletteItem(hit.href, hit.label, null, hit.snippet)));
+      paletteGroup("Full-text search", [paletteItem(`/search?q=${encodeURIComponent(query)}`, `See all results for “${query}”`, "Every matching section, grouped by document")]);
+      selected = 0;
+      highlight();
+    }
+
+    function paletteItems() {
+      return [...paletteResults.querySelectorAll(".palette-item")];
+    }
+
+    function highlight() {
+      const items = paletteItems();
+      items.forEach((item, i) => item.toggleAttribute("data-selected", i === selected));
+      items[selected]?.scrollIntoView({ block: "nearest" });
+    }
+
+    function openPalette() {
+      if (palette.open) return;
+      paletteInput.value = "";
+      renderPalette("", []);
+      palette.showModal();
+    }
+
+    paletteInput.addEventListener("input", () => {
+      const query = paletteInput.value.trim();
+      const run = ++searchRun;
+      renderPalette(query, []);
+      clearTimeout(searchTimer);
+      if (!query) return;
+      searchTimer = setTimeout(async () => {
+        const hits = await (await fetch(`/api/search?q=${encodeURIComponent(query)}`)).json();
+        if (run === searchRun) renderPalette(query, hits);
+      }, 150);
+    });
+
+    paletteInput.addEventListener("keydown", (event) => {
+      const items = paletteItems();
+      if (!items.length) return;
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        selected = (selected + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+        highlight();
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        items[selected].click();
+      }
+    });
+
+    paletteResults.addEventListener("click", () => palette.close());
+    palette.addEventListener("click", (event) => {
+      if (event.target === palette) palette.close();
+    });
+    document.querySelectorAll("[data-palette-open]").forEach((b) => b.addEventListener("click", openPalette));
+    addEventListener("keydown", (event) => {
+      const typing = event.target.closest("input, textarea, select");
+      if ((event.key === "k" && (event.metaKey || event.ctrlKey)) || (event.key === "/" && !typing)) {
+        event.preventDefault();
+        openPalette();
+      }
+    });
+    if (/Mac|iPhone|iPad/.test(navigator.platform)) {
+      document.querySelectorAll("[data-shortcut]").forEach((k) => (k.textContent = "⌘K"));
+    }
   </script>
 </body>
 </html>

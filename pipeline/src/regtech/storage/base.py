@@ -1,12 +1,11 @@
+from datetime import date
 from typing import Protocol
 
-from regtech.models import DocumentSummary, LegalDocument, Link, SearchHit
+from regtech.models import Change, DocumentSummary, FeedEvent, LegalDocument, Link, SearchHit
 
 
 class DocumentStore(Protocol):
     def save_documents(self, docs: list[LegalDocument]) -> None: ...
-
-    def delete_document(self, doc_id: str) -> None: ...
 
     def get_document(self, doc_id: str) -> LegalDocument | None: ...
 
@@ -19,3 +18,15 @@ class LinkStore(Protocol):
     def save_links(self, links: list[Link]) -> None: ...
 
     def links(self, doc_id: str) -> tuple[list[Link], list[Link]]: ...
+
+
+class ChangeStore(Protocol):
+    def save_changes(self, changes: list[Change]) -> None: ...
+
+    def changes(self, doc_id: str) -> list[Change]: ...
+
+    def feed(self, after: int, since: date | None, limit: int) -> list[FeedEvent]: ...
+
+    def recent_changes(
+        self, before: int | None, source: str | None, status: str | None, limit: int
+    ) -> list[FeedEvent]: ...

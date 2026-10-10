@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "icons.html" as icon %}
+{% from "change_macros.html" import change_badge, change_diff, change_label %}
+{% block title %}Changes{% endblock %}
+{% block content %}
+{% set source_tabs = [(None, "All"), (sfs_source, "SFS"), (fffs_source, "FFFS")] %}
+{% set status_tabs = [(None, "All"), ("MODIFIED", "Modified"), ("ADDED", "Added"), ("REPEALED", "Repealed")] %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-8 lg:py-12">
+  <h1 class="text-2xl font-semibold tracking-tight">Changes</h1>
+  <p class="muted mt-1 text-sm">Documents and sections that were added, changed or repealed, newest first, by the day they were fetched.</p>
+
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    {% for tabs, param, current in [(source_tabs, "source", source), (status_tabs, "status", status)] %}
+    <div role="tablist" class="inline-flex self-start rounded-lg bg-slate-200/60 p-1 dark:bg-slate-800/60">
+      {% for value, label in tabs %}
+      {% set url = request.url.remove_query_params(["before", param]) %}
+      <a role="tab" href="{{ url.include_query_params(**{param: value}) if value else url }}"
+         aria-selected="{{ 'true' if value == current else 'false' }}" class="tab">{{ label }}</a>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% for day, events in events_by_day.items() %}
+  <section class="mt-8">
+    <p class="eyebrow mb-2">Fetched {{ day }}</p>
+    <ul class="surface divide-y divide-slate-100 overflow-hidden dark:divide-slate-800">
+      {% for event in events %}
+      {% set href = hrefs[event.event_id] %}
+      <li class="px-4 py-3">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <a href="/doc/{{ event.document_id }}" class="shrink-0 font-semibold tabular-nums text-blue-700 hover:underline dark:text-blue-400">{{ event.identifier }}</a>
+          <span class="muted min-w-0 truncate text-sm">{{ event.title }}</span>
+        </div>
+        <div class="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
+          <a href="{{ href.viewer }}" class="font-medium hover:underline">{{ change_label(event) }}</a>
+          {{ change_badge(event) }}
+          {% if href.file %}<a href="{{ href.file }}" class="muted inline-flex items-center gap-1 text-xs hover:text-slate-900 dark:hover:text-white">Saved copy {{ icon.external() }}</a>{% endif %}
+        </div>
+        {{ change_diff(event) }}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% else %}
+  <div class="mt-8 rounded-xl border border-dashed border-slate-300 px-6 py-16 text-center dark:border-slate-700">
+    <p class="font-medium">No changes recorded{{ " here" if before or source or status }}</p>
+    <p class="muted mt-1 text-sm">Changes are recorded each time <code>regtech fetch</code> finds a new document, a new wording or a repeal.</p>
+  </div>
+  {% endfor %}
+
+  {% if before or older %}
+  <nav class="mt-8 flex justify-between text-sm font-medium">
+    {% if before %}<a href="{{ request.url.remove_query_params('before') }}" class="text-blue-700 hover:underline dark:text-blue-400">Newest</a>{% else %}<span></span>{% endif %}
+    {% if older %}<a href="{{ request.url.include_query_params(before=older) }}" class="text-blue-700 hover:underline dark:text-blue-400">Older</a>{% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

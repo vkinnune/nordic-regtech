@@ -1238,7 +1238,18 @@ A.openRegInReader = el => {
 
   const p = { id: targetRegId };
   if (targetSecId) p.sec = targetSecId;
+  if (el.dataset.diff) p.diff = el.dataset.diff;
   go('regulations', p);
+};
+A.clearChangesFilters = () => {
+  S.ui.changesSource = 'all';
+  S.ui.changesStatus = 'all';
+  S.ui.changesQ = '';
+  render();
+};
+A.clearChangesQ = () => {
+  S.ui.changesQ = '';
+  render();
 };
 A.setRegView = el => {
   const v = el.dataset.view || 'library';

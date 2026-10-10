@@ -160,7 +160,9 @@ export const TM = new Proxy({}, { get: (_, k) => team(k) || NO_TEAM });
 /* ---------- statutory regulations lookups ---------- */
 import {
   REGULATIONS,
+  CHANGES_FEED,
   allRegulations,
+  allChanges,
   regulation,
   allChaptersOf,
   allSectionsOf,
@@ -180,7 +182,9 @@ import {
 } from '../data/regulations.js';
 export {
   REGULATIONS,
+  CHANGES_FEED,
   allRegulations,
+  allChanges,
   regulation,
   allChaptersOf,
   allSectionsOf,
