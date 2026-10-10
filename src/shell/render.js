@@ -139,7 +139,8 @@ export function render() {
   const ov = {
     pop: !!S.ui.pop,
     modals: S.ui.modals.length,
-    drawer: S.ui.drawer || (S.ui.govDrawer ? S.ui.govDrawer.type + ':' + S.ui.govDrawer.id : null),
+    drawer:
+      S.ui.drawer || (S.ui.govDrawer ? S.ui.govDrawer.type + ':' + S.ui.govDrawer.id : null) || (S.ui.changeDrawer ? 'change:' + S.ui.changeDrawer : null),
     pal: !!S.ui.palette,
     sub: !!S.ui.subOpen,
   };

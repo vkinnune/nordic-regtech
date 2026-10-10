@@ -1,7 +1,7 @@
 /* ---------- REGULATORY CHANGES & AMENDMENT CALENDAR & FEED ---------- */
 import { MON, MONL, TODAY, WD, addD, diffD, esc, fmtDate, iso, parse, sod } from '../core/utils.js';
 import { ic } from '../core/icons.js';
-import { S, allChanges } from '../core/store.js';
+import { S, allChanges, formatChangeSecLabel } from '../core/store.js';
 import { empty } from '../ui/helpers.js';
 import { changeBadgeHtml, diffAccordionHtml } from '../ui/diff.js';
 
@@ -181,7 +181,7 @@ export function pageChanges() {
                   const isAdd = e.status === 'ADDED';
                   const statusColor = isMod ? 'var(--amber)' : isAdd ? 'var(--green)' : 'var(--red)';
                   const statusBadgeCls = isMod ? 'badge-amber' : isAdd ? 'badge-emerald' : 'badge-red';
-                  const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+                  const secLabel = esc(formatChangeSecLabel(e));
 
                   return `<button class="wcard" style="--c:${statusColor}" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details">
                     <div class="row" style="gap:6px;align-items:center;justify-content:space-between">
@@ -260,10 +260,7 @@ export function pageChanges() {
                     ${items
                       .map(e => {
                         const statusBadge = changeBadgeHtml(e.status, e.amendingAct, getChangeDate(e));
-                        const secLabel =
-                          e.level === 'document'
-                            ? 'Whole document'
-                            : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §${e.upcoming ? ' (upcoming wording)' : ''}`;
+                        const secLabel = esc(formatChangeSecLabel(e)) + (e.upcoming ? ' (upcoming wording)' : '');
 
                         return `
                         <article class="changes-card surface">
@@ -338,7 +335,7 @@ export function pageChanges() {
           <tbody>
             ${filtered
               .map(e => {
-                const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+                const secLabel = esc(formatChangeSecLabel(e));
                 const isMod = e.status === 'MODIFIED';
                 const isAdd = e.status === 'ADDED';
                 const badgeCls = isMod ? 'badge-amber' : isAdd ? 'badge-emerald' : 'badge-red';

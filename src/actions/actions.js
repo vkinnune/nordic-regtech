@@ -23,6 +23,7 @@ import {
   policy,
   regulation,
   changeEvent,
+  formatChangeSecLabel,
   findSectionAndRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
@@ -1291,13 +1292,12 @@ A.openChangeDrawer = el => {
   delete S.ui.drawer;
   delete S.ui.govDrawer;
   S.ui.changeDrawer = ev.id;
-  S.ui.drawerFull = false;
+  S.ui.drawerFull = S.prefs.openTasks === 'full' || (S.ui.drawerFull && S.ui.changeDrawer === ev.id);
   S.ui.pop = null;
   S.ui.palette = null;
   S.ui.modals = [];
   S.ui.mention = null;
   S.ui.subOpen = null;
-  fxSet({ drawer: true });
   render();
   const dr = $('.drawer');
   if (dr && !dr.contains(document.activeElement)) dr.focus({ preventScroll: true });
@@ -1311,9 +1311,9 @@ A.createChangeComplianceTask = el => {
   const id = el.dataset.id;
   const e = changeEvent(id);
   if (!e) return;
-  const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${e.chapter} kap. ` : ''}${e.section || ''} §`;
+  const secLabel = formatChangeSecLabel(e);
   const codePill = e.code || e.docId;
-  const newId = dispatchGovTask({
+  dispatchGovTask({
     key: `REG-${e.id}`,
     title: `Assess amendment to ${codePill} ${secLabel}`,
     desc: `Assess regulatory compliance impact for ${e.status} provision under ${codePill} (${e.title}) ${secLabel}.\n\nAmending act: ${e.amendingAct || 'N/A'}\nIn-force date: ${e.amendedDate || 'N/A'}\nSource: ${e.source || 'N/A'}`,
@@ -1321,10 +1321,11 @@ A.createChangeComplianceTask = el => {
     labels: ['Compliance', 'Regulatory Change'],
     logMessage: `Created compliance task for regulatory change ${codePill} ${secLabel}`,
     toastMessage: `Compliance task created for ${codePill} ${secLabel}`,
+    onBeforeCommit: newId => {
+      delete S.ui.changeDrawer;
+      S.ui.drawer = newId;
+    },
   });
-  delete S.ui.changeDrawer;
-  S.ui.drawer = newId;
-  render();
 };
 A.setRegView = el => {
   const v = el.dataset.view || 'library';

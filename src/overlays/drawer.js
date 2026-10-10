@@ -22,6 +22,7 @@ import {
   riskExposureScore,
   regulationOfSection,
   changeEvent,
+  formatChangeSecLabel,
 } from '../core/store.js';
 import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
 import { renderDiffHtml } from '../ui/diff.js';
@@ -537,15 +538,40 @@ export function govDrawerHtml(gov) {
 }
 
 /* ---------------- REGULATORY CHANGE DRAWER ---------------- */
+const CHANGE_STATUS_META = {
+  MODIFIED: {
+    color: 'var(--amber)',
+    badgeCls: 'badge-amber',
+    alertCls: 'warning',
+    icon: 'alert-triangle',
+    title: 'Statutory Amendment · Modified Provision',
+    desc: e => `Amended by <b>${esc(e.amendingAct || 'amending act')}</b>.`,
+  },
+  ADDED: {
+    color: 'var(--green)',
+    badgeCls: 'badge-emerald',
+    alertCls: 'ok',
+    icon: 'plus-circle',
+    title: 'Newly Added Provision',
+    desc: e => `Introduced by <b>${esc(e.amendingAct || 'enacting act')}</b>.`,
+  },
+  REPEALED: {
+    color: 'var(--red)',
+    badgeCls: 'badge-red',
+    alertCls: 'danger',
+    icon: 'alert-octagon',
+    title: 'Repealed Provision',
+    desc: e => `Repealed by <b>${esc(e.amendingAct || 'repealing act')}</b>.`,
+  },
+};
+
 export function changeDrawerHtml(e) {
   if (!e) return '';
   const u = S.ui;
-  const isMod = e.status === 'MODIFIED';
-  const isAdd = e.status === 'ADDED';
-  const isRep = e.status === 'REPEALED';
-  const statusColor = isMod ? 'var(--amber)' : isAdd ? 'var(--green)' : 'var(--red)';
-  const statusBadgeCls = isMod ? 'badge-amber' : isAdd ? 'badge-emerald' : 'badge-red';
-  const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+  const stMeta = CHANGE_STATUS_META[e.status] || CHANGE_STATUS_META.MODIFIED;
+  const statusColor = stMeta.color;
+  const statusBadgeCls = stMeta.badgeCls;
+  const secLabel = formatChangeSecLabel(e);
   const inForceDate = e.amendedDate || (e.fetchedAt ? e.fetchedAt.slice(0, 10) : 'Recent');
 
   let daysDiffText = '';
@@ -590,40 +616,16 @@ export function changeDrawerHtml(e) {
       <div style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.4">${esc(e.title)}</div>
 
       <!-- In-force status alert -->
-      ${
-        isMod
-          ? `<div class="alert warning" style="margin-bottom:16px">
-              ${ic('alert-triangle', 15)}
-              <div style="flex:1">
-                <div style="font-weight:700;font-size:12.5px">Statutory Amendment · Modified Provision</div>
-                <div style="font-size:12px;margin-top:2px">
-                  Amended by <b>${esc(e.amendingAct || 'amending act')}</b>.
-                  In force: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
-                </div>
-              </div>
-            </div>`
-          : isAdd
-            ? `<div class="alert ok" style="margin-bottom:16px">
-                ${ic('plus-circle', 15)}
-                <div style="flex:1">
-                  <div style="font-weight:700;font-size:12.5px">Newly Added Provision</div>
-                  <div style="font-size:12px;margin-top:2px">
-                    Introduced by <b>${esc(e.amendingAct || 'enacting act')}</b>.
-                    In force: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
-                  </div>
-                </div>
-              </div>`
-            : `<div class="alert danger" style="margin-bottom:16px">
-                ${ic('alert-octagon', 15)}
-                <div style="flex:1">
-                  <div style="font-weight:700;font-size:12.5px">Repealed Provision</div>
-                  <div style="font-size:12px;margin-top:2px">
-                    Repealed by <b>${esc(e.amendingAct || 'repealing act')}</b>.
-                    Effective: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
-                  </div>
-                </div>
-              </div>`
-      }
+      <div class="alert ${stMeta.alertCls}" style="margin-bottom:16px">
+        ${ic(stMeta.icon, 15)}
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:12.5px">${stMeta.title}</div>
+          <div style="font-size:12px;margin-top:2px">
+            ${stMeta.desc(e)}
+            In force: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
+          </div>
+        </div>
+      </div>
 
       <dl class="kv" style="margin-top:16px">
         ${prop('calendar', 'In force date', `<span class="num">${fmtDate(inForceDate, true)}</span>${e.upcoming ? ' <span class="badge badge-amber" style="font-size:10px;margin-left:4px">Upcoming</span>' : ''}`)}
@@ -633,7 +635,7 @@ export function changeDrawerHtml(e) {
         ${prop('shield', 'Statutory status', `<span class="finlex-tag-badge ${statusBadgeCls}" style="font-size:11px">${e.status}</span>`)}
       </dl>
 
-      <!-- Word-level redline diff or added text -->
+      <!-- Word-level redline diff, amended fallback, or newly added/repealed text -->
       ${
         e.diff && e.diff.length
           ? `<div class="dsec" style="margin-top:22px">
@@ -643,21 +645,29 @@ export function changeDrawerHtml(e) {
               </div>
               <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap">${renderDiffHtml(e.diff)}</div>
             </div>`
-          : isAdd && e.newText
+          : e.status === 'MODIFIED' && (e.newText || e.oldText)
             ? `<div class="dsec" style="margin-top:22px">
                 <div class="dsec-h">
-                  <h3>Newly Enacted Statutory Text</h3>
+                  <h3>Amended Statutory Text</h3>
+                  ${e.amendingAct ? `<span class="muted" style="font-size:11.5px">as amended by ${esc(e.amendingAct)}</span>` : ''}
                 </div>
-                <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><ins class="diff-token-ins">${esc(e.newText)}</ins></div>
+                <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap">${esc(e.newText || e.oldText)}</div>
               </div>`
-            : isRep && e.oldText
+            : e.status === 'ADDED' && e.newText
               ? `<div class="dsec" style="margin-top:22px">
                   <div class="dsec-h">
-                    <h3>Repealed Text</h3>
+                    <h3>Newly Enacted Statutory Text</h3>
                   </div>
-                  <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><del class="diff-token-del">${esc(e.oldText)}</del></div>
+                  <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><ins class="diff-token-ins">${esc(e.newText)}</ins></div>
                 </div>`
-              : ''
+              : e.status === 'REPEALED' && e.oldText
+                ? `<div class="dsec" style="margin-top:22px">
+                    <div class="dsec-h">
+                      <h3>Repealed Text</h3>
+                    </div>
+                    <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><del class="diff-token-del">${esc(e.oldText)}</del></div>
+                  </div>`
+                : ''
       }
 
       <!-- Next actions: Reader deep-link & compliance task creation -->

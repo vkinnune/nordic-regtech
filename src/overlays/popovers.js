@@ -2,7 +2,22 @@
 import { $, MOD, MONL, TODAY, WD, addD, dOff, diffD, esc, fmtDate, iso, parse } from '../core/utils.js';
 import { ic, wsLogo } from '../core/icons.js';
 import { LABELS, PRIOS, PSTAT, STATUSES } from '../core/constants.js';
-import { D, S, allChanges, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects, REGULATION_SORTS } from '../core/store.js';
+import {
+  D,
+  S,
+  allChanges,
+  formatChangeSecLabel,
+  allControls,
+  allTasks,
+  canSee,
+  me,
+  mem,
+  pColor,
+  proj,
+  task,
+  visibleProjects,
+  REGULATION_SORTS,
+} from '../core/store.js';
 import { av, avStack, prIcon, stIcon } from '../ui/helpers.js';
 import { focusKey, render } from '../shell/render.js';
 import { FIELDS, REG_FIELDS, viewOf } from '../shell/view-engine.js';
@@ -367,7 +382,7 @@ export function popHtml(p) {
         `<div style="max-height:360px;overflow-y:auto">` +
         events
           .map(e => {
-            const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+            const secLabel = esc(formatChangeSecLabel(e));
             const stCls = e.status === 'MODIFIED' ? 'badge-amber' : e.status === 'ADDED' ? 'badge-emerald' : 'badge-red';
             const stLabel = e.status === 'MODIFIED' ? 'Mod' : e.status === 'ADDED' ? 'Add' : 'Rep';
             return `<button class="mi" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details in drawer" style="display:flex;align-items:center;gap:6px">

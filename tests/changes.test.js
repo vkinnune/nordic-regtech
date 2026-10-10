@@ -153,4 +153,17 @@ test('Change Drawer Architecture: overlays, actions, keyboard, and router integr
 
   const popoversSrc = fs.readFileSync(path.join(ROOT, 'src/overlays/popovers.js'), 'utf-8');
   assert.ok(popoversSrc.includes('data-a="openChangeDrawer"'), 'popovers.js must use data-a="openChangeDrawer" in changesDaylist');
+
+  const renderSrc = fs.readFileSync(path.join(ROOT, 'src/shell/render.js'), 'utf-8');
+  assert.ok(renderSrc.includes("change:' + S.ui.changeDrawer"), 'render.js must track changeDrawer in ov.drawer for focus restoration and animation');
+  assert.ok(actionsSrc.includes("S.prefs.openTasks === 'full'"), 'actions.js must respect user preference for full drawer');
+  assert.ok(drawerSrc.includes('Amended Statutory Text'), 'drawer.js must have fallback for modified statutory text when diff is empty');
+});
+
+test('formatChangeSecLabel Helper: formats statutory section citations cleanly', async () => {
+  const { formatChangeSecLabel } = await import('../src/data/regulations.js');
+  assert.equal(formatChangeSecLabel({ level: 'document' }), 'Whole document');
+  assert.equal(formatChangeSecLabel({ level: 'section', chapter: '13', section: '4' }), '13 kap. 4 §');
+  assert.equal(formatChangeSecLabel({ level: 'section', chapter: '', section: '1' }), '1 §');
+  assert.equal(formatChangeSecLabel(null), '');
 });

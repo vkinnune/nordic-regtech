@@ -45,6 +45,12 @@ export function changeEvent(id) {
   return CHANGES_FEED.find(e => (isNum && e.id === num) || String(e.id) === String(id) || e.chunkId === id) || null;
 }
 
+export function formatChangeSecLabel(e) {
+  if (!e) return '';
+  if (e.level === 'document') return 'Whole document';
+  return `${e.chapter ? `${e.chapter} kap. ` : ''}${e.section || ''} §`.trim();
+}
+
 export function regulation(id) {
   if (!id) return null;
   ensureIndexes();
