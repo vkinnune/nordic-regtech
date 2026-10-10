@@ -1,5 +1,5 @@
 /* ---------- STATUTORY REGULATIONS DATA MODEL ---------- */
-import swedishRegs from './swedish_regulations.json';
+import swedishRegs from './swedish_regulations.json' with { type: 'json' };
 
 export const REGULATIONS = swedishRegs;
 

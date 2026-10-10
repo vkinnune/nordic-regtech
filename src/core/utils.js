@@ -2,15 +2,17 @@
    QUIRE — core: utils, icons, seed data, store, render loop, events
    ===================================================================== */
 // Web fonts load without blocking first paint (the link starts as media=print).
-document.querySelectorAll('link[data-font]').forEach(l => {
-  l.media = 'all';
-});
-export const $ = (s, r = document) => r.querySelector(s);
-export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+if (typeof document !== 'undefined') {
+  document.querySelectorAll('link[data-font]').forEach(l => {
+    l.media = 'all';
+  });
+}
+export const $ = (s, r = typeof document !== 'undefined' ? document : null) => r?.querySelector(s);
+export const $$ = (s, r = typeof document !== 'undefined' ? document : null) => (r ? [...r.querySelectorAll(s)] : []);
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const uid = (p = 'x') => p + Math.random().toString(36).slice(2, 8);
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-export const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+export const isMac = typeof navigator !== 'undefined' ? /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '') : false;
 export const MOD = isMac ? '⌘' : 'Ctrl';
 
 /* ---------- dates ---------- */

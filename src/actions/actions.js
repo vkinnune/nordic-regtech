@@ -27,7 +27,7 @@ import {
 import { fileType, fsize } from '../ui/helpers.js';
 import { effectiveDark } from '../core/theme.js';
 import { mutate, toast } from '../ui/toast.js';
-import { autosize, focusKey, fxSet, go, render } from '../shell/render.js';
+import { autosize, focusKey, fxSet, go, goAuth, render } from '../shell/render.js';
 import { viewOf } from '../shell/view-engine.js';
 import { TEMPLATES, closeModal, openModal } from '../overlays/modals.js';
 import { closePop, openPop, tgt } from '../overlays/popovers.js';
@@ -194,7 +194,7 @@ A.go = el => {
   go(r, p, { tab: tabOnly });
 };
 A.back = () => {
-  const h = S.ui.history.pop();
+  const h = S.ui.history && S.ui.history.length ? S.ui.history.pop() : null;
   if (h) go(h.route, h.params, { back: true });
   else go('home');
 };
@@ -1236,26 +1236,18 @@ A.openRegInReader = el => {
     }
   }
 
-  S.ui.route = 'regulations';
-  if (targetRegId) {
-    S.ui.regSel = targetRegId;
-  }
-  if (targetSecId) {
-    S.ui.regSec = targetSecId;
-    S.ui.pendingScrollSec = targetSecId;
-  } else {
-    delete S.ui.regSec;
-    delete S.ui.pendingScrollSec;
-  }
-  S.ui.regView = 'reader';
-  delete S.ui.govDrawer;
-  fxSet({ route: true, tabs: true });
-  render();
+  const p = { id: targetRegId };
+  if (targetSecId) p.sec = targetSecId;
+  go('regulations', p);
 };
 A.setRegView = el => {
-  S.ui.regView = el.dataset.view || 'library';
-  fxSet({ route: true, tabs: true });
-  render();
+  const v = el.dataset.view || 'library';
+  if (v === 'library') {
+    go('regulations', {});
+  } else {
+    const regId = S.ui.regSel || 'sfs-2004-46';
+    go('regulations', { id: regId });
+  }
 };
 A.toggleRegToc = () => {
   S.ui.regTocCollapsed = !S.ui.regTocCollapsed;
@@ -1276,9 +1268,10 @@ A.clearRegLibFilters = () => {
 };
 
 A.selectSec = el => {
-  S.ui.regSec = el.dataset.id;
-  S.ui.pendingScrollSec = el.dataset.id;
-  render();
+  const secId = el.dataset.id;
+  if (!secId) return;
+  const regId = S.ui.regSel || S.ui.params?.id || 'sfs-2004-46';
+  go('regulations', { id: regId, sec: secId });
 };
 A.toggleDiffPlain = () => {
   S.ui.diffPlain = S.ui.diffPlain === false ? true : false;
@@ -1979,20 +1972,17 @@ A.switchWs = el => {
 };
 A.newWorkspace = () => {
   S.ui.pop = null;
-  S.ui.auth = 'onboarding';
   S.ui.onb = 1;
   S.ui.onbData.ws = '';
   S.ui.onbData.url = '';
-  render();
+  goAuth('onboarding');
 };
 A.signOut = () => {
   S.ui.pop = null;
   S.ui.palette = null;
   S.ui.drawer = null;
   S.ui.modals = [];
-  S.ui.auth = 'login';
-  S.ui.errors = {};
-  render();
+  goAuth('login');
 };
 A.shortcuts = () => {
   S.ui.pop = null;
@@ -2001,9 +1991,8 @@ A.shortcuts = () => {
 };
 A.startOnboarding = () => {
   S.ui.pop = null;
-  S.ui.auth = 'onboarding';
   S.ui.onb = 0;
-  render();
+  goAuth('onboarding');
 };
 A.toggleOffline = () => {
   S.ui.offline = !S.ui.offline;
@@ -2155,8 +2144,7 @@ A.delWorkspace = () =>
       S.data = seed();
       S.views = {};
       save();
-      S.ui.auth = 'login';
-      render();
+      goAuth('login');
       toast('Workspace deleted. Demo data was restored for this prototype.', { kind: 'info', ms: 5000 });
     },
   });
@@ -2290,11 +2278,7 @@ A.changePlan = el => {
 
 /* auth */
 A.auth = el => {
-  S.ui.auth = el.dataset.v;
-  S.ui.errors = {};
-  S.ui.pwNew = '';
-  render();
-  setTimeout(() => $('.auth input')?.focus(), 20);
+  goAuth(el.dataset.v);
 };
 A.toggleShowPw = () => {
   const v = $('#l-pw')?.value;
@@ -2349,9 +2333,8 @@ A.doSignup = () => {
     return;
   }
   loadingBtn('signup-btn', 800, () => {
-    S.ui.auth = 'verify';
     startResend();
-    render();
+    goAuth('verify');
   });
 };
 export function startResend() {
@@ -2375,11 +2358,10 @@ A.resend = el => {
   } else toast(`Reset link sent to ${S.ui.af.email}`);
 };
 A.verified = () => {
-  S.ui.auth = 'onboarding';
   S.ui.onb = 0;
   S.ui.onbData.ws = '';
   S.ui.onbData.url = '';
-  render();
+  goAuth('onboarding');
 };
 A.doForgot = () => {
   const em = $('#f-email').value.trim();
@@ -2391,8 +2373,7 @@ A.doForgot = () => {
     return;
   }
   loadingBtn('forgot-btn', 700, () => {
-    S.ui.auth = 'forgot-sent';
-    render();
+    goAuth('forgot-sent');
   });
 };
 A.doReset = () => {
@@ -2406,9 +2387,8 @@ A.doReset = () => {
     return;
   }
   loadingBtn('reset-btn', 700, () => {
-    S.ui.auth = 'reset-done';
     S.ui.pwNew = '';
-    render();
+    goAuth('reset-done');
   });
 };
 
@@ -2477,7 +2457,7 @@ A.onbNext = el => {
 };
 A.onbExit = () => {
   S.ui.auth = null;
-  render();
+  go(S.prefs.home || 'home');
 };
 A.onbFinish = () => {
   const o = S.ui.onbData;

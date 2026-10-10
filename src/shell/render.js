@@ -11,6 +11,19 @@ import { tlAfter } from '../views/timeline.js';
 import { renderLayer } from '../overlays/drawer.js';
 import { placePop } from '../overlays/popovers.js';
 import { renderAuth } from '../pages/auth.js';
+import {
+  syncHash,
+  goAuth,
+  initRouter,
+  hashToRoute,
+  routeToHash,
+  restoreRoute,
+  parseHash,
+  formatHash,
+  applyRoute,
+  safeReplaceHash,
+  go as routerGo,
+} from '../core/router.js';
 
 export const ROUTE_NAMES = {
   home: 'Home',
@@ -38,6 +51,8 @@ export const ROUTE_NAMES = {
   states: 'System states',
   archive: 'Archive',
 };
+
+export { syncHash, goAuth, initRouter, hashToRoute, routeToHash, restoreRoute, parseHash, formatHash, applyRoute, safeReplaceHash };
 export const ROUTE_ICONS = {
   home: 'house',
   inbox: 'inbox',
@@ -64,24 +79,10 @@ export const ROUTE_ICONS = {
 };
 
 export function go(route, params = {}, opt = {}) {
-  if (route === 'project' && !params.tab) params.tab = 'board';
-  if (!opt.back) S.ui.history.push({ route: S.ui.route, params: S.ui.params });
-  const same = S.ui.route === route && JSON.stringify(S.ui.params) === JSON.stringify(params);
-  S.ui.route = route;
-  S.ui.params = params;
-  S.ui.mnav = false;
-  S.ui.sel.clear();
-  S.ui.pop = null;
-  S.ui.composer = null;
-  S.ui.editCell = null;
-  if (!opt.keepDrawer && S.ui.drawer && innerWidth < 900) S.ui.drawer = null;
-  // Pages render instantly; motion (not a fake wait) carries the transition.
   clearTimeout(go._t);
-  S.ui.loading = false;
-  if (!same) fxSet(opt.tab ? { tab: true, tabs: true } : { route: true, tabs: true });
-  render();
+  routerGo(route, params, opt);
   const c = $('.content');
-  if (c && !same) c.scrollTop = 0;
+  if (c && !opt.tab) c.scrollTop = 0;
 }
 
 /* One-shot motion flags: read by templates during the next render, then cleared, so full re-renders never replay them. */
@@ -217,8 +218,8 @@ export function afterRender() {
   if (pal && document.activeElement !== pal && !S.ui.pop) pal.focus();
   if ((S.ui.route === 'project' && S.ui.params.tab === 'timeline') || S.ui.route === 'timeline') tlAfter();
   if (S.ui.pendingScrollSec) {
-    const targetEl = document.getElementById(`sec-${S.ui.pendingScrollSec}`);
-    if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const targetEl = document.getElementById(`sec-${S.ui.pendingScrollSec}`) || document.getElementById(S.ui.pendingScrollSec);
+    if (targetEl?.scrollIntoView) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     delete S.ui.pendingScrollSec;
   }
 }
