@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
@@ -93,6 +93,62 @@ def create_app(
             repealed_by_id=doc_ids.get(doc.repealed_by) if doc.repealed_by else None,
             amendments=[summary for summary in summaries if summary.amends == doc.identifier],
         )
+
+    @app.api_route("/doc/{doc_id}/pdf", methods=["GET", "HEAD"])
+    def document_pdf(doc_id: str):
+        doc = doc_store.get_document(doc_id)
+        if doc is None:
+            raise HTTPException(status_code=404, detail=f"{doc_id} is not stored")
+        pdf_path = doc.local_pdf_path
+        if not pdf_path:
+            for cand in [
+                f"fi_fffs/{doc_id}/consolidated.pdf",
+                f"fi_fffs/{doc_id}/regulation.pdf",
+            ]:
+                if (files_dir / cand).is_file():
+                    pdf_path = cand
+                    break
+        if not pdf_path:
+            raise HTTPException(status_code=404, detail=f"No local PDF recorded for {doc_id}")
+        pdf_file = files_dir / pdf_path
+        if not pdf_file.is_file():
+            raise HTTPException(status_code=404, detail=f"PDF file not found on disk for {doc_id}")
+        return FileResponse(pdf_file, media_type="application/pdf", filename=pdf_file.name)
+
+    @app.api_route("/doc/{doc_id}/memo", methods=["GET", "HEAD"])
+    def document_memo(doc_id: str):
+        doc = doc_store.get_document(doc_id)
+        if doc is None:
+            raise HTTPException(status_code=404, detail=f"{doc_id} is not stored")
+        memo_path = doc.local_memo_path
+        if not memo_path:
+            cand = f"fi_fffs/{doc_id}/memo.pdf"
+            if (files_dir / cand).is_file():
+                memo_path = cand
+        if not memo_path:
+            raise HTTPException(status_code=404, detail=f"No local decision memo recorded for {doc_id}")
+        memo_file = files_dir / memo_path
+        if not memo_file.is_file():
+            raise HTTPException(status_code=404, detail=f"Decision memo file not found on disk for {doc_id}")
+        return FileResponse(memo_file, media_type="application/pdf", filename=memo_file.name)
+
+    @app.api_route("/doc/{doc_id}/raw", methods=["GET", "HEAD"])
+    def document_raw(doc_id: str):
+        doc = doc_store.get_document(doc_id)
+        if doc is None:
+            raise HTTPException(status_code=404, detail=f"{doc_id} is not stored")
+        if doc.local_source_path:
+            source_file = files_dir / doc.local_source_path
+            if source_file.is_file():
+                media_type = "text/html" if source_file.suffix == ".html" else "application/json"
+                return FileResponse(source_file, media_type=media_type)
+        sfs_raw = files_dir / "riksdagen" / "documents" / f"{doc_id}.json"
+        if sfs_raw.is_file():
+            return FileResponse(sfs_raw, media_type="application/json")
+        fffs_raw = files_dir / "fi_fffs" / doc_id / "item.html"
+        if fffs_raw.is_file():
+            return FileResponse(fffs_raw, media_type="text/html")
+        return doc
 
     @app.get("/search", response_class=HTMLResponse)
     def search(request: Request, q: str = ""):

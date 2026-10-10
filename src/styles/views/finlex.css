@@ -318,6 +318,65 @@
   border-color: var(--border-strong);
 }
 
+.finlex-attach-chip-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1px 3px 1px 1px;
+}
+.finlex-attach-chip-group .finlex-attach-chip {
+  border: none;
+  background: transparent;
+  padding: 2px 7px;
+}
+.finlex-local-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--brand, #3b82f6);
+}
+.finlex-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--dur);
+}
+.finlex-preview-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.finlex-attach-sublink {
+  font-size: 10.5px;
+  color: var(--text-3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+}
+.finlex-attach-sublink:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
 /* Delegated Authority Strip */
 .finlex-auth-bar {
   display: flex;

@@ -377,29 +377,83 @@ function renderRegulationsReader(u) {
 
             <!-- Official Documents & Attachments Toolbar -->
             ${
-              curAct.pdfUrl || curAct.memoUrl || curAct.sourceUrl
+              curAct.localPdf || curAct.localMemo || curAct.localSource || curAct.pdfUrl || curAct.memoUrl || curAct.sourceUrl
                 ? `
               <div class="finlex-attachments-bar">
-                <span class="finlex-attachments-label">${ic('paperclip', 12)} Official Attachments & Links:</span>
+                <span class="finlex-attachments-label">${ic('paperclip', 12)} Official Attachments & Local Serving:</span>
                 <div class="finlex-attachments-links">
                   ${
-                    curAct.pdfUrl
+                    curAct.localPdf
                       ? `
+                    <div class="finlex-attach-chip-group">
+                      <a href="/doc/${esc(curAct.id)}/pdf" target="_blank" class="finlex-attach-chip pdf is-local" title="Open locally cached PDF (offline, bypasses fi.se geoblocking)">
+                        ${ic('file-text', 12)}
+                        <span>Original PDF</span>
+                        <span class="finlex-local-badge">${ic('hard-drive', 10)} Local</span>
+                      </a>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Original PDF · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/pdf" title="Preview PDF inline in reader">
+                        ${ic('eye', 11)}
+                      </button>
+                      ${
+                        curAct.pdfUrl
+                          ? `
+                        <a href="${esc(curAct.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-sublink" title="Open on official government site (fi.se)">
+                          online ${ic('external-link', 9)}
+                        </a>
+                      `
+                          : ''
+                      }
+                    </div>
+                  `
+                      : curAct.pdfUrl
+                        ? `
                     <a href="${esc(curAct.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip pdf" title="Download official PDF Gazette document">
                       ${ic('file-text', 12)}
                       <span>Official PDF</span>
                       ${ic('external-link', 10)}
                     </a>
                   `
-                      : ''
+                        : ''
                   }
                   ${
-                    curAct.memoUrl
+                    curAct.localMemo
                       ? `
+                    <div class="finlex-attach-chip-group">
+                      <a href="/doc/${esc(curAct.id)}/memo" target="_blank" class="finlex-attach-chip memo is-local" title="Open locally cached decision memorandum (Besluts-PM)">
+                        ${ic('file-check', 12)}
+                        <span>Decision Memo (Besluts-PM)</span>
+                        <span class="finlex-local-badge">${ic('hard-drive', 10)} Local</span>
+                      </a>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Decision Memo (Besluts-PM) · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/memo" title="Preview Memo inline in reader">
+                        ${ic('eye', 11)}
+                      </button>
+                      ${
+                        curAct.memoUrl
+                          ? `
+                        <a href="${esc(curAct.memoUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-sublink" title="Open on official government site">
+                          online ${ic('external-link', 9)}
+                        </a>
+                      `
+                          : ''
+                      }
+                    </div>
+                  `
+                      : curAct.memoUrl
+                        ? `
                     <a href="${esc(curAct.memoUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip memo" title="Read supervisory decision memorandum (Besluts-PM)">
                       ${ic('file-check', 12)}
                       <span>Decision Memo (Besluts-PM)</span>
                       ${ic('external-link', 10)}
+                    </a>
+                  `
+                        : ''
+                  }
+                  ${
+                    curAct.localSource
+                      ? `
+                    <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip is-local" title="Inspect raw local statutory payload">
+                      ${ic('code', 12)}
+                      <span>Local Raw</span>
                     </a>
                   `
                       : ''

@@ -51,6 +51,8 @@ export function modalHtml(m) {
       return wrap('', teamModal(m, H));
     case 'filePreview':
       return wrap('lg', filePreviewModal(m, H));
+    case 'previewDoc':
+      return wrap('xl', previewDocModal(m, H));
     case 'saveView':
       return wrap(
         'sm',
@@ -287,4 +289,18 @@ export function filePreviewModal(m, H) {
   <div class="modal-b"><div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">${filePrev(f).replace('class="fprev"', 'class="fprev" style="aspect-ratio:16/9"')}</div>
   ${m.tid ? `<div class="row faint" style="font-size:12.5px">${ic('link', 13)}Attached to <button class="link" data-a="openTask" data-id="${m.tid}">${esc(task(m.tid)?.title)}</button></div>` : ''}</div>
   <div class="modal-f"><button class="btn btn-secondary" data-a="copyLink" data-fid="${f.id}">${ic('link', 14)}Copy link</button><span class="sp"></span><button class="btn btn-primary" data-a="closeModal">Close</button></div>`;
+}
+
+export function previewDocModal(m, H) {
+  return `${H(esc(m.title || 'Document Preview'), esc(m.subtitle || 'Local Document Serving (FastAPI proxy)'))}
+  <div class="modal-b" style="padding:0;overflow:hidden">
+    <div style="height:70vh;min-height:480px;background:var(--surface-2);display:flex;flex-direction:column">
+      <iframe src="${esc(m.url)}" style="width:100%;height:100%;border:none;flex:1" title="${esc(m.title || 'Document')}"></iframe>
+    </div>
+  </div>
+  <div class="modal-f">
+    <a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">${ic('external-link', 14)} Open in new tab</a>
+    <span class="sp"></span>
+    <button class="btn btn-primary" data-a="closeModal">Close</button>
+  </div>`;
 }

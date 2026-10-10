@@ -1358,6 +1358,18 @@ A.loadMoreRegs = () => {
   S.ui.regLibLimit = (S.ui.regLibLimit || 24) + 24;
   render();
 };
+A.previewDoc = el => {
+  const url = el.dataset.url;
+  const title = el.dataset.title || 'Document Preview';
+  const subtitle = el.dataset.subtitle || 'Local Document Serving';
+  if (!url) return;
+  openModal({
+    type: 'previewDoc',
+    url,
+    title,
+    subtitle,
+  });
+};
 
 A.selectSec = el => {
   const secId = el.dataset.id;

@@ -18,6 +18,7 @@ sys.path.insert(0, str(PIPELINE_DIR / "src"))
 from regtech.versions import text_diff
 
 DB_PATH = PIPELINE_DIR / "data" / "regtech.db"
+RAW_DIR = PIPELINE_DIR / "data" / "raw"
 OUTPUT_PATH = PIPELINE_DIR.parent / "src" / "data" / "swedish_regulations.json"
 FEED_OUTPUT_PATH = PIPELINE_DIR.parent / "src" / "data" / "changes_feed.json"
 
@@ -199,6 +200,7 @@ def export():
         data = json.loads(doc_json_str)
 
         is_sfs = source == "riksdagen"
+        is_fffs = not is_sfs
         jurisdiction = "Sweden (Riksdagen)" if is_sfs else "Sweden (Finansinspektionen)"
         authority = "Riksdagen" if is_sfs else "Finansinspektionen (FI)"
         doc_type = "national_act" if is_sfs else "fsa_regulation"
@@ -391,6 +393,40 @@ def export():
             doc_obj["memoUrl"] = data.get("memo_url")
         if data.get("source_url"):
             doc_obj["sourceUrl"] = data.get("source_url")
+
+        # Local document serving assets (M2.1)
+        local_pdf = data.get("local_pdf_path")
+        if not local_pdf and is_fffs:
+            cand = f"fi_fffs/{doc_id}/regulation.pdf"
+            if (RAW_DIR / cand).is_file():
+                local_pdf = cand
+            else:
+                cand_cons = f"fi_fffs/{doc_id}/consolidated.pdf"
+                if (RAW_DIR / cand_cons).is_file():
+                    local_pdf = cand_cons
+        if local_pdf and (RAW_DIR / local_pdf).is_file():
+            doc_obj["localPdf"] = local_pdf
+
+        local_memo = data.get("local_memo_path")
+        if not local_memo and is_fffs:
+            cand_memo = f"fi_fffs/{doc_id}/memo.pdf"
+            if (RAW_DIR / cand_memo).is_file():
+                local_memo = cand_memo
+        if local_memo and (RAW_DIR / local_memo).is_file():
+            doc_obj["localMemo"] = local_memo
+
+        local_source = data.get("local_source_path")
+        if not local_source:
+            if is_fffs:
+                cand_item = f"fi_fffs/{doc_id}/item.html"
+                if (RAW_DIR / cand_item).is_file():
+                    local_source = cand_item
+            else:
+                cand_sfs = f"riksdagen/documents/{doc_id}.json"
+                if (RAW_DIR / cand_sfs).is_file():
+                    local_source = cand_sfs
+        if local_source and (RAW_DIR / local_source).is_file():
+            doc_obj["localSource"] = local_source
         if amends_target:
             doc_obj["amends"] = amends_target
             if amends_id:

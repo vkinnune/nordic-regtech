@@ -168,6 +168,33 @@ def test_saved_copy_is_served(client):
     assert response.content == b"%PDF-1.4 regulation"
 
 
+def test_dedicated_pdf_endpoint_serves_local_pdf(client):
+    response = client.get(f"/doc/{FFFS.id}/pdf")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content == b"%PDF-1.4 regulation"
+
+
+def test_dedicated_pdf_endpoint_404_when_missing(client):
+    # sfs-2007-528 has no local PDF recorded
+    assert client.get("/doc/sfs-2007-528/pdf").status_code == 404
+    assert client.get("/doc/sfs-9999-99/pdf").status_code == 404
+
+
+def test_dedicated_memo_endpoint_404_when_file_not_on_disk(client):
+    # FFFS has local_memo_path set, but file was not written to disk in fixture
+    assert client.get(f"/doc/{FFFS.id}/memo").status_code == 404
+
+
+def test_dedicated_raw_endpoint_serves_stored_document(client):
+    response = client.get(f"/doc/{FFFS.id}/raw")
+
+    assert response.status_code == 200
+    # Returns JSON payload or file
+    assert response.json()["identifier"] == FFFS.identifier
+
+
 def test_upcoming_wording_shows_its_change_and_diff(client):
     html = page(client, "/doc/sfs-2007-528")
     upcoming = html[html.index('id="riksdagen_sfs-2007-528_k7_p6_i20261205"') :]

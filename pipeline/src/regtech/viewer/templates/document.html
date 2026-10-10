@@ -128,17 +128,18 @@
       {% if doc.amends %}{% call property("Amends") %}{% if amends_id %}<a href="/doc/{{ amends_id }}" class="link">{{ doc.amends }}</a>{% else %}{{ doc.amends }}{% endif %}{% endcall %}{% endif %}
       {% if amendments %}{% call property("Amended by") %}{% for a in amendments %}<a href="/doc/{{ a.id }}" class="link">{{ a.identifier }}</a>{{ ", " if not loop.last }}{% endfor %}{% endcall %}{% endif %}
       {% call property("Sources") %}
-        <span class="flex flex-wrap gap-x-4 gap-y-1">
+        <span class="flex flex-wrap items-center gap-x-4 gap-y-1">
           {% for source in sources %}
           {% if source.local_href %}
           <span class="inline-flex items-center gap-1.5">
-            <a href="{{ source.local_href }}" class="link">{{ source.label }}</a>
-            {% if source.url %}<a href="{{ source.url }}" title="Open on the official site" class="muted inline-flex items-center gap-0.5 text-xs hover:text-slate-900 dark:hover:text-white">online{{ icon.external("h-3 w-3") }}</a>{% endif %}
+            <a href="{{ source.local_href }}" target="_blank" class="link">{{ source.label }}</a>
+            {% if source.url %}<a href="{{ source.url }}" target="_blank" rel="noopener noreferrer" title="Open on the official site" class="muted inline-flex items-center gap-0.5 text-xs hover:text-slate-900 dark:hover:text-white">online{{ icon.external("h-3 w-3") }}</a>{% endif %}
           </span>
           {% else %}
-          <a href="{{ source.url }}" class="link inline-flex items-center gap-1">{{ source.label }}{{ icon.external() }}</a>
+          <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer" class="link inline-flex items-center gap-1">{{ source.label }}{{ icon.external() }}</a>
           {% endif %}
           {% endfor %}
+          <a href="/doc/{{ doc.id }}/raw" target="_blank" class="muted inline-flex items-center gap-1 text-xs hover:text-slate-900 dark:hover:text-white" title="Inspect raw local source payload">Local raw</a>
         </span>
       {% endcall %}
       {% if doc.authorizations %}{% call property("Issued with authority from") %}

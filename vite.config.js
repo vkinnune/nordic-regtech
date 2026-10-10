@@ -53,7 +53,14 @@ function lucideSubset() {
 
 export default defineConfig({
   plugins: [lucideSubset()],
-  server: { port: 5173 },
+  server: {
+    port: 5173,
+    proxy: {
+      '/files': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+      '/doc': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+      '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+    },
+  },
   build: {
     rollupOptions: {
       output: {
