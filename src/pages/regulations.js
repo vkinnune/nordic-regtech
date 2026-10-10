@@ -106,10 +106,10 @@ function renderRegulationsLibrary(u) {
     </div>
 
     <div class="stats" style="margin-bottom:16px">
-      <div class="stat"><span class="k">Statutes</span><span class="v">${allActs.length}</span><span class="d">Swedish acts & FFFS circulars</span></div>
-      <div class="stat"><span class="k">Statutory Sections</span><span class="v">${totalSections}</span><span class="d">indexed legal provisions</span></div>
+      <div class="stat"><span class="k">Total Regulations</span><span class="v">${allActs.length}</span><span class="d">Swedish acts & FFFS circulars</span></div>
       <div class="stat"><span class="k">Acts & Ordinances</span><span class="v">${sfsCount}</span><span class="d">Parliamentary SFS statutes</span></div>
       <div class="stat"><span class="k">Supervisory Rules</span><span class="v">${fffsCount}</span><span class="d">Finansinspektionen FFFS circulars</span></div>
+      <div class="stat"><span class="k">Sections (§)</span><span class="v">${totalSections.toLocaleString('en-US')}</span><span class="d">Indexed legal § provisions</span></div>
     </div>
 
     ${viewToolbar('regulations', {
