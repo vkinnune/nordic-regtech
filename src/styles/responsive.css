@@ -50,6 +50,26 @@
   .page {
     padding: 20px var(--gutter) 96px;
   }
+  .page.flush.page-changes,
+  .page.flush.page-calendar {
+    height: auto;
+    min-height: 100%;
+  }
+  .changes-view-container {
+    overflow: visible;
+    flex: 1 1 auto;
+    min-height: auto;
+  }
+  .changes-cal-wrap {
+    overflow: visible;
+    padding-bottom: 96px;
+  }
+  .changes-table-wrap {
+    padding-bottom: 96px;
+  }
+  .cal {
+    padding-bottom: 96px;
+  }
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

@@ -202,39 +202,41 @@ export function pageChanges() {
     }
 
     bodyContent = `
-      <div class="toolbar" style="gap:8px;border-top:0;background:var(--surface-2);padding:6px var(--gutter)">
-        <button class="btn btn-secondary btn-sm" data-a="changesCalNav" data-d="0">Today</button>
-        <div class="row" style="gap:0">
-          <button class="ibtn ibtn-sm" data-a="changesCalNav" data-d="-1" aria-label="Previous">${ic('chevron-left', 16)}</button>
-          <button class="ibtn ibtn-sm" data-a="changesCalNav" data-d="1" aria-label="Next">${ic('chevron-right', 16)}</button>
+      <div class="changes-cal-wrap">
+        <div class="toolbar" style="gap:8px;border-top:0;background:var(--surface-2);padding:6px var(--gutter)">
+          <button class="btn btn-secondary btn-sm" data-a="changesCalNav" data-d="0">Today</button>
+          <div class="row" style="gap:0">
+            <button class="ibtn ibtn-sm" data-a="changesCalNav" data-d="-1" aria-label="Previous">${ic('chevron-left', 16)}</button>
+            <button class="ibtn ibtn-sm" data-a="changesCalNav" data-d="1" aria-label="Next">${ic('chevron-right', 16)}</button>
+          </div>
+          <h2 style="font-size:15px;font-weight:600;margin:0 4px;letter-spacing:-.01em" aria-live="polite">${label}</h2>
+
+          <span class="sp"></span>
+
+          <!-- In-force milestone quick jumpers -->
+          <span class="row hide-m" style="gap:6px;font-size:11.5px;color:var(--text-3);align-items:center">
+            <span style="font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:10px">In-Force Milestones:</span>
+            ${milestones
+              .slice(0, 6)
+              .map(
+                m => `
+              <button class="milestone-pill ${curYm === m.key ? 'on' : ''}" data-a="changesJumpDate" data-date="${m.date}" title="Jump to ${m.label}">
+                <span>${m.label}</span>
+                <span class="milestone-badge">${m.count}</span>
+              </button>
+            `,
+              )
+              .join('')}
+          </span>
+
+          <div class="seg">
+            <button class="${calMode === 'month' ? 'on' : ''}" data-a="set" data-k="changesCalMode" data-v="month">Month</button>
+            <button class="${calMode === 'week' ? 'on' : ''}" data-a="set" data-k="changesCalMode" data-v="week">Week</button>
+          </div>
         </div>
-        <h2 style="font-size:15px;font-weight:600;margin:0 4px;letter-spacing:-.01em" aria-live="polite">${label}</h2>
-
-        <span class="sp"></span>
-
-        <!-- In-force milestone quick jumpers -->
-        <span class="row hide-m" style="gap:6px;font-size:11.5px;color:var(--text-3);align-items:center">
-          <span style="font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:10px">In-Force Milestones:</span>
-          ${milestones
-            .slice(0, 6)
-            .map(
-              m => `
-            <button class="milestone-pill ${curYm === m.key ? 'on' : ''}" data-a="changesJumpDate" data-date="${m.date}" title="Jump to ${m.label}">
-              <span>${m.label}</span>
-              <span class="milestone-badge">${m.count}</span>
-            </button>
-          `,
-            )
-            .join('')}
-        </span>
-
-        <div class="seg">
-          <button class="${calMode === 'month' ? 'on' : ''}" data-a="set" data-k="changesCalMode" data-v="month">Month</button>
-          <button class="${calMode === 'week' ? 'on' : ''}" data-a="set" data-k="changesCalMode" data-v="week">Week</button>
+        <div class="cal" style="flex:1;min-height:560px">
+          ${calBody}
         </div>
-      </div>
-      <div class="cal" style="flex:1;min-height:560px">
-        ${calBody}
       </div>
     `;
   } else if (view === 'feed') {
@@ -372,7 +374,7 @@ export function pageChanges() {
     `;
   }
 
-  return `<div class="page flush">
+  return `<div class="page flush page-changes">
     <!-- PAGE HEADER -->
     <div class="ph">
       <div>
