@@ -125,7 +125,7 @@ export function pageChanges() {
       const secLabel = e.level === 'document' ? 'Doc' : `${e.chapter ? `${esc(e.chapter)}:` : ''}${esc(e.section || '')} §`;
       const tooltip = `${esc(e.code)} ${secLabel}: ${e.status} ${e.amendingAct ? `by ${esc(e.amendingAct)}` : ''} · in force ${getChangeDate(e)}`;
 
-      return `<button class="cev cev-change ${statusCls}" style="--c:${statusColor}" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="${tooltip}">
+      return `<button class="cev cev-change ${statusCls}" style="--c:${statusColor}" data-a="openChangeDrawer" data-id="${e.id}" title="${tooltip}">
         <span class="pdot" style="--c:${statusColor}"></span>
         <span class="status-tag">${tag}</span>
         <span class="trunc"><b>${esc(e.code)}</b> ${secLabel}</span>
@@ -183,7 +183,7 @@ export function pageChanges() {
                   const statusBadgeCls = isMod ? 'badge-amber' : isAdd ? 'badge-emerald' : 'badge-red';
                   const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
 
-                  return `<button class="wcard" style="--c:${statusColor}" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open in reader">
+                  return `<button class="wcard" style="--c:${statusColor}" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details">
                     <div class="row" style="gap:6px;align-items:center;justify-content:space-between">
                       <span class="pdot" style="--c:${statusColor}"></span>
                       <span style="font-weight:700;font-size:12px;color:var(--text)">${esc(e.code)}</span>
@@ -269,7 +269,7 @@ export function pageChanges() {
                         <article class="changes-card surface">
                           <div class="changes-card-head">
                             <div class="changes-act-line">
-                              <button class="changes-act-code link" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open regulation in reader">
+                              <button class="changes-act-code link" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect amendment details in drawer">
                                 ${esc(e.code || e.docId)}
                               </button>
                               <span class="changes-act-title truncate" title="${esc(e.title)}">${esc(e.title)}</span>
@@ -281,14 +281,19 @@ export function pageChanges() {
 
                           <div class="changes-card-meta">
                             <div class="changes-sec-group">
-                              <button class="changes-sec-btn link" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Jump to section in reader">
+                              <button class="changes-sec-btn link" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect amendment details in drawer">
                                 ${secLabel}
                               </button>
                               ${statusBadge}
                             </div>
-                            <button class="btn btn-secondary btn-xs" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open reader and inspect diff">
-                              ${ic('external-link', 11)} Open in Reader
-                            </button>
+                            <div class="row" style="gap:4px">
+                              <button class="btn btn-secondary btn-xs" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect amendment details in drawer">
+                                ${ic('panel-right-open', 11)} Details
+                              </button>
+                              <button class="btn btn-ghost btn-xs" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open reader and inspect diff">
+                                ${ic('external-link', 11)} Reader
+                              </button>
+                            </div>
                           </div>
 
                           ${diffAccordionHtml({
@@ -342,13 +347,13 @@ export function pageChanges() {
                 <tr>
                   <td><span class="num">${esc(getChangeDate(e))}</span></td>
                   <td>
-                    <button class="link bold" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" style="font-family:var(--font-mono, monospace);font-size:12px">
+                    <button class="link bold" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details in drawer" style="font-family:var(--font-mono, monospace);font-size:12px">
                       ${esc(e.code)}
                     </button>
                   </td>
                   <td class="trunc" title="${esc(e.title)}">${esc(e.title)}</td>
                   <td>
-                    <button class="link" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true">
+                    <button class="link" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details in drawer">
                       ${secLabel}
                     </button>
                   </td>
@@ -356,8 +361,8 @@ export function pageChanges() {
                   <td>${e.amendingAct ? `<span class="num">${esc(e.amendingAct)}</span>` : '<span class="faint">—</span>'}</td>
                   <td><span class="changes-source-pill ${e.source === 'riksdagen' ? 'is-sfs' : 'is-fffs'}">${e.source === 'riksdagen' ? 'SFS' : 'FFFS'}</span></td>
                   <td style="text-align:right">
-                    <button class="btn btn-secondary btn-xs" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open in reader with diff">
-                      ${ic('external-link', 11)} View
+                    <button class="btn btn-secondary btn-xs" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect amendment details in drawer">
+                      ${ic('panel-right-open', 11)} Details
                     </button>
                   </td>
                 </tr>

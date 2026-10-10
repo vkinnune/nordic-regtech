@@ -290,6 +290,7 @@ export function applyRoute(target, opt = {}) {
     S.ui.palette = null;
     S.ui.subOpen = null;
     delete S.ui.govDrawer;
+    delete S.ui.changeDrawer;
     if (!sameAuth && S.ui.fx) S.ui.fx[target.auth === 'onboarding' ? 'step' : 'auth'] = true;
   } else {
     if (target.route === 'project' && !target.params?.tab) {
@@ -332,6 +333,7 @@ export function applyRoute(target, opt = {}) {
     S.ui.palette = null;
     S.ui.subOpen = null;
     delete S.ui.govDrawer;
+    delete S.ui.changeDrawer;
     S.ui.composer = null;
     S.ui.editCell = null;
     if (!opt.keepDrawer && S.ui.drawer && typeof innerWidth !== 'undefined' && innerWidth < 900) S.ui.drawer = null;

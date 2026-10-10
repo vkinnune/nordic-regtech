@@ -370,7 +370,7 @@ export function popHtml(p) {
             const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
             const stCls = e.status === 'MODIFIED' ? 'badge-amber' : e.status === 'ADDED' ? 'badge-emerald' : 'badge-red';
             const stLabel = e.status === 'MODIFIED' ? 'Mod' : e.status === 'ADDED' ? 'Add' : 'Rep';
-            return `<button class="mi" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open in reader with diff" style="display:flex;align-items:center;gap:6px">
+            return `<button class="mi" data-a="openChangeDrawer" data-id="${e.id}" title="Inspect change details in drawer" style="display:flex;align-items:center;gap:6px">
               <span class="finlex-tag-badge ${stCls}" style="font-size:10px;padding:1px 5px">${stLabel}</span>
               <span style="font-weight:600;font-size:12px;color:var(--text)">${esc(e.code)}</span>
               <span class="trunc grow" style="font-size:12px;color:var(--text-2)">${secLabel} · ${esc(e.title)}</span>

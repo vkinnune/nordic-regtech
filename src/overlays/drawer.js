@@ -21,8 +21,10 @@ import {
   riskControls,
   riskExposureScore,
   regulationOfSection,
+  changeEvent,
 } from '../core/store.js';
 import { FT, av, diffBadge, diffTokenHtml, filePrev, fileType, fmtComment, lbl, progBar, formatSecBadge } from '../ui/helpers.js';
+import { renderDiffHtml } from '../ui/diff.js';
 
 import { fxc } from '../shell/render.js';
 import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../components/task-list.js';
@@ -38,6 +40,10 @@ export function renderLayer() {
     h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeDrawer"></div>` : '') + drawerHtml(task(u.drawer));
   if (u.govDrawer)
     h += (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeGovDrawer"></div>` : '') + govDrawerHtml(u.govDrawer);
+  if (u.changeDrawer && changeEvent(u.changeDrawer))
+    h +=
+      (u.drawerFull ? `<div class="drawer-scrim full${u.fx.drawer ? ' enter' : ''}" data-a="closeChangeDrawer"></div>` : '') +
+      changeDrawerHtml(changeEvent(u.changeDrawer));
   u.modals.forEach((m, i) => {
     const en = u.fx.modal === i + 1;
     h += `<div class="scrim${en ? ' enter' : ''}" data-a="closeModal" style="z-index:${60 + i * 2}"></div><div class="modal-wrap" data-a="closeModalBg" style="z-index:${61 + i * 2}">${en ? modalHtml(m).replace('class="modal ', 'class="modal enter ') : modalHtml(m)}</div>`;
@@ -526,6 +532,159 @@ export function govDrawerHtml(gov) {
             </div>`
           : ''
       }
+    </div>
+  </aside>`;
+}
+
+/* ---------------- REGULATORY CHANGE DRAWER ---------------- */
+export function changeDrawerHtml(e) {
+  if (!e) return '';
+  const u = S.ui;
+  const isMod = e.status === 'MODIFIED';
+  const isAdd = e.status === 'ADDED';
+  const isRep = e.status === 'REPEALED';
+  const statusColor = isMod ? 'var(--amber)' : isAdd ? 'var(--green)' : 'var(--red)';
+  const statusBadgeCls = isMod ? 'badge-amber' : isAdd ? 'badge-emerald' : 'badge-red';
+  const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+  const inForceDate = e.amendedDate || (e.fetchedAt ? e.fetchedAt.slice(0, 10) : 'Recent');
+
+  let daysDiffText = '';
+  if (e.amendedDate) {
+    try {
+      const d = parse(e.amendedDate);
+      if (d) {
+        const diff = diffD(d, TODAY);
+        if (diff === 0) daysDiffText = ' · In force today';
+        else if (diff > 0) daysDiffText = ` · Takes effect in ${diff} day${diff === 1 ? '' : 's'}`;
+        else daysDiffText = ` · In force since ${fmtDate(e.amendedDate, true)}`;
+      }
+    } catch {
+      // ignore parsing error
+    }
+  }
+
+  const prop = (icon, label, val) => `<dt>${ic(icon, 14)}${label}</dt><dd>${val}</dd>`;
+
+  return `<aside class="drawer ${u.drawerFull ? 'full' : ''} ${u.fx.drawer ? 'enter' : ''}" role="dialog" aria-modal="${u.drawerFull}" aria-labelledby="change-d-h" tabindex="-1">
+    <div class="drawer-h">
+      <button class="pillbtn" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" style="font-size:12.5px" title="Open regulation in reader">
+        <span class="pdot" style="--c:${statusColor}"></span>${esc(e.code || e.docId)}
+      </button>
+      <span class="faint">/</span>
+      <span class="mono faint" style="font-size:11.5px;padding:0 6px">${secLabel}</span>
+      <span class="sp"></span>
+      <span class="finlex-tag-badge ${statusBadgeCls}" style="font-size:11px;margin-right:6px">${e.status}</span>
+      <button class="btn btn-sm btn-secondary" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open full statute in Regulations Reader">
+        ${ic('book-open', 14)}<span>Reader</span>
+      </button>
+      <button class="ibtn ibtn-sm hide-m" data-a="toggleDrawerFull" data-tip="${u.drawerFull ? 'Side panel' : 'Full page'}" aria-label="Toggle full page">
+        ${ic(u.drawerFull ? 'minimize-2' : 'maximize-2', 15)}
+      </button>
+      <button class="ibtn ibtn-sm" data-a="closeChangeDrawer" data-tip="Close  Esc" aria-label="Close">
+        ${ic('x', 16)}
+      </button>
+    </div>
+
+    <div class="drawer-b">
+      <h2 id="change-d-h" style="font-size:19px;font-weight:700;color:var(--text);margin:0 0 6px;line-height:1.35">${secLabel} · ${esc(e.code)}</h2>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.4">${esc(e.title)}</div>
+
+      <!-- In-force status alert -->
+      ${
+        isMod
+          ? `<div class="alert warning" style="margin-bottom:16px">
+              ${ic('alert-triangle', 15)}
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:12.5px">Statutory Amendment · Modified Provision</div>
+                <div style="font-size:12px;margin-top:2px">
+                  Amended by <b>${esc(e.amendingAct || 'amending act')}</b>.
+                  In force: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
+                </div>
+              </div>
+            </div>`
+          : isAdd
+            ? `<div class="alert ok" style="margin-bottom:16px">
+                ${ic('plus-circle', 15)}
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:12.5px">Newly Added Provision</div>
+                  <div style="font-size:12px;margin-top:2px">
+                    Introduced by <b>${esc(e.amendingAct || 'enacting act')}</b>.
+                    In force: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
+                  </div>
+                </div>
+              </div>`
+            : `<div class="alert danger" style="margin-bottom:16px">
+                ${ic('alert-octagon', 15)}
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:12.5px">Repealed Provision</div>
+                  <div style="font-size:12px;margin-top:2px">
+                    Repealed by <b>${esc(e.amendingAct || 'repealing act')}</b>.
+                    Effective: <b>${fmtDate(inForceDate, true)}</b>${daysDiffText}.
+                  </div>
+                </div>
+              </div>`
+      }
+
+      <dl class="kv" style="margin-top:16px">
+        ${prop('calendar', 'In force date', `<span class="num">${fmtDate(inForceDate, true)}</span>${e.upcoming ? ' <span class="badge badge-amber" style="font-size:10px;margin-left:4px">Upcoming</span>' : ''}`)}
+        ${prop('file-text', 'Amending act', e.amendingAct ? `<span class="mono" style="font-weight:600">${esc(e.amendingAct)}</span>` : '<span class="faint">—</span>')}
+        ${prop('landmark', 'Legislative source', e.source === 'riksdagen' ? 'Sveriges riksdag (SFS)' : 'Finansinspektionen (FFFS)')}
+        ${prop('layers', 'Provision level', e.level === 'document' ? 'Whole document' : `Chapter ${esc(e.chapter || '—')}, Section ${esc(e.section || '—')} §`)}
+        ${prop('shield', 'Statutory status', `<span class="finlex-tag-badge ${statusBadgeCls}" style="font-size:11px">${e.status}</span>`)}
+      </dl>
+
+      <!-- Word-level redline diff or added text -->
+      ${
+        e.diff && e.diff.length
+          ? `<div class="dsec" style="margin-top:22px">
+              <div class="dsec-h">
+                <h3>Statutory Redline Diff</h3>
+                <span class="muted" style="font-size:11.5px">Word-level changes</span>
+              </div>
+              <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap">${renderDiffHtml(e.diff)}</div>
+            </div>`
+          : isAdd && e.newText
+            ? `<div class="dsec" style="margin-top:22px">
+                <div class="dsec-h">
+                  <h3>Newly Enacted Statutory Text</h3>
+                </div>
+                <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><ins class="diff-token-ins">${esc(e.newText)}</ins></div>
+              </div>`
+            : isRep && e.oldText
+              ? `<div class="dsec" style="margin-top:22px">
+                  <div class="dsec-h">
+                    <h3>Repealed Text</h3>
+                  </div>
+                  <div class="diff-body" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:13.5px;line-height:1.65;font-family:var(--font-serif, Georgia, serif);white-space:pre-wrap"><del class="diff-token-del">${esc(e.oldText)}</del></div>
+                </div>`
+              : ''
+      }
+
+      <!-- Next actions: Reader deep-link & compliance task creation -->
+      <div class="dsec" style="margin-top:24px">
+        <div class="dsec-h"><h3>Compliance Actions</h3></div>
+        <div class="col" style="gap:8px">
+          <div class="row" style="justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
+            <div>
+              <div style="font-weight:600;font-size:12.5px">Regulations Reader</div>
+              <div class="muted" style="font-size:11.5px">Read complete statute with table of contents and full context</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true">
+              ${ic('book-open', 13)} Open in Reader ➔
+            </button>
+          </div>
+
+          <div class="row" style="justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
+            <div>
+              <div style="font-weight:600;font-size:12.5px">Create Compliance Task</div>
+              <div class="muted" style="font-size:11.5px">Track regulatory implementation and assign responsible owner</div>
+            </div>
+            <button class="btn btn-sm btn-primary" data-a="createChangeComplianceTask" data-id="${e.id}">
+              ${ic('plus', 13)} Create Task
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>`;
 }

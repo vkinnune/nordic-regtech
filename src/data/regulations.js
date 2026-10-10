@@ -38,6 +38,13 @@ export function allChanges() {
   return CHANGES_FEED;
 }
 
+export function changeEvent(id) {
+  if (id == null) return null;
+  const num = Number(id);
+  const isNum = !isNaN(num);
+  return CHANGES_FEED.find(e => (isNum && e.id === num) || String(e.id) === String(id) || e.chunkId === id) || null;
+}
+
 export function regulation(id) {
   if (!id) return null;
   ensureIndexes();

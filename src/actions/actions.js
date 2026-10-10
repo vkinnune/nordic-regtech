@@ -22,6 +22,7 @@ import {
   control,
   policy,
   regulation,
+  changeEvent,
   findSectionAndRegulation,
 } from '../core/store.js';
 import { fileType, fsize } from '../ui/helpers.js';
@@ -398,7 +399,8 @@ A.openTask = el => {
     toast("You don't have access to that task", { kind: 'err' });
     return;
   }
-  if ((!S.ui.drawer && !S.ui.govDrawer) || !document.activeElement?.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.changeDrawer) || !document.activeElement?.closest?.('.drawer'))
+    S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   S.ui.drawer = id;
   S.ui.drawerFull = S.prefs.openTasks === 'full' || (S.ui.drawerFull && S.ui.drawer === id);
   S.ui.pop = null;
@@ -407,6 +409,7 @@ A.openTask = el => {
   S.ui.mention = null;
   S.ui.subOpen = null;
   delete S.ui.govDrawer;
+  delete S.ui.changeDrawer;
   S.ui.drawerTab = S.ui.drawerTab || 'comments';
   render();
   const dr = $('.drawer');
@@ -414,6 +417,7 @@ A.openTask = el => {
 };
 A.closeDrawer = () => {
   S.ui.drawer = null;
+  delete S.ui.changeDrawer;
   S.ui.drawerFull = false;
   S.ui.subOpen = null;
   render();
@@ -1277,6 +1281,51 @@ A.setChangesViewDate = el => {
   S.ui.pop = null;
   render();
 };
+A.openChangeDrawer = el => {
+  const id = el.dataset.id;
+  const ev = changeEvent(id);
+  if (!ev) return;
+  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.changeDrawer) || !document.activeElement?.closest?.('.drawer')) {
+    S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  }
+  delete S.ui.drawer;
+  delete S.ui.govDrawer;
+  S.ui.changeDrawer = ev.id;
+  S.ui.drawerFull = false;
+  S.ui.pop = null;
+  S.ui.palette = null;
+  S.ui.modals = [];
+  S.ui.mention = null;
+  S.ui.subOpen = null;
+  fxSet({ drawer: true });
+  render();
+  const dr = $('.drawer');
+  if (dr && !dr.contains(document.activeElement)) dr.focus({ preventScroll: true });
+};
+A.closeChangeDrawer = () => {
+  delete S.ui.changeDrawer;
+  S.ui.drawerFull = false;
+  render();
+};
+A.createChangeComplianceTask = el => {
+  const id = el.dataset.id;
+  const e = changeEvent(id);
+  if (!e) return;
+  const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${e.chapter} kap. ` : ''}${e.section || ''} §`;
+  const codePill = e.code || e.docId;
+  const newId = dispatchGovTask({
+    key: `REG-${e.id}`,
+    title: `Assess amendment to ${codePill} ${secLabel}`,
+    desc: `Assess regulatory compliance impact for ${e.status} provision under ${codePill} (${e.title}) ${secLabel}.\n\nAmending act: ${e.amendingAct || 'N/A'}\nIn-force date: ${e.amendedDate || 'N/A'}\nSource: ${e.source || 'N/A'}`,
+    project: 'p5',
+    labels: ['Compliance', 'Regulatory Change'],
+    logMessage: `Created compliance task for regulatory change ${codePill} ${secLabel}`,
+    toastMessage: `Compliance task created for ${codePill} ${secLabel}`,
+  });
+  delete S.ui.changeDrawer;
+  S.ui.drawer = newId;
+  render();
+};
 A.setRegView = el => {
   const v = el.dataset.view || 'library';
   if (v === 'library') {
@@ -1331,8 +1380,10 @@ IN.changesQ = el => {
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
-  if ((!S.ui.drawer && !S.ui.govDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
+  if ((!S.ui.drawer && !S.ui.govDrawer && !S.ui.changeDrawer) || !el.closest?.('.drawer'))
+    S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;
   delete S.ui.drawer;
+  delete S.ui.changeDrawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.drawerFull = false;
   fxSet({ drawer: true });
