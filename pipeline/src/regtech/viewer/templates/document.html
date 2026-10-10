@@ -126,7 +126,21 @@
       {% if is_fffs and doc.repealed_on %}{% call property("Not in the register") %}<span class="badge badge-red">since {{ doc.repealed_on }}</span>{% endcall %}
       {% elif doc.repealed_on or doc.repealed_by %}{% call property("Repealed") %}<span class="badge badge-red">{{ "from " ~ doc.repealed_on if doc.repealed_on }}</span>{% if doc.repealed_by %} by {% if repealed_by_id %}<a href="/doc/{{ repealed_by_id }}" class="link">{{ doc.repealed_by }}</a>{% else %}{{ doc.repealed_by }}{% endif %}{% endif %}{% endcall %}{% endif %}
       {% if doc.amends %}{% call property("Amends") %}{% if amends_id %}<a href="/doc/{{ amends_id }}" class="link">{{ doc.amends }}</a>{% else %}{{ doc.amends }}{% endif %}{% endcall %}{% endif %}
-      {% if amendments %}{% call property("Amended by") %}{% for a in amendments %}<a href="/doc/{{ a.id }}" class="link">{{ a.identifier }}</a>{{ ", " if not loop.last }}{% endfor %}{% endcall %}{% endif %}
+      {% if amendments %}
+        {% call property("Amended by") %}
+          <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            {% for a in amendments %}
+            <span class="inline-flex items-center gap-1 rounded bg-slate-50 px-1.5 py-0.5 ring-1 ring-slate-200/70 dark:bg-slate-800/60 dark:ring-slate-700">
+              <a href="/doc/{{ a.id }}" class="link text-xs font-medium">{{ a.identifier }}</a>
+              <a href="/doc/{{ doc.id }}/diff/{{ a.id }}" class="badge badge-violet hover:bg-violet-100 dark:hover:bg-violet-900/40 inline-flex items-center gap-1 text-[11px]" title="Compare diff against {{ a.identifier }}">
+                {{ icon.git_compare("h-3 w-3") }}
+                Compare Diff
+              </a>
+            </span>
+            {% endfor %}
+          </span>
+        {% endcall %}
+      {% endif %}
       {% call property("Sources") %}
         <span class="flex flex-wrap items-center gap-x-4 gap-y-1">
           {% for source in sources %}

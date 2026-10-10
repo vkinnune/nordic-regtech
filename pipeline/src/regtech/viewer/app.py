@@ -20,6 +20,7 @@ from regtech.models import (
     SearchHit,
     SourceName,
 )
+from regtech.diff import align_sections
 from regtech.sources.fffs import FffsSource
 from regtech.sources.riksdagen import RiksdagenSource
 from regtech.storage.base import ChangeStore, DocumentStore, LinkStore
@@ -159,6 +160,30 @@ def create_app(
         if fffs_raw.is_file():
             return FileResponse(fffs_raw, media_type="text/html")
         return doc
+
+    @app.get("/doc/{doc_id}/diff/{amendment_id}", response_class=HTMLResponse)
+    def document_diff(request: Request, doc_id: str, amendment_id: str):
+        base_doc = doc_store.get_document(doc_id)
+        if base_doc is None:
+            raise HTTPException(status_code=404, detail=f"Base document {doc_id} not found")
+        amendment_doc = doc_store.get_document(amendment_id)
+        if amendment_doc is None:
+            raise HTTPException(
+                status_code=404, detail=f"Amendment document {amendment_id} not found"
+            )
+
+        diff_sections, summary = align_sections(base_doc, amendment_doc)
+        summaries = doc_store.list_documents()
+
+        return page(
+            request,
+            "diff.html",
+            summaries,
+            base_doc=base_doc,
+            amendment_doc=amendment_doc,
+            diff_sections=diff_sections,
+            summary=summary,
+        )
 
     @app.get("/search", response_class=HTMLResponse)
     def search(request: Request, q: str = ""):
