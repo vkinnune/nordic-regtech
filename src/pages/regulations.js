@@ -416,11 +416,11 @@ function renderRegulationsReader(u) {
                     curAct.localSource || curAct.sourceUrl
                       ? `
                     <div class="finlex-attach-chip-group">
-                      <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip" title="Inspect raw local statutory payload">
-                        ${ic('code', 12)}
-                        <span>${curAct.jurisdiction && curAct.jurisdiction.includes('Riksdagen') ? 'Local HTML' : 'Local Raw'}</span>
+                      <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip" title="Open web version">
+                        ${ic('globe', 12)}
+                        <span>Web Version</span>
                       </a>
-                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Local Raw Source · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/raw" title="Preview raw document inline in reader">
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Web Version · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/raw" title="Preview web version">
                         ${ic('eye', 11)}
                       </button>
                     </div>
