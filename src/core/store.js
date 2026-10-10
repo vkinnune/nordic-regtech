@@ -208,7 +208,21 @@ export {
 };
 
 /* ---------- statutory governance (policies, controls, risks) ---------- */
-export { POLICIES, CONTROLS, RISKS } from '../data/governance.js';
+import { POLICIES, CONTROLS, RISKS, GovernanceMatrix, createGovernanceMatrix, defaultGovernanceMatrix } from '../data/governance.js';
+export { POLICIES, CONTROLS, RISKS, GovernanceMatrix, createGovernanceMatrix, defaultGovernanceMatrix };
+
+let _activeMatrix = null;
+let _matrixVersion = null;
+
+export function getGovernanceMatrix() {
+  const d = D();
+  const ver = `${d.policies?.length}_${d.controls?.length}_${d.risks?.length}`;
+  if (!_activeMatrix || _matrixVersion !== ver) {
+    _activeMatrix = createGovernanceMatrix(allPolicies(), allControls(), allRisks());
+    _matrixVersion = ver;
+  }
+  return _activeMatrix;
+}
 
 export function allPolicies() {
   return D().policies || [];
@@ -263,7 +277,7 @@ export function isPolicyImpacted(p) {
 }
 
 export function policiesForSection(secId) {
-  return allPolicies().filter(p => p.statuteSections && p.statuteSections.includes(secId));
+  return getGovernanceMatrix().getSectionObligations(secId).policies;
 }
 
 export function policiesNeedingReviewForSection(secId) {
@@ -271,11 +285,11 @@ export function policiesNeedingReviewForSection(secId) {
 }
 
 export function controlsForSection(secId) {
-  return allControls().filter(c => c.statuteSections && c.statuteSections.includes(secId));
+  return getGovernanceMatrix().getSectionObligations(secId).controls;
 }
 
 export function risksForSection(secId) {
-  return allRisks().filter(r => r.statuteSections && r.statuteSections.includes(secId));
+  return getGovernanceMatrix().getSectionObligations(secId).risks;
 }
 
 export function impactedControlsForSection(secId) {
@@ -284,8 +298,7 @@ export function impactedControlsForSection(secId) {
 
 export function riskControls(r) {
   if (!r) return [];
-  const ids = r.controlIds || [];
-  return allControls().filter(c => ids.includes(c.id) || c.riskId === r.id);
+  return getGovernanceMatrix().getRiskControls(r.id);
 }
 
 export function riskGapStatus(r) {

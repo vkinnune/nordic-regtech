@@ -236,3 +236,173 @@ export const RISKS = [
     gapSummary: 'All identified statutory requirements covered by effective automated controls.',
   },
 ];
+
+/* ============================================================
+   DEEP GOVERNANCE MATRIX: O(1) Statutory Mapping & Gap Analysis
+   ============================================================ */
+
+export class GovernanceMatrix {
+  constructor(policies = [], controls = [], risks = []) {
+    this.policies = policies;
+    this.controls = controls;
+    this.risks = risks;
+
+    this._secPolicies = new Map();
+    this._secControls = new Map();
+    this._secRisks = new Map();
+    this._policyControls = new Map();
+    this._riskControls = new Map();
+
+    this.reindex();
+  }
+
+  reindex() {
+    this._secPolicies.clear();
+    this._secControls.clear();
+    this._secRisks.clear();
+    this._policyControls.clear();
+    this._riskControls.clear();
+
+    for (const p of this.policies) {
+      for (const sec of p.statuteSections || []) {
+        if (!this._secPolicies.has(sec)) this._secPolicies.set(sec, []);
+        this._secPolicies.get(sec).push(p);
+      }
+    }
+
+    for (const c of this.controls) {
+      for (const sec of c.statuteSections || []) {
+        if (!this._secControls.has(sec)) this._secControls.set(sec, []);
+        this._secControls.get(sec).push(c);
+      }
+      if (c.policyId) {
+        if (!this._policyControls.has(c.policyId)) this._policyControls.set(c.policyId, []);
+        this._policyControls.get(c.policyId).push(c);
+      }
+      if (c.riskId) {
+        if (!this._riskControls.has(c.riskId)) this._riskControls.set(c.riskId, []);
+        this._riskControls.get(c.riskId).push(c);
+      }
+    }
+
+    for (const r of this.risks) {
+      for (const sec of r.statuteSections || []) {
+        if (!this._secRisks.has(sec)) this._secRisks.set(sec, []);
+        this._secRisks.get(sec).push(r);
+      }
+      for (const ctlId of r.controlIds || []) {
+        const ctl = this.controls.find(c => c.id === ctlId);
+        if (ctl) {
+          if (!this._riskControls.has(r.id)) this._riskControls.set(r.id, []);
+          const existing = this._riskControls.get(r.id);
+          if (!existing.includes(ctl)) existing.push(ctl);
+        }
+      }
+    }
+  }
+
+  getSectionObligations(secId) {
+    if (!secId) return { policies: [], controls: [], risks: [] };
+    return {
+      policies: this._secPolicies.get(secId) || [],
+      controls: this._secControls.get(secId) || [],
+      risks: this._secRisks.get(secId) || [],
+    };
+  }
+
+  getComplianceGap(secId) {
+    const ob = this.getSectionObligations(secId);
+    const hasControls = ob.controls.length > 0;
+    const hasPolicies = ob.policies.length > 0;
+    const isCovered = hasControls && hasPolicies;
+
+    return {
+      isCovered,
+      hasControls,
+      hasPolicies,
+      controlsCount: ob.controls.length,
+      policiesCount: ob.policies.length,
+      gapStatus: isCovered ? 'COVERED' : 'OPEN_GAPS',
+    };
+  }
+
+  getPolicyControls(policyId) {
+    return this._policyControls.get(policyId) || [];
+  }
+
+  getRiskControls(riskId) {
+    return this._riskControls.get(riskId) || [];
+  }
+
+  getRiskExposure(r) {
+    if (!r) return { score: 0, gapStatus: 'AT_RISK' };
+    const ctls = this.getRiskControls(r.id);
+    const baseScore = r.exposureScore || 70;
+    if (!ctls.length) {
+      return { score: baseScore, gapStatus: r.gapStatus || 'AT_RISK' };
+    }
+    const hasDeficient = ctls.some(c => c.status === 'DEFICIENT');
+    const gapStatus = hasDeficient ? 'OPEN_GAPS' : 'COVERED';
+    return { score: baseScore, gapStatus };
+  }
+
+  linkSection(secId, { type, id }) {
+    if (!secId || !id) return false;
+    let target = null;
+    let map = null;
+
+    if (type === 'control') {
+      target = this.controls.find(c => c.id === id);
+      map = this._secControls;
+    } else if (type === 'policy') {
+      target = this.policies.find(p => p.id === id);
+      map = this._secPolicies;
+    } else if (type === 'risk') {
+      target = this.risks.find(r => r.id === id);
+      map = this._secRisks;
+    }
+
+    if (!target) return false;
+    if (!target.statuteSections) target.statuteSections = [];
+    if (target.statuteSections.includes(secId)) return false;
+
+    target.statuteSections.push(secId);
+    if (!map.has(secId)) map.set(secId, []);
+    map.get(secId).push(target);
+    return true;
+  }
+
+  unlinkSection(secId, { type, id }) {
+    if (!secId || !id) return false;
+    let target = null;
+    let map = null;
+
+    if (type === 'control') {
+      target = this.controls.find(c => c.id === id);
+      map = this._secControls;
+    } else if (type === 'policy') {
+      target = this.policies.find(p => p.id === id);
+      map = this._secPolicies;
+    } else if (type === 'risk') {
+      target = this.risks.find(r => r.id === id);
+      map = this._secRisks;
+    }
+
+    if (!target || !target.statuteSections) return false;
+    const idx = target.statuteSections.indexOf(secId);
+    if (idx === -1) return false;
+
+    target.statuteSections.splice(idx, 1);
+    if (map.has(secId)) {
+      const list = map.get(secId).filter(item => item.id !== id);
+      map.set(secId, list);
+    }
+    return true;
+  }
+}
+
+export function createGovernanceMatrix(policies, controls, risks) {
+  return new GovernanceMatrix(policies, controls, risks);
+}
+
+export const defaultGovernanceMatrix = new GovernanceMatrix(POLICIES, CONTROLS, RISKS);
