@@ -2,7 +2,7 @@
 import { $, MOD, MONL, TODAY, WD, addD, dOff, diffD, esc, fmtDate, iso, parse } from '../core/utils.js';
 import { ic, wsLogo } from '../core/icons.js';
 import { LABELS, PRIOS, PSTAT, STATUSES } from '../core/constants.js';
-import { D, S, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects, REGULATION_SORTS } from '../core/store.js';
+import { D, S, allChanges, allControls, allTasks, canSee, me, mem, pColor, proj, task, visibleProjects, REGULATION_SORTS } from '../core/store.js';
 import { av, avStack, prIcon, stIcon } from '../ui/helpers.js';
 import { focusKey, render } from '../shell/render.js';
 import { FIELDS, REG_FIELDS, viewOf } from '../shell/view-engine.js';
@@ -354,6 +354,34 @@ export function popHtml(p) {
           )
           .join('');
       style = 'width:280px';
+      break;
+    }
+    case 'changesDaylist': {
+      const ds = p.date;
+      const events = (allChanges() || []).filter(e => {
+        const d = e.amendedDate || (e.fetchedAt ? e.fetchedAt.slice(0, 10) : null);
+        return d === ds;
+      });
+      inner =
+        `<div class="mh" style="display:flex;align-items:center;justify-content:space-between"><span>${fmtDate(ds, true)}</span><span class="badge" style="font-size:10px">${events.length} change${events.length === 1 ? '' : 's'}</span></div>` +
+        `<div style="max-height:360px;overflow-y:auto">` +
+        events
+          .map(e => {
+            const secLabel = e.level === 'document' ? 'Whole document' : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §`;
+            const stCls = e.status === 'MODIFIED' ? 'badge-amber' : e.status === 'ADDED' ? 'badge-emerald' : 'badge-red';
+            const stLabel = e.status === 'MODIFIED' ? 'Mod' : e.status === 'ADDED' ? 'Add' : 'Rep';
+            return `<button class="mi" data-a="openRegInReader" data-id="${e.docId}" data-sec="${e.chunkId || ''}" data-diff="true" title="Open in reader with diff" style="display:flex;align-items:center;gap:6px">
+              <span class="finlex-tag-badge ${stCls}" style="font-size:10px;padding:1px 5px">${stLabel}</span>
+              <span style="font-weight:600;font-size:12px;color:var(--text)">${esc(e.code)}</span>
+              <span class="trunc grow" style="font-size:12px;color:var(--text-2)">${secLabel} · ${esc(e.title)}</span>
+              ${ic('chevron-right', 12)}
+            </button>`;
+          })
+          .join('') +
+        `</div>` +
+        `<div class="msep"></div>` +
+        `<button class="mi" data-a="setChangesViewDate" data-date="${ds}">${ic('newspaper', 13)}View in Feed Stream</button>`;
+      style = 'width:360px';
       break;
     }
     case 'event': {

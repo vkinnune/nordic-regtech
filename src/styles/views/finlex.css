@@ -1285,3 +1285,110 @@
 .changes-sec-btn:hover {
   color: var(--text-strong, var(--text));
 }
+
+/* Regulatory Changes Calendar & Views */
+.changes-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.changes-cal-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.changes-feed-wrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 24px var(--gutter) 80px;
+}
+
+.changes-feed-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.changes-table-wrap {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+.milestone-pill {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all var(--dur);
+  white-space: nowrap;
+}
+
+.milestone-pill:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.milestone-pill.on {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.milestone-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+
+.milestone-pill.on .milestone-badge {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.cev-change {
+  font-size: 11.5px;
+  font-family: var(--font);
+}
+
+.cev-change .status-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+.cev-change.is-mod .status-tag {
+  background: color-mix(in srgb, var(--amber) 20%, transparent);
+  color: var(--amber);
+}
+
+.cev-change.is-add .status-tag {
+  background: color-mix(in srgb, var(--green) 20%, transparent);
+  color: var(--green);
+}
+
+.cev-change.is-rep .status-tag {
+  background: color-mix(in srgb, var(--red) 20%, transparent);
+  color: var(--red);
+}

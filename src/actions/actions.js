@@ -1251,6 +1251,32 @@ A.clearChangesQ = () => {
   S.ui.changesQ = '';
   render();
 };
+A.changesCalNav = el => {
+  const d = +el.dataset.d;
+  const cur = parse(S.ui.changesCalDate || S.ui.calDate || iso(TODAY));
+  if (d === 0) {
+    S.ui.changesCalDate = iso(TODAY);
+  } else if ((S.ui.changesCalMode || 'month') === 'month') {
+    S.ui.changesCalDate = iso(new Date(cur.getFullYear(), cur.getMonth() + d, 1));
+  } else {
+    S.ui.changesCalDate = iso(addD(cur, d * 7));
+  }
+  render();
+};
+A.changesJumpDate = el => {
+  if (el.dataset.date) {
+    S.ui.changesCalDate = el.dataset.date;
+    render();
+  }
+};
+A.setChangesViewDate = el => {
+  S.ui.changesView = 'feed';
+  if (el.dataset.date) {
+    S.ui.changesQ = el.dataset.date;
+  }
+  S.ui.pop = null;
+  render();
+};
 A.setRegView = el => {
   const v = el.dataset.view || 'library';
   if (v === 'library') {

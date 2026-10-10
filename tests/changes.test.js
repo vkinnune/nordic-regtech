@@ -90,3 +90,18 @@ test('Routing Integration: regulations diff deep-linking', () => {
     auth: null,
   });
 });
+
+test('Milestone Dates: changes feed contains authentic in-force amendment milestones', () => {
+  const events = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/changes_feed.json'), 'utf-8'));
+  const dates = events.map(e => e.amendedDate || (e.fetchedAt ? e.fetchedAt.slice(0, 10) : null)).filter(Boolean);
+  assert.ok(dates.length > 50, 'Must have in-force dates for amendments');
+
+  const futureDates = dates.filter(d => d >= '2026-10-01');
+  assert.ok(futureDates.length >= 50, 'Must have future in-force milestones starting from late 2026');
+
+  // Verify key Swedish statutory milestones (e.g. 2026-10-08, 2026-12-05, 2027-01-11, 2030-01-10)
+  assert.ok(dates.includes('2026-10-08'), 'Must include 2026-10-08 fetched milestone');
+  assert.ok(dates.includes('2026-12-05'), 'Must include 2026-12-05 milestone');
+  assert.ok(dates.includes('2027-01-11'), 'Must include 2027-01-11 milestone');
+  assert.ok(dates.includes('2030-01-10'), 'Must include 2030-01-10 milestone');
+});
