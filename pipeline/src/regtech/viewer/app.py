@@ -113,7 +113,12 @@ def create_app(
         pdf_file = files_dir / pdf_path
         if not pdf_file.is_file():
             raise HTTPException(status_code=404, detail=f"PDF file not found on disk for {doc_id}")
-        return FileResponse(pdf_file, media_type="application/pdf", filename=pdf_file.name)
+        return FileResponse(
+            pdf_file,
+            media_type="application/pdf",
+            filename=pdf_file.name,
+            content_disposition_type="inline",
+        )
 
     @app.api_route("/doc/{doc_id}/memo", methods=["GET", "HEAD"])
     def document_memo(doc_id: str):
@@ -130,7 +135,12 @@ def create_app(
         memo_file = files_dir / memo_path
         if not memo_file.is_file():
             raise HTTPException(status_code=404, detail=f"Decision memo file not found on disk for {doc_id}")
-        return FileResponse(memo_file, media_type="application/pdf", filename=memo_file.name)
+        return FileResponse(
+            memo_file,
+            media_type="application/pdf",
+            filename=memo_file.name,
+            content_disposition_type="inline",
+        )
 
     @app.api_route("/doc/{doc_id}/raw", methods=["GET", "HEAD"])
     def document_raw(doc_id: str):

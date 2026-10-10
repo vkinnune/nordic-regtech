@@ -11,7 +11,7 @@ export async function onRequest(context) {
 
   for (const part of parts) {
     if (part.startsWith('fffs-') || part.startsWith('sfs-')) {
-      docId = part.toLowerCase();
+      docId = part.replace(/\.[^/.]+$/, '').toLowerCase();
       break;
     }
   }
