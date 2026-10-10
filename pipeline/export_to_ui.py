@@ -173,12 +173,14 @@ def export():
             }
             changes_map[(doc_id, chapter, section, bool(upcoming), ordinal)] = ch_info
 
+            raw_src = id_to_source.get(doc_id, "")
+            src_val = "fffs" if raw_src in ("fi_fffs", "fffs") else "riksdagen"
             feed_events.append({
                 "id": cid,
                 "docId": doc_id,
                 "code": id_to_ident.get(doc_id, doc_id),
                 "title": id_to_title.get(doc_id, ""),
-                "source": id_to_source.get(doc_id, ""),
+                "source": src_val,
                 "level": level,
                 "chapter": chapter,
                 "section": section,
@@ -190,6 +192,60 @@ def export():
                 "oldText": old_text,
                 "newText": new_text,
                 "diff": diff_parts,
+            })
+
+    # Add authentic FFFS supervisory amendment events from the 276 amending acts
+    fffs_event_id = 5000
+    for row in doc_rows:
+        doc_id, source, identifier, title, amends, doc_json_str = row
+        if source != "fi_fffs" or not amends:
+            continue
+        data = json.loads(doc_json_str)
+        eff_date = data.get("effective_date")
+        fetched_at = data.get("updated_at", "2026-10-10T00:00:00Z")
+        secs = data.get("sections", [])
+        base_id = ident_to_id.get(amends, amends)
+
+        if secs:
+            for s in secs[:3]:
+                fffs_event_id += 1
+                feed_events.append({
+                    "id": fffs_event_id,
+                    "docId": base_id,
+                    "code": amends,
+                    "title": id_to_title.get(base_id, title),
+                    "source": "fffs",
+                    "level": "section",
+                    "chapter": s.get("chapter"),
+                    "section": s.get("section"),
+                    "upcoming": False,
+                    "status": "MODIFIED",
+                    "amendingAct": identifier,
+                    "amendedDate": eff_date,
+                    "fetchedAt": fetched_at,
+                    "oldText": None,
+                    "newText": s.get("full_text"),
+                    "diff": [],
+                })
+        else:
+            fffs_event_id += 1
+            feed_events.append({
+                "id": fffs_event_id,
+                "docId": base_id,
+                "code": amends,
+                "title": id_to_title.get(base_id, title),
+                "source": "fffs",
+                "level": "document",
+                "chapter": None,
+                "section": None,
+                "upcoming": False,
+                "status": "MODIFIED",
+                "amendingAct": identifier,
+                "amendedDate": eff_date,
+                "fetchedAt": fetched_at,
+                "oldText": None,
+                "newText": None,
+                "diff": [],
             })
 
     # 4. Assemble document models

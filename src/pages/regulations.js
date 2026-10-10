@@ -377,95 +377,53 @@ function renderRegulationsReader(u) {
 
             <!-- Official Documents & Attachments Toolbar -->
             ${
-              curAct.localPdf || curAct.localMemo || curAct.localSource || curAct.pdfUrl || curAct.memoUrl || curAct.sourceUrl
+              curAct.localPdf || curAct.pdfUrl || curAct.localMemo || curAct.memoUrl || curAct.localSource || curAct.sourceUrl
                 ? `
               <div class="finlex-attachments-bar">
-                <span class="finlex-attachments-label">${ic('paperclip', 12)} Official Attachments & Local Serving:</span>
+                <span class="finlex-attachments-label">${ic('paperclip', 12)} Official Documents:</span>
                 <div class="finlex-attachments-links">
                   ${
-                    curAct.localPdf
+                    curAct.localPdf || curAct.pdfUrl
                       ? `
                     <div class="finlex-attach-chip-group">
-                      <a href="/doc/${esc(curAct.id)}/pdf" target="_blank" class="finlex-attach-chip pdf is-local" title="Open locally cached PDF (offline, bypasses fi.se geoblocking)">
+                      <a href="/doc/${esc(curAct.id)}/pdf" target="_blank" class="finlex-attach-chip pdf" title="Open PDF document">
                         ${ic('file-text', 12)}
                         <span>Original PDF</span>
-                        <span class="finlex-local-badge">${ic('hard-drive', 10)} Local</span>
                       </a>
                       <button class="finlex-preview-btn" data-a="previewDoc" data-title="Original PDF · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/pdf" title="Preview PDF inline in reader">
                         ${ic('eye', 11)}
                       </button>
-                      ${
-                        curAct.pdfUrl
-                          ? `
-                        <a href="${esc(curAct.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-sublink" title="Open on official government site (fi.se)">
-                          online ${ic('external-link', 9)}
-                        </a>
-                      `
-                          : ''
-                      }
                     </div>
-                  `
-                      : curAct.pdfUrl
-                        ? `
-                    <a href="${esc(curAct.pdfUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip pdf" title="Download official PDF Gazette document">
-                      ${ic('file-text', 12)}
-                      <span>Official PDF</span>
-                      ${ic('external-link', 10)}
-                    </a>
-                  `
-                        : ''
-                  }
-                  ${
-                    curAct.localMemo
-                      ? `
-                    <div class="finlex-attach-chip-group">
-                      <a href="/doc/${esc(curAct.id)}/memo" target="_blank" class="finlex-attach-chip memo is-local" title="Open locally cached decision memorandum (Besluts-PM)">
-                        ${ic('file-check', 12)}
-                        <span>Decision Memo (Besluts-PM)</span>
-                        <span class="finlex-local-badge">${ic('hard-drive', 10)} Local</span>
-                      </a>
-                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Decision Memo (Besluts-PM) · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/memo" title="Preview Memo inline in reader">
-                        ${ic('eye', 11)}
-                      </button>
-                      ${
-                        curAct.memoUrl
-                          ? `
-                        <a href="${esc(curAct.memoUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-sublink" title="Open on official government site">
-                          online ${ic('external-link', 9)}
-                        </a>
-                      `
-                          : ''
-                      }
-                    </div>
-                  `
-                      : curAct.memoUrl
-                        ? `
-                    <a href="${esc(curAct.memoUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip memo" title="Read supervisory decision memorandum (Besluts-PM)">
-                      ${ic('file-check', 12)}
-                      <span>Decision Memo (Besluts-PM)</span>
-                      ${ic('external-link', 10)}
-                    </a>
-                  `
-                        : ''
-                  }
-                  ${
-                    curAct.localSource
-                      ? `
-                    <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip is-local" title="Inspect raw local statutory payload">
-                      ${ic('code', 12)}
-                      <span>Local Raw</span>
-                    </a>
                   `
                       : ''
                   }
                   ${
-                    curAct.sourceUrl
+                    curAct.localMemo || curAct.memoUrl
                       ? `
-                    <a href="${esc(curAct.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="Open official supervisory registry page">
-                      ${ic('globe', 12)}
-                      <span>Official Page</span>
-                      ${ic('external-link', 10)}
-                    </a>
+                    <div class="finlex-attach-chip-group">
+                      <a href="/doc/${esc(curAct.id)}/memo" target="_blank" class="finlex-attach-chip memo" title="Open decision memorandum (Besluts-PM)">
+                        ${ic('file-check', 12)}
+                        <span>Decision Memo (Besluts-PM)</span>
+                      </a>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Decision Memo (Besluts-PM) · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/memo" title="Preview Memo inline in reader">
+                        ${ic('eye', 11)}
+                      </button>
+                    </div>
+                  `
+                      : ''
+                  }
+                  ${
+                    curAct.localSource || curAct.sourceUrl
+                      ? `
+                    <div class="finlex-attach-chip-group">
+                      <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip" title="Inspect raw local statutory payload">
+                        ${ic('code', 12)}
+                        <span>${curAct.jurisdiction && curAct.jurisdiction.includes('Riksdagen') ? 'Local HTML' : 'Local Raw'}</span>
+                      </a>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Local Raw Source · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/raw" title="Preview raw document inline in reader">
+                        ${ic('eye', 11)}
+                      </button>
+                    </div>
                   `
                       : ''
                   }
@@ -664,7 +622,6 @@ function renderSectionBlock(s, activeSecId, isFffs) {
 
   const ch = s.change;
   const status = s.status || (ch ? ch.status : 'UNCHANGED');
-  const isAdded = status === 'ADDED';
   const amendingAct = s.amendingAct || (ch ? ch.amendingAct : null);
   const inForceDate = s.inForceFrom || s.amendedDate || (ch ? ch.amendedDate : null);
 
@@ -676,7 +633,7 @@ function renderSectionBlock(s, activeSecId, isFffs) {
     <header class="finlex-sec-head">
       <div class="finlex-sec-cite">
         <span class="finlex-sec-num">${esc(s.number)}</span>
-        ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>` : ''}
+        ${s.upcoming ? `<span class="finlex-tag-badge upcoming">${ic('clock', 11)} Upcoming wording${!statusBadge && inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>` : ''}
         ${s.inForceUntil ? `<span class="finlex-tag-badge past">In force until ${esc(s.inForceUntil)}</span>` : ''}
         ${statusBadge}
         ${amendingAct && !statusBadge ? `<span class="finlex-sec-amendment">${esc(amendingAct)}</span>` : ''}
@@ -727,8 +684,6 @@ function renderSectionBlock(s, activeSecId, isFffs) {
     ${diffAccordionHtml({
       diff: ch?.diff,
       isUpcoming: s.upcoming,
-      isAdded: isAdded,
-      newText: ch?.newText,
       isOpen: openDiff,
     })}
 

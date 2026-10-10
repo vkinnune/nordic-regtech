@@ -209,8 +209,8 @@ export async function onRequest(context) {
   const { request, next, env } = context;
   const url = new URL(request.url);
 
-  // Allow static favicon
-  if (url.pathname === '/favicon.svg') {
+  // Allow static favicon and document serving endpoints
+  if (url.pathname === '/favicon.svg' || url.pathname.startsWith('/doc/') || url.pathname.startsWith('/files/')) {
     return next();
   }
 

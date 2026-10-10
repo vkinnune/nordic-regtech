@@ -6,9 +6,6 @@ import { esc } from '../core/utils.js';
 const ICON_GIT_COMPARE =
   '<svg class="i" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>';
 
-const ICON_PLUS_CIRCLE =
-  '<svg class="i" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>';
-
 const STATUS_CONFIG = {
   MODIFIED: { cls: 'badge-amber', label: 'Modified', title: 'Statutory modification' },
   ADDED: { cls: 'badge-emerald', label: 'Added', title: 'Newly added statutory provision' },
@@ -64,7 +61,7 @@ export function changeBadgeHtml(status, amendingAct = null, amendedDate = null) 
  * @param {boolean} [options.isOpen]
  * @returns {string} HTML markup
  */
-export function diffAccordionHtml({ diff, isUpcoming = false, isAdded = false, newText = '', isOpen = false }) {
+export function diffAccordionHtml({ diff, isUpcoming = false, isOpen = false }) {
   const hasDiff = Boolean(diff && diff.length > 0);
   if (hasDiff) {
     const diffCount = diff.filter(d => d[0] !== 'equal').length;
@@ -77,20 +74,6 @@ export function diffAccordionHtml({ diff, isUpcoming = false, isAdded = false, n
         </summary>
         <div class="finlex-diff-body diff-body">
           ${renderDiffHtml(diff)}
-        </div>
-      </details>
-    `;
-  }
-
-  if (isAdded && newText) {
-    return `
-      <details class="finlex-diff-details" ${isOpen ? 'open' : ''}>
-        <summary class="finlex-diff-summary">
-          ${ICON_PLUS_CIRCLE}
-          <span>View newly added statutory text</span>
-        </summary>
-        <div class="finlex-diff-body diff-body">
-          <ins class="diff-token-ins">${esc(newText)}</ins>
         </div>
       </details>
     `;
