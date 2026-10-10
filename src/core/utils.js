@@ -84,23 +84,3 @@ export function dayBucket(ts) {
   if (n > -7) return 'This week';
   return 'Earlier';
 }
-
-/* ---------- redline diff markup renderer ---------- */
-export function renderDiffHtml(diff) {
-  if (!diff || !diff.length) return '';
-  return diff
-    .map(([op, text]) => {
-      if (op === 'delete') {
-        const words = text.replace(/\s+$/, '');
-        const space = text.slice(words.length);
-        return `<del class="diff-token-del">${esc(words)}</del>${esc(space)}`;
-      }
-      if (op === 'insert') {
-        const words = text.replace(/\s+$/, '');
-        const space = text.slice(words.length);
-        return `<ins class="diff-token-ins">${esc(words)}</ins>${esc(space)}`;
-      }
-      return esc(text);
-    })
-    .join('');
-}

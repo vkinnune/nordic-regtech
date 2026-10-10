@@ -1,7 +1,7 @@
 /* =====================================================================
    ROUTER: client-side hash routing, parsing, serialization, and history sync
    ===================================================================== */
-import { S } from './store.js';
+import { S } from '../core/store.js';
 
 export const AUTH_SCREENS = ['login', 'signup', 'forgot', 'forgot-sent', 'reset', 'reset-done', 'verify', 'onboarding'];
 
@@ -158,14 +158,21 @@ export function hashToRoute(hash, options = {}) {
     return { route: 'settings', params: {}, auth: null };
   }
 
-  // Regulations route: #/regulations, #/regulation, #/regulations/:id, #/regulations/:id/:sec
+  // Regulations route: #/regulations, #/regulation, #/regulations/:id, #/regulations/:id/:sec, #/regulations/:id/:sec/diff
   if (p0 === 'regulations' || p0 === 'regulation') {
-    if (parts.length > 3) {
+    if (parts.length > 4) {
       return { route: '404', params: { path: clean }, auth: null };
     }
     if (parts[1]) {
       const params = { id: parts[1] };
       if (parts[2]) params.sec = parts[2];
+      if (parts[3]) {
+        if (parts[3].toLowerCase() === 'diff') {
+          params.diff = true;
+        } else {
+          return { route: '404', params: { path: clean }, auth: null };
+        }
+      }
       return { route: 'regulations', params, auth: null };
     }
     return { route: 'regulations', params: {}, auth: null };
@@ -245,7 +252,8 @@ export function routeToHash(state = null, options = {}) {
 
   if (r === 'regulations' || r === 'regulation') {
     if (s.params?.id && s.params?.sec) {
-      return `#/regulations/${encodeURIComponent(s.params.id)}/${encodeURIComponent(s.params.sec)}`;
+      const diffSuffix = s.params?.diff ? '/diff' : '';
+      return `#/regulations/${encodeURIComponent(s.params.id)}/${encodeURIComponent(s.params.sec)}${diffSuffix}`;
     }
     if (s.params?.id) {
       return `#/regulations/${encodeURIComponent(s.params.id)}`;

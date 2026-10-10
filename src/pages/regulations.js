@@ -19,7 +19,7 @@ import {
 } from '../core/store.js';
 import { empty } from '../ui/helpers.js';
 import { applyRegView, viewOf, viewToolbar } from '../shell/view-engine.js';
-import { renderDiffHtml } from './changes.js';
+import { changeBadgeHtml, diffAccordionHtml } from '../ui/diff.js';
 
 export function pageRegulations() {
   const u = S.ui;
@@ -577,24 +577,12 @@ function renderSectionBlock(s, activeSecId, isFffs) {
 
   const ch = s.change;
   const status = s.status || (ch ? ch.status : 'UNCHANGED');
-  const isModified = status === 'MODIFIED';
   const isAdded = status === 'ADDED';
-  const isRepealed = status === 'REPEALED';
   const amendingAct = s.amendingAct || (ch ? ch.amendingAct : null);
   const inForceDate = s.inForceFrom || s.amendedDate || (ch ? ch.amendedDate : null);
 
-  let statusBadge = '';
-  if (isModified) {
-    statusBadge = `<span class="finlex-tag-badge badge-amber" title="Statutory modification">Modified${amendingAct ? ` by ${esc(amendingAct)}` : ''}${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>`;
-  } else if (isAdded) {
-    statusBadge = `<span class="finlex-tag-badge badge-emerald" title="Newly added statutory provision">Added${amendingAct ? ` by ${esc(amendingAct)}` : ''}${inForceDate ? `, in force ${esc(inForceDate)}` : ''}</span>`;
-  } else if (isRepealed) {
-    statusBadge = `<span class="finlex-tag-badge badge-red" title="Repealed provision">Repealed${amendingAct ? ` by ${esc(amendingAct)}` : ''}</span>`;
-  }
-
-  const hasDiff = Boolean(ch && ch.diff && ch.diff.length);
-  const diffCount = hasDiff ? ch.diff.filter(d => d[0] !== 'equal').length : 0;
-  const openDiff = isActive || Boolean(S.ui.params && S.ui.params.diff);
+  const statusBadge = changeBadgeHtml(status, amendingAct, inForceDate);
+  const openDiff = Boolean(S.ui.params && S.ui.params.diff && s.id === activeSecId);
 
   return `<article class="finlex-sec ${isActive ? 'active' : ''} ${isGuidanceSec ? 'is-guidance' : ''}" id="sec-${s.id}">
     <!-- Section Citation & Heading -->
@@ -649,34 +637,13 @@ function renderSectionBlock(s, activeSecId, isFffs) {
     }
 
     <!-- REDLINE VERSION DIFF ACCORDION -->
-    ${
-      hasDiff
-        ? `
-      <details class="finlex-diff-details" ${openDiff ? 'open' : ''}>
-        <summary class="finlex-diff-summary">
-          ${ic('git-compare', 12)}
-          <span>Show changes ${s.upcoming ? 'against the text in force' : 'since previous version'}</span>
-          <span class="finlex-diff-stats">(${diffCount} changes)</span>
-        </summary>
-        <div class="finlex-diff-body diff-body">
-          ${renderDiffHtml(ch.diff)}
-        </div>
-      </details>
-    `
-        : isAdded && ch && ch.newText
-          ? `
-      <details class="finlex-diff-details" ${openDiff ? 'open' : ''}>
-        <summary class="finlex-diff-summary">
-          ${ic('plus-circle', 12)}
-          <span>View newly added statutory text</span>
-        </summary>
-        <div class="finlex-diff-body diff-body">
-          <ins class="diff-token-ins">${esc(ch.newText)}</ins>
-        </div>
-      </details>
-    `
-          : ''
-    }
+    ${diffAccordionHtml({
+      diff: ch?.diff,
+      isUpcoming: s.upcoming,
+      isAdded: isAdded,
+      newText: ch?.newText,
+      isOpen: openDiff,
+    })}
 
     <!-- OUTGOING CITATIONS -->
     ${

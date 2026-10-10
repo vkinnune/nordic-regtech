@@ -1298,6 +1298,11 @@ IN.regLibQ = el => {
   render();
 };
 
+IN.changesQ = el => {
+  S.ui.changesQ = el.value;
+  render();
+};
+
 /* ---------- statutory governance (policies, controls, risks) ---------- */
 A.openGovDrawer = el => {
   if ((!S.ui.drawer && !S.ui.govDrawer) || !el.closest?.('.drawer')) S.ui.drawerOpener = el.isConnected ? focusKey(el) : S.ui.drawerOpener;

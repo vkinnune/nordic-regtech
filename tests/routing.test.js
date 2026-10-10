@@ -17,7 +17,7 @@ import {
   safeReplaceHash,
   AUTH_SCREENS,
   SINGULAR_ROUTE_MAP,
-} from '../src/core/router.js';
+} from '../src/shell/router.js';
 import { S } from '../src/core/store.js';
 
 test('Router: normalizeHash strips leading hashes, slashes, queries, and extra fragments', () => {

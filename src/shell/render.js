@@ -23,7 +23,7 @@ import {
   applyRoute,
   safeReplaceHash,
   go as routerGo,
-} from '../core/router.js';
+} from './router.js';
 
 export const ROUTE_NAMES = {
   home: 'Home',

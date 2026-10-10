@@ -1,10 +1,9 @@
 /* ---------- REGULATORY CHANGES & AMENDMENT FEED ---------- */
-import { esc, renderDiffHtml } from '../core/utils.js';
+import { esc } from '../core/utils.js';
 import { ic } from '../core/icons.js';
 import { S, allChanges } from '../core/store.js';
 import { empty } from '../ui/helpers.js';
-
-export { renderDiffHtml };
+import { changeBadgeHtml, diffAccordionHtml } from '../ui/diff.js';
 
 function formatDate(dateStr) {
   if (!dateStr) return 'Recent';
@@ -42,7 +41,8 @@ export function pageChanges() {
     if (sourceFilter === 'fffs' && e.source !== 'fffs') return false;
     if (statusFilter !== 'all' && e.status !== statusFilter) return false;
     if (q) {
-      const matchText = `${e.code || ''} ${e.title || ''} ${e.amendingAct || ''} ${e.chapter || ''} ${e.section || ''} ${e.oldText || ''} ${e.newText || ''}`.toLowerCase();
+      const matchText =
+        `${e.code || ''} ${e.title || ''} ${e.amendingAct || ''} ${e.chapter || ''} ${e.section || ''} ${e.oldText || ''} ${e.newText || ''}`.toLowerCase();
       if (!matchText.includes(q)) return false;
     }
     return true;
@@ -83,24 +83,11 @@ export function pageChanges() {
             <div class="changes-cards-list">
               ${items
                 .map(e => {
-                  const isModified = e.status === 'MODIFIED';
-                  const isAdded = e.status === 'ADDED';
-                  const isRepealed = e.status === 'REPEALED';
-
-                  let statusBadge = '';
-                  if (isModified) {
-                    statusBadge = `<span class="finlex-tag-badge badge-amber">Modified${e.amendingAct ? ` by ${esc(e.amendingAct)}` : ''}${e.amendedDate ? `, in force ${esc(e.amendedDate)}` : ''}</span>`;
-                  } else if (isAdded) {
-                    statusBadge = `<span class="finlex-tag-badge badge-emerald">Added${e.amendingAct ? ` by ${esc(e.amendingAct)}` : ''}${e.amendedDate ? `, in force ${esc(e.amendedDate)}` : ''}</span>`;
-                  } else if (isRepealed) {
-                    statusBadge = `<span class="finlex-tag-badge badge-red">Repealed${e.amendingAct ? ` by ${esc(e.amendingAct)}` : ''}</span>`;
-                  }
-
-                  const hasDiff = e.diff && e.diff.length > 0;
-                  const diffChangesCount = hasDiff ? e.diff.filter(d => d[0] !== 'equal').length : 0;
-                  const secLabel = e.level === 'document'
-                    ? 'Whole document'
-                    : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §${e.upcoming ? ' (upcoming wording)' : ''}`;
+                  const statusBadge = changeBadgeHtml(e.status, e.amendingAct, e.amendedDate);
+                  const secLabel =
+                    e.level === 'document'
+                      ? 'Whole document'
+                      : `${e.chapter ? `${esc(e.chapter)} kap. ` : ''}${esc(e.section || '')} §${e.upcoming ? ' (upcoming wording)' : ''}`;
 
                   return `
                   <article class="changes-card surface">
@@ -128,34 +115,13 @@ export function pageChanges() {
                       </button>
                     </div>
 
-                    ${
-                      hasDiff
-                        ? `
-                      <details class="finlex-diff-details">
-                        <summary class="finlex-diff-summary">
-                          ${ic('git-compare', 12)}
-                          <span>Show changes ${e.upcoming ? 'against the text in force' : 'since previous version'}</span>
-                          <span class="finlex-diff-stats">(${diffChangesCount} changes)</span>
-                        </summary>
-                        <div class="finlex-diff-body diff-body">
-                          ${renderDiffHtml(e.diff)}
-                        </div>
-                      </details>
-                    `
-                        : isAdded && e.newText
-                          ? `
-                      <details class="finlex-diff-details">
-                        <summary class="finlex-diff-summary">
-                          ${ic('plus-circle', 12)}
-                          <span>View newly added statutory text</span>
-                        </summary>
-                        <div class="finlex-diff-body diff-body">
-                          <ins class="diff-token-ins">${esc(e.newText)}</ins>
-                        </div>
-                      </details>
-                    `
-                          : ''
-                    }
+                    ${diffAccordionHtml({
+                      diff: e.diff,
+                      isUpcoming: e.upcoming,
+                      isAdded: e.status === 'ADDED',
+                      newText: e.newText,
+                      isOpen: false,
+                    })}
                   </article>
                 `;
                 })

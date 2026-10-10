@@ -54,7 +54,7 @@ import './features/archive.js';
 import './actions/teams.js';
 import './actions/subtasks.js';
 import './actions/archive.js';
-import './core/router.js';
+import './shell/router.js';
 import { S, D } from './core/store.js';
 import { A } from './actions/actions.js';
 import { render, go, initRouter } from './shell/render.js';

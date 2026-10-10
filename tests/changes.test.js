@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { hashToRoute, routeToHash } from '../src/core/router.js';
-import { renderDiffHtml } from '../src/core/utils.js';
+import { hashToRoute, routeToHash } from '../src/shell/router.js';
+import { renderDiffHtml } from '../src/ui/diff.js';
 
 const ROOT = path.resolve('.');
 
@@ -72,4 +72,21 @@ test('Routing Integration: changes feed route and aliases', () => {
   assert.deepStrictEqual(hashToRoute('#/feed'), { route: 'changes', params: {}, auth: null });
   assert.deepStrictEqual(hashToRoute('#/change'), { route: 'changes', params: {}, auth: null });
   assert.equal(routeToHash({ route: 'changes' }), '#/changes');
+});
+
+test('Routing Integration: regulations diff deep-linking', () => {
+  assert.deepStrictEqual(hashToRoute('#/regulations/sfs-2004-46/chapter-2-section-1/diff'), {
+    route: 'regulations',
+    params: { id: 'sfs-2004-46', sec: 'chapter-2-section-1', diff: true },
+    auth: null,
+  });
+  assert.equal(
+    routeToHash({ route: 'regulations', params: { id: 'sfs-2004-46', sec: 'chapter-2-section-1', diff: true } }),
+    '#/regulations/sfs-2004-46/chapter-2-section-1/diff',
+  );
+  assert.deepStrictEqual(hashToRoute('#/regulations/sfs-2004-46/chapter-2-section-1/unknown'), {
+    route: '404',
+    params: { path: 'regulations/sfs-2004-46/chapter-2-section-1/unknown' },
+    auth: null,
+  });
 });
