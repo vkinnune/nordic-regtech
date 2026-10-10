@@ -1349,8 +1349,13 @@ A.clearRegLibFilters = () => {
   v.filters = [];
   v.q = '';
   S.ui.regLibQ = '';
+  S.ui.regLibLimit = 24;
   S.ui.pop = null;
   fxSet({ tabs: true });
+  render();
+};
+A.loadMoreRegs = () => {
+  S.ui.regLibLimit = (S.ui.regLibLimit || 24) + 24;
   render();
 };
 

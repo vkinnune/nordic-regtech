@@ -271,9 +271,10 @@ def export():
                 "heading": sec.get("heading") or "",
                 "text": sec.get("full_text") or sec.get("text") or "",
                 "ruleType": sec_rule_type,
-                "crossRefs": sec_refs,
                 "status": sec_status,
             }
+            if sec_refs:
+                sec_data["crossRefs"] = sec_refs
 
             if change_info:
                 sec_data["amendingAct"] = amending_act
@@ -290,15 +291,7 @@ def export():
                 # Also link back chunkId to feed event
                 change_info["chunkId"] = sec_id
 
-            if paras:
-                sec_data["paragraphs"] = [
-                    {
-                        "text": p.get("text") or "",
-                        "ruleType": p.get("rule_type") or "binding_rule",
-                        "points": p.get("points") or [],
-                    }
-                    for p in paras
-                ]
+            # Omit redundant paragraphs array; sec_data["text"] contains the authentic statutory text
 
             if sec.get("upcoming") or (change_info and change_info.get("upcoming")):
                 sec_data["upcoming"] = True
@@ -419,7 +412,7 @@ def export():
     docs.sort(key=lambda d: d["code"])
 
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(docs, f, ensure_ascii=False, indent=2)
+        json.dump(docs, f, ensure_ascii=False, separators=(",", ":"))
 
     file_size_mb = OUTPUT_PATH.stat().st_size / (1024 * 1024)
     print(f"✅ Successfully exported {len(docs)} regulations ({file_size_mb:.2f} MB) to {OUTPUT_PATH}")

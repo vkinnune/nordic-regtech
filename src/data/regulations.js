@@ -91,10 +91,12 @@ export function allChaptersOf(reg) {
 
 export function allSectionsOf(reg) {
   if (!reg) return [];
+  if (reg._cachedSections) return reg._cachedSections;
   const secs = [];
   allChaptersOf(reg).forEach(ch => {
     (ch.sections || []).forEach(s => secs.push({ ...s, chapterNumber: ch.number, chapterTitle: ch.title }));
   });
+  reg._cachedSections = secs;
   return secs;
 }
 

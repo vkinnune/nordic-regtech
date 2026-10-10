@@ -39,23 +39,26 @@ function renderRegulationsLibrary(u) {
   const layout = u.regLibLayout || 'grid'; // 'grid' or 'list'
 
   const allActs = allRegulations();
-  const totalSections = allActs.reduce((sum, a) => sum + allSectionsOf(a).length, 0);
+  const countSecs = r => (r._cachedSections ? r._cachedSections.length : (r.chapters || []).reduce((sum, ch) => sum + (ch.sections || []).length, 0));
+  const totalSections = allActs.reduce((sum, a) => sum + countSecs(a), 0);
   const fffsCount = allActs.filter(r => getRegulationAuthority(r) === 'fi').length;
   const sfsCount = allActs.filter(r => getRegulationAuthority(r) === 'riksdagen').length;
 
   // Decorate all acts with precomputed metadata for fast multi-dimensional evaluation
   const decorated = allActs.map(r => {
-    const secs = allSectionsOf(r);
+    const secCount = countSecs(r);
+    const secs = r._cachedSections || { length: secCount };
     const year = getRegulationYear(r);
     const regDomain = getRegulationDomain(r);
     const regTier = getRegulationTier(r);
     const regAuth = getRegulationAuthority(r);
     const isRepeal = isRegulationRepeal(r);
-    const hasAmended = secs.some(isSectionAmended);
+    const hasAmended = (r.chapters || []).some(ch => (ch.sections || []).some(isSectionAmended));
 
     return {
       r,
       secs,
+      secCount,
       year,
       regDomain,
       regTier,
@@ -121,63 +124,83 @@ function renderRegulationsLibrary(u) {
 }
 
 function renderRegulationsGrid(decoratedActs) {
-  return `<div class="finlex-lib-grid">
-    ${decoratedActs
-      .map(item => {
-        const { r, secs, year, regDomain, regTier, isRepeal, hasAmended } = item;
-        const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
-        const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
-        const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
-        const tierLabel = tierObj ? tierObj.label.replace('Parliamentary ', '').replace('Supervisory ', '').replace('Government ', '') : regTier;
+  const limit = S.ui.regLibLimit || 24;
+  const renderedActs = decoratedActs.slice(0, limit);
+  const remaining = decoratedActs.length - renderedActs.length;
 
-        return `<article class="finlex-lib-card" data-a="openRegInReader" data-id="${r.id}" title="Open regulation in reader">
-        <div class="finlex-lib-card-top">
-          <div class="row" style="gap:6px;align-items:center">
-            <span class="finlex-jurisdiction-tag">${esc(r.jurisdiction)}</span>
-            <span class="finlex-tier-badge ${regTier}">${esc(tierLabel)}</span>
+  return `<div>
+    <div class="finlex-lib-grid">
+      ${renderedActs
+        .map(item => {
+          const { r, secs, year, regDomain, regTier, isRepeal, hasAmended } = item;
+          const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
+          const domainObj = REGULATION_DOMAINS.find(d => d.id === regDomain);
+          const tierObj = REGULATION_TIERS.find(t => t.id === regTier);
+          const tierLabel = tierObj ? tierObj.label.replace('Parliamentary ', '').replace('Supervisory ', '').replace('Government ', '') : regTier;
+
+          return `<article class="finlex-lib-card" data-a="openRegInReader" data-id="${r.id}" title="Open regulation in reader">
+          <div class="finlex-lib-card-top">
+            <div class="row" style="gap:6px;align-items:center">
+              <span class="finlex-jurisdiction-tag">${esc(r.jurisdiction)}</span>
+              <span class="finlex-tier-badge ${regTier}">${esc(tierLabel)}</span>
+            </div>
+            <span class="finlex-code-badge">${esc(r.code)}</span>
           </div>
-          <span class="finlex-code-badge">${esc(r.code)}</span>
-        </div>
 
-        <div>
-          <h2 class="finlex-lib-card-title">${esc(displayTitle)}</h2>
-          ${r.shortTitle && r.shortTitle !== r.code && r.title && r.title !== r.shortTitle ? `<div class="faint trunc" style="font-size:11.5px;margin-top:2px" title="${esc(r.title)}">${esc(r.title)}</div>` : ''}
-        </div>
-
-        <p class="finlex-lib-card-desc">${esc(r.summary)}</p>
-
-        <div class="finlex-lib-card-meta">
-          <span class="finlex-domain-badge">${esc(domainObj ? domainObj.label : regDomain)}</span>
-          <span>·</span>
-          <span>${esc(r.authority)}</span>
-          <span>·</span>
-          <span>${year || esc(r.inForce || 'In force')}</span>
-          <span>·</span>
-          <span>${secs.length} sections</span>
-          ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
-          ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber);border-color:var(--amber)">Amended</span>` : ''}
-        </div>
-
-        ${
-          r.tags && r.tags.length
-            ? `<div class="finlex-lib-card-foot">
-          <div class="row" style="gap:4px;flex-wrap:wrap">
-            ${r.tags
-              .slice(0, 3)
-              .map(t => `<span class="pill" style="font-size:10.5px;padding:1px 6px">${esc(t)}</span>`)
-              .join('')}
+          <div>
+            <h2 class="finlex-lib-card-title">${esc(displayTitle)}</h2>
+            ${r.shortTitle && r.shortTitle !== r.code && r.title && r.title !== r.shortTitle ? `<div class="faint trunc" style="font-size:11.5px;margin-top:2px" title="${esc(r.title)}">${esc(r.title)}</div>` : ''}
           </div>
-        </div>`
-            : ''
-        }
-      </article>`;
-      })
-      .join('')}
+
+          <p class="finlex-lib-card-desc">${esc(r.summary)}</p>
+
+          <div class="finlex-lib-card-meta">
+            <span class="finlex-domain-badge">${esc(domainObj ? domainObj.label : regDomain)}</span>
+            <span>·</span>
+            <span>${esc(r.authority)}</span>
+            <span>·</span>
+            <span>${year || esc(r.inForce || 'In force')}</span>
+            <span>·</span>
+            <span>${secs.length} sections</span>
+            ${isRepeal ? `<span class="finlex-repeal-badge">Repeal</span>` : ''}
+            ${hasAmended ? `<span class="pill" style="font-size:10px;background:var(--amber-soft);color:var(--amber);border-color:var(--amber)">Amended</span>` : ''}
+          </div>
+
+          ${
+            r.tags && r.tags.length
+              ? `<div class="finlex-lib-card-foot">
+            <div class="row" style="gap:4px;flex-wrap:wrap">
+              ${r.tags
+                .slice(0, 3)
+                .map(t => `<span class="pill" style="font-size:10.5px;padding:1px 6px">${esc(t)}</span>`)
+                .join('')}
+            </div>
+          </div>`
+              : ''
+          }
+        </article>`;
+        })
+        .join('')}
+    </div>
+    ${
+      remaining > 0
+        ? `<div style="display:flex;justify-content:center;margin:24px 0">
+            <button class="btn btn-secondary" data-a="loadMoreRegs" style="padding:10px 24px;font-weight:600">
+              ${ic('chevron-down', 14)} Show more regulations (+${Math.min(remaining, 24)}) · ${renderedActs.length} of ${decoratedActs.length} shown
+            </button>
+          </div>`
+        : ''
+    }
   </div>`;
 }
 
 function renderRegulationsList(decoratedActs) {
-  return `<table class="finlex-lib-table">
+  const limit = S.ui.regLibLimit || 48;
+  const renderedActs = decoratedActs.slice(0, limit);
+  const remaining = decoratedActs.length - renderedActs.length;
+
+  return `<div>
+    <table class="finlex-lib-table">
       <thead>
         <tr>
           <th style="width:320px">Regulation & Title</th>
@@ -190,7 +213,7 @@ function renderRegulationsList(decoratedActs) {
         </tr>
       </thead>
       <tbody>
-        ${decoratedActs
+        ${renderedActs
           .map(item => {
             const { r, secs, year, regDomain, regTier, isRepeal, hasAmended } = item;
             const displayTitle = r.shortTitle && r.shortTitle !== r.code ? r.shortTitle : r.title;
@@ -220,7 +243,17 @@ function renderRegulationsList(decoratedActs) {
           })
           .join('')}
       </tbody>
-    </table>`;
+    </table>
+    ${
+      remaining > 0
+        ? `<div style="display:flex;justify-content:center;margin:20px 0">
+            <button class="btn btn-secondary" data-a="loadMoreRegs" style="padding:10px 24px;font-weight:600">
+              ${ic('chevron-down', 14)} Show more regulations (+${Math.min(remaining, 48)}) · ${renderedActs.length} of ${decoratedActs.length} shown
+            </button>
+          </div>`
+        : ''
+    }
+  </div>`;
 }
 
 /* ============================================================
