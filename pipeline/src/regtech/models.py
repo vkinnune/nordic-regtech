@@ -13,11 +13,11 @@ CitationType = Literal[
     "eu_directive",
     "eu_regulation",
 ]
-DocumentType = Literal["lag", "forordning", "foreskrift", "allmanna_rad"]
+DocumentType = Literal["lag", "forordning", "foreskrift", "allmanna_rad", "fiva_regulation", "eu_regulation"]
 RuleType = Literal["binding_rule", "guidance"]
 SNIPPET_MATCH_START = "\x02"
 SNIPPET_MATCH_END = "\x03"
-SourceName = Literal["riksdagen", "fi_fffs"]
+SourceName = Literal["riksdagen", "fi_fffs", "fiva", "eu"]
 
 
 class CitationTarget(BaseModel):

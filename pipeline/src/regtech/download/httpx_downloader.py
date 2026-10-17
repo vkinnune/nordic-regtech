@@ -28,12 +28,12 @@ class HttpxDownloader:
         self._pause_s = pause_s
         self._last_request_at = 0.0
 
-    def download(self, url: str, dest: Path) -> Path:
+    def download(self, url: str, dest: Path, headers: dict[str, str] | None = None) -> Path:
         wait_s = self._last_request_at + self._pause_s - time.monotonic()
         if wait_s > 0:
             time.sleep(wait_s)
 
-        response = self._client.get(url)
+        response = self._client.get(url, headers=headers)
         self._last_request_at = time.monotonic()
         response.raise_for_status()
 

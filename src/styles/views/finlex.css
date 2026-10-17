@@ -976,9 +976,22 @@
   .finlex-toc {
     width: 100%;
     max-width: none;
-    max-height: 220px;
+    /* Keep the outline usable on phones without pushing the document away. */
+    height: 42vh;
+    height: 42svh;
+    max-height: 360px;
+    min-height: 190px;
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+  .finlex-toc-top {
+    flex: 0 0 auto;
+  }
+  .finlex-toc-tree {
+    flex: 1 1 0;
+    min-height: 72px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
   .finlex-reader-inner {
     padding: 16px;

@@ -95,7 +95,7 @@
     </nav>
 
     <div id="sidebar-documents" class="relative mt-2 flex-1 overflow-y-auto px-3 pb-6">
-      {% for heading, source in [("Acts and ordinances", sfs_source), ("FFFS regulations", fffs_source)] %}
+      {% for heading, source in [("Acts and ordinances", sfs_source), ("FFFS regulations", fffs_source), ("FIVA regulations", fiva_source)] %}
       {% set documents = library | selectattr("source", "equalto", source) | list %}
       {% if documents %}
       <p class="eyebrow mb-1 mt-5 px-2">{{ heading }}</p>

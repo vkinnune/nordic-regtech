@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup, escape
 
+from regtech.diff import align_sections
 from regtech.models import (
     SNIPPET_MATCH_END,
     SNIPPET_MATCH_START,
@@ -20,8 +21,8 @@ from regtech.models import (
     SearchHit,
     SourceName,
 )
-from regtech.diff import align_sections
 from regtech.sources.fffs import FffsSource
+from regtech.sources.fiva import FivaSource
 from regtech.sources.riksdagen import RiksdagenSource
 from regtech.storage.base import ChangeStore, DocumentStore, LinkStore
 from regtech.versions import chunk_ids, text_diff
@@ -39,6 +40,7 @@ DOCUMENT_TYPE_LABELS = {
     "forordning": "Ordinance",
     "foreskrift": "Regulation",
     "allmanna_rad": "General guidelines",
+    "fiva_regulation": "FIN-FSA regulations and guidelines",
 }
 CHANGE_BADGES = {"MODIFIED": "badge-amber", "ADDED": "badge-emerald", "REPEALED": "badge-red"}
 DIFF_TAGS = {"delete": "del", "insert": "ins"}
@@ -60,6 +62,7 @@ def create_app(
     templates.env.globals["change_badges"] = CHANGE_BADGES
     templates.env.globals["sfs_source"] = RiksdagenSource.name
     templates.env.globals["fffs_source"] = FffsSource.name
+    templates.env.globals["fiva_source"] = FivaSource.name
 
     def page(request: Request, name: str, summaries: list[DocumentSummary], **context):
         return templates.TemplateResponse(request, name, {"library": summaries, **context})
@@ -83,7 +86,7 @@ def create_app(
             "document.html",
             summaries,
             doc=doc,
-            is_fffs=doc.source == FffsSource.name,
+            is_fffs=doc.source in (FffsSource.name, FivaSource.name),
             sources=_sources(doc, files_dir),
             chapters=_chapters(doc),
             citation_hrefs=_citation_hrefs(outgoing),

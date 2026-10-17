@@ -13,6 +13,7 @@ import {
   getRegulationDomain,
   getRegulationTier,
   getRegulationAuthority,
+  getRegulationCountry,
   isRegulationRepeal,
   REGULATION_DOMAINS,
   REGULATION_TIERS,
@@ -43,6 +44,8 @@ function renderRegulationsLibrary(u) {
   const totalSections = allActs.reduce((sum, a) => sum + countSecs(a), 0);
   const fffsCount = allActs.filter(r => getRegulationAuthority(r) === 'fi').length;
   const sfsCount = allActs.filter(r => getRegulationAuthority(r) === 'riksdagen').length;
+  const fivaCount = allActs.filter(r => getRegulationAuthority(r) === 'fiva').length;
+  const euCount = allActs.filter(r => getRegulationAuthority(r) === 'eu').length;
 
   // Decorate all acts with precomputed metadata for fast multi-dimensional evaluation
   const decorated = allActs.map(r => {
@@ -63,6 +66,7 @@ function renderRegulationsLibrary(u) {
       regDomain,
       regTier,
       regAuth,
+      country: getRegulationCountry(r),
       isRepeal,
       hasAmended,
     };
@@ -94,6 +98,8 @@ function renderRegulationsLibrary(u) {
   const right = `<div class="seg" role="tablist">
     <button class="${auth === 'all' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="all">All (${allActs.length})</button>
     <button class="${auth === 'fi' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="fi">Finansinspektionen (${fffsCount})</button>
+    <button class="${auth === 'fiva' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="fiva">Finanssivalvonta (FIVA) (${fivaCount})</button>
+    <button class="${auth === 'eu' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="eu">European Union (${euCount})</button>
     <button class="${auth === 'riksdagen' ? 'on' : ''}" data-a="set" data-k="regLibAuth" data-v="riksdagen">Riksdagen Acts (${sfsCount})</button>
   </div>`;
 
@@ -101,14 +107,14 @@ function renderRegulationsLibrary(u) {
     <div class="ph">
       <div>
         <h1>Regulations Library</h1>
-        <p>Swedish financial statutory library and supervisory regulations</p>
+        <p>Nordic financial regulations from Sweden and Finland</p>
       </div>
     </div>
 
     <div class="stats" style="margin-bottom:16px">
-      <div class="stat"><span class="k">Total Regulations</span><span class="v">${allActs.length}</span><span class="d">Swedish acts & FFFS circulars</span></div>
+      <div class="stat"><span class="k">Total Regulations</span><span class="v">${allActs.length}</span><span class="d">Swedish & Finnish rules</span></div>
       <div class="stat"><span class="k">Acts & Ordinances</span><span class="v">${sfsCount}</span><span class="d">Parliamentary SFS statutes</span></div>
-      <div class="stat"><span class="k">Supervisory Rules</span><span class="v">${fffsCount}</span><span class="d">Finansinspektionen FFFS circulars</span></div>
+      <div class="stat"><span class="k">Swedish Supervisory Rules</span><span class="v">${fffsCount}</span><span class="d">Finansinspektionen FFFS circulars</span></div>
       <div class="stat"><span class="k">Sections (§)</span><span class="v">${totalSections.toLocaleString('en-US')}</span><span class="d">Indexed legal § provisions</span></div>
     </div>
 
@@ -267,7 +273,9 @@ function renderRegulationsReader(u) {
   const allSecs = allSectionsOf(curAct);
   const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
   const chapters = allChaptersOf(curAct);
-  const isFffs = Boolean((curAct.jurisdiction && curAct.jurisdiction.includes('Finansinspektionen')) || (curAct.code && curAct.code.startsWith('FFFS')));
+  const isFffs = Boolean((curAct.jurisdiction && (curAct.jurisdiction.includes('Finansinspektionen') || curAct.jurisdiction.includes('Finanssivalvonta'))) || (curAct.code && curAct.code.startsWith('FFFS')));
+  const isRiksdagenAct = curAct.type === 'national_act' || curAct.code?.startsWith('SFS ');
+  const webVersionUrl = `/doc/${encodeURIComponent(curAct.id)}/raw`;
 
   return `<div class="page flush">
     <div class="finlex-container">
@@ -425,14 +433,20 @@ function renderRegulationsReader(u) {
                     curAct.localSource || curAct.sourceUrl
                       ? `
                     <div class="finlex-attach-chip-group">
-                      <a href="/doc/${esc(curAct.id)}/raw" target="_blank" class="finlex-attach-chip" title="Open web version">
+                      <a href="${esc(webVersionUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="${isRiksdagenAct ? 'Open downloaded local copy' : 'Open web version'}">
                         ${ic('globe', 12)}
-                        <span>Web Version</span>
+                        <span>${isRiksdagenAct ? 'Downloaded Version' : 'Web Version'}</span>
                       </a>
-                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Web Version · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/raw" title="Preview web version">
-                        ${ic('eye', 11)}
-                      </button>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="${isRiksdagenAct ? 'Downloaded Version' : 'Web Version'} · ${esc(curAct.code)}" data-url="${esc(webVersionUrl)}" title="Preview downloaded version">${ic('eye', 11)}</button>
                     </div>
+                    ${isRiksdagenAct && curAct.sourceUrl ? `
+                    <div class="finlex-attach-chip-group">
+                      <a href="${esc(curAct.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="Open official Riksdagen page">
+                        ${ic('globe', 12)}
+                        <span>Official Web Version</span>
+                      </a>
+                    </div>
+                    ` : ''}
                   `
                       : ''
                   }

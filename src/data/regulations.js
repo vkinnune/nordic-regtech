@@ -150,7 +150,8 @@ export function getRegulationTier(r) {
   const title = (r.title || '').toLowerCase();
   if (title.startsWith('förordning') || title.includes('förordning (')) return 'ordinance';
   if (t === 'national_act' || (code.startsWith('SFS') && !title.includes('förordning')) || /act\b/i.test(title) || title.startsWith('lag (')) return 'act';
-  if (t === 'fsa_regulation' || code.startsWith('FFFS')) return 'supervisory';
+  if (t === 'fsa_regulation' || t === 'fiva_regulation' || code.startsWith('FFFS')) return 'supervisory';
+  if (t === 'eu_regulation') return 'eu';
   return 'other';
 }
 
@@ -158,9 +159,17 @@ export function getRegulationAuthority(r) {
   if (!r) return 'other';
   const auth = (r.authority || '').toLowerCase();
   const jur = (r.jurisdiction || '').toLowerCase();
+  if (auth.includes('finanssivalvonta') || jur.includes('finanssivalvonta') || (r.tags || []).includes('FIVA')) return 'fiva';
   if (auth.includes('finansinspektionen') || jur.includes('finansinspektionen') || (r.code && r.code.startsWith('FFFS'))) return 'fi';
   if (auth.includes('riksdagen') || jur.includes('riksdagen') || (r.code && r.code.startsWith('SFS'))) return 'riksdagen';
+  if (auth.includes('eur-lex') || auth.includes('publications office') || jur.includes('european union')) return 'eu';
   return 'other';
+}
+
+export function getRegulationCountry(r) {
+  const jurisdiction = (r?.jurisdiction || '').trim();
+  const match = jurisdiction.match(/^(.+?)\s+\(/);
+  return match ? match[1] : jurisdiction || 'Unknown';
 }
 
 export function isRegulationRepeal(r) {
@@ -185,14 +194,17 @@ export const REGULATION_DOMAINS = [
 export const REGULATION_TIERS = [
   { id: 'all', label: 'All Legal Tiers' },
   { id: 'act', label: 'Parliamentary Acts (SFS)' },
-  { id: 'supervisory', label: 'Supervisory Regulations (FFFS)' },
+  { id: 'supervisory', label: 'Supervisory Regulations (FFFS / FIVA)' },
+  { id: 'eu', label: 'EU Regulations' },
   { id: 'ordinance', label: 'Government Ordinances' },
 ];
 
 export const REGULATION_AUTHORITIES = [
   { id: 'all', label: 'All Authorities' },
   { id: 'fi', label: 'Finansinspektionen (FI)' },
+  { id: 'fiva', label: 'Finanssivalvonta (FIVA)' },
   { id: 'riksdagen', label: 'Riksdagen / Parliament' },
+  { id: 'eu', label: 'EUR-Lex (European Union)' },
 ];
 
 export const REGULATION_STATUSES = [

@@ -1,9 +1,11 @@
 # regtech
 
-regtech downloads Swedish financial law and makes it searchable and linked:
+regtech downloads financial regulation from Sweden and Finland and makes it searchable and linked:
 
 - Acts and Ordinances (SFS) from Riksdagen's open API, `data.riksdagen.se`.
 - FFFS regulations from Finansinspektionen's register on `fi.se`, read from their PDFs.
+- Finnish FIN-FSA regulations and guidelines from Finanssivalvonta's official catalogue, read from their PDFs.
+- EU regulations by CELEX number from the Publications Office CELLAR API, parsed from the official English XHTML text.
 
 It splits each document into chapters and sections, finds the citations in the text (for example "25 kap. 4 § lagen (2007:528)"), links each citation to the section it points at, stores everything in one SQLite database file with full-text search, and shows it in a browser viewer.
 
@@ -34,15 +36,19 @@ regtech --help             # or: python3 -m regtech --help
 | `regtech fetch sfs --all` | Every Ministry of Finance Act and Ordinance in force (about 1,200), plus stored ones that were repealed since. Takes about half an hour. |
 | `regtech fetch sfs --since 2026-10-01` | Only the Ministry of Finance laws Riksdagen changed on or after that day, for a daily update. Same choice of laws as `--all`. |
 | `regtech fetch fffs` | Download and parse every active FFFS regulation: register page, item pages, regulation PDFs, decision memos. `--number 2017:11` picks only that one from the register. Prints all parsed documents as one JSON array. Without `--limit` and `--number`, also marks stored regulations that are no longer in the register ([Plan.md](Plan.md#storage)). |
+| `regtech fetch fiva` | Download and parse the Finnish `Määräykset ja ohjeet` corpus from the official catalogue. `--number 2/2024` picks one item. |
+| `regtech fetch eu --number 32022R2554` | Download and parse an EU regulation by CELEX number from the official CELLAR API. Repeat `--number` for more. |
 | `regtech link` | Match every stored citation to the section it points at. Deletes all stored links and builds them again. |
 | `regtech serve` | Start the viewer at http://localhost:8000/. It listens on `0.0.0.0`, so other computers on the same network can open it too; `--host 127.0.0.1` limits it to this computer. `--port 8080` picks another port. Ctrl+C stops it. |
 
 | Flag | For | Does |
 |---|---|---|
 | `--number YYYY:N` | `fetch sfs`, `fetch fffs` | Only this document. Repeat for more. A number that is not found stops the command before any document is downloaded. |
+| `--number N/YYYY` | `fetch fiva` | Only this catalogue item, for example `2/2024`. Repeat for more. |
+| `--number CELEX` | `fetch eu` | Only this EU regulation, for example `32022R2554` (DORA). Repeat for more. |
 | `--all` | `fetch sfs`, `fetch fffs` | `sfs`: every Ministry of Finance law in force; `fetch sfs` needs one of `--number`, `--all`, `--since`. `fffs`: the whole register, the same as no flag. |
 | `--since YYYY-MM-DD` | `fetch sfs` | Ministry of Finance laws changed on or after that day. |
-| `--offline` | `fetch sfs`, `fetch fffs` | Parse the files already in `data/raw/` again; download nothing. An item whose files are missing fails. |
+| `--offline` | `fetch sfs`, `fetch fffs`, `fetch fiva`, `fetch eu` | Parse the files already in `data/raw/` again; download nothing. An item whose files are missing fails. |
 | `--limit N` | `fetch sfs`, `fetch fffs` | Only the first N items, for a quick trial run. N must be a whole number above 0. |
 | `--data-dir DIR` | all commands | Where downloads, JSON files and the database go. Default `data`. |
 
@@ -73,10 +79,19 @@ regtech fetch sfs --number 2007:528 --number 2007:572 --number 2017:630 \
 # 2. All active FFFS regulations
 regtech fetch fffs
 
-# 3. Link citations across everything stored
+# 3. Finnish FIN-FSA regulations and guidelines (all catalogue PDFs)
+regtech fetch fiva
+
+# 4. EU regulations by CELEX number (example: DORA)
+regtech fetch eu --number 32022R2554
+
+# 5. Link citations across everything stored
 regtech link
 
-# 4. Browse
+# 6. Export the library for Nordic RegTech Studio
+npm run pipeline:export
+
+# 7. Browse
 regtech serve
 ```
 
@@ -93,9 +108,13 @@ data/                                  git-ignored
     fi_fffs/search.html                the FFFS register page
     fi_fffs/fffs-2017-11/              item.html, regulation.pdf, memo.pdf,
                                        consolidated.pdf (only when the item page links one)
+    fiva/fiva-2024-2/                  item.html, regulation.pdf
+    eu/eu-2022-2554/                   notice.xml, regulation.xhtml
   json/                                one parsed document per file
     riksdagen/sfs-2007-528.json
     fi_fffs/fffs-2017-11.json
+    fiva/fiva-2024-2.json
+    eu/eu-2022-2554.json
   regtech.db                            SQLite database: documents, links, search index, version changes
 ```
 

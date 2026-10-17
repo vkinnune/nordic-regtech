@@ -1,5 +1,326 @@
 [
   {
+    "id": 5581,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "document",
+    "chapter": null,
+    "section": null,
+    "upcoming": false,
+    "status": "ADDED",
+    "amendingAct": null,
+    "amendedDate": "2020-01-01",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": null,
+    "newText": null,
+    "diff": []
+  },
+  {
+    "id": 5580,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "section",
+    "chapter": "1",
+    "section": "5",
+    "upcoming": true,
+    "status": "MODIFIED",
+    "amendingAct": "SFS 2026:641",
+    "amendedDate": "2030-01-10",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": "I denna lag betyder\n1. behörig myndighet: en utländsk myndighet som har behörighet att utföra uppgifter enligt nationella bestämmelser som genomför Europaparlamentets och rådets direktiv (EU) 2016/2341 av den 14 december 2016 om verksamhet i och tillsyn över tjänstepensionsinstitut, i den ursprungliga lydelsen,\n2. blandat finansiellt holdingföretag: ett sådant företag som avses i 1 kap. 3 § 4 lagen (2006:531) om särskild tillsyn över finansiella konglomerat,\n3. EES: Europeiska ekonomiska samarbetsområdet,\n4. Solvens II-direktivet: Europaparlamentets och rådets direktiv 2009/138/EG av den 25 november 2009 om upptagande och utövande av försäkrings- och återförsäkringsverksamhet (Solvens II), i lydelsen enligt Europaparlamentets och rådets direktiv (EU) 2019/2177,\n5. EES-försäkringsgivare: en utländsk försäkringsgivare vars hemland hör till EES och som omfattas av Solvens II-direktivet,\n6. försäkringsföretag: ett företag som har tillstånd att driva försäkringsrörelse enligt försäkringsrörelselagen (2010:2043),\n7. försäkringsgivare från tredjeland: en utländsk försäkringsgivare vars hemland inte hör till EES och som skulle omfattas av Solvens II-direktivet om dess hemland hörde till EES,\n8. försäkringsholdingföretag: ett moderföretag\na) som inte är ett försäkringsföretag, en EES-försäkringsgivare, ett försäkringsföretag från tredjeland eller ett blandat finansiellt holdingföretag, och\nb) vars huvudsakliga verksamhet är att förvärva och förvalta andelar i dotterföretag som uteslutande eller huvudsakligen är försäkringsföretag, EES-försäkringsgivare eller försäkringsgivare från tredjeland,\n9. försäkringsholdingföretag med blandad verksamhet: ett moderföretag som inte är ett försäkringsföretag, en EES-försäkringsgivare, en försäkringsgivare från tredjeland, ett blandat finansiellt holdingföretag eller ett försäkringsholdingföretag och som har minst ett dotterföretag som är försäkringsföretag,\n10. MTF-plattform, OTF-plattform och reglerad marknad: detsamma som i 1 kap. 4 b § lagen (2007:528) om värdepappersmarknaden, och\n11. uppdragsgivande företag: den som i egenskap av arbetsgivare betalar försäkringspremier till tjänstepensionsföretaget. Lag (2021:462).",
+    "newText": "I denna lag betyder\n1. behörig myndighet: en utländsk myndighet som har behörighet att utföra uppgifter enligt nationella bestämmelser som genomför Europaparlamentets och rådets direktiv (EU) 2016/2341 av den 14 december 2016 om verksamhet i och tillsyn över tjänstepensionsinstitut, i den ursprungliga lydelsen,\n2. blandat finansiellt holdingföretag: ett sådant företag som avses i 1 kap. 3 § 4 lagen (2006:531) om särskild tillsyn över finansiella konglomerat,\n3. EES: Europeiska ekonomiska samarbetsområdet,\n4. Solvens II-direktivet: Europaparlamentets och rådets direktiv 2009/138/EG av den 25 november 2009 om upptagande och utövande av försäkrings- och återförsäkringsverksamhet (Solvens II), i lydelsen enligt Europaparlamentets och rådets direktiv (EU) 2023/2864,\n5. EES-försäkringsgivare: en utländsk försäkringsgivare vars hemland hör till EES och som omfattas av Solvens II-direktivet,\n6. försäkringsföretag: ett företag som har tillstånd att driva försäkringsrörelse enligt försäkringsrörelselagen (2010:2043),\n7. försäkringsgivare från tredjeland: en utländsk försäkringsgivare vars hemland inte hör till EES och som skulle omfattas av Solvens II-direktivet om dess hemland hörde till EES,\n8. försäkringsholdingföretag: ett moderföretag\na) som inte är ett försäkringsföretag, en EES-försäkringsgivare, ett försäkringsföretag från tredjeland eller ett blandat finansiellt holdingföretag, och\nb) vars huvudsakliga verksamhet är att förvärva och förvalta andelar i dotterföretag som uteslutande eller huvudsakligen är försäkringsföretag, EES-försäkringsgivare eller försäkringsgivare från tredjeland,\n9. försäkringsholdingföretag med blandad verksamhet: ett moderföretag som inte är ett försäkringsföretag, en EES-försäkringsgivare, en försäkringsgivare från tredjeland, ett blandat finansiellt holdingföretag eller ett försäkringsholdingföretag och som har minst ett dotterföretag som är försäkringsföretag,\n10. MTF-plattform, OTF-plattform och reglerad marknad: detsamma som i 1 kap. 4 b § lagen (2007:528) om värdepappersmarknaden, och\n11. uppdragsgivande företag: den som i egenskap av arbetsgivare betalar försäkringspremier till tjänstepensionsföretaget. Lag (2026:641).",
+    "diff": [
+      [
+        "equal",
+        "I denna lag betyder\n1. behörig myndighet: en utländsk myndighet som har behörighet att utföra uppgifter enligt nationella bestämmelser som genomför Europaparlamentets och rådets direktiv (EU) 2016/2341 av den 14 december 2016 om verksamhet i och tillsyn över tjänstepensionsinstitut, i den ursprungliga lydelsen,\n2. blandat finansiellt holdingföretag: ett sådant företag som avses i 1 kap. 3 § 4 lagen (2006:531) om särskild tillsyn över finansiella konglomerat,\n3. EES: Europeiska ekonomiska samarbetsområdet,\n4. Solvens II-direktivet: Europaparlamentets och rådets direktiv 2009/138/EG av den 25 november 2009 om upptagande och utövande av försäkrings- och återförsäkringsverksamhet (Solvens II), i lydelsen enligt Europaparlamentets och rådets direktiv (EU) "
+      ],
+      [
+        "delete",
+        "2019/2177,\n"
+      ],
+      [
+        "insert",
+        "2023/2864,\n"
+      ],
+      [
+        "equal",
+        "5. EES-försäkringsgivare: en utländsk försäkringsgivare vars hemland hör till EES och som omfattas av Solvens II-direktivet,\n6. försäkringsföretag: ett företag som har tillstånd att driva försäkringsrörelse enligt försäkringsrörelselagen (2010:2043),\n7. försäkringsgivare från tredjeland: en utländsk försäkringsgivare vars hemland inte hör till EES och som skulle omfattas av Solvens II-direktivet om dess hemland hörde till EES,\n8. försäkringsholdingföretag: ett moderföretag\na) som inte är ett försäkringsföretag, en EES-försäkringsgivare, ett försäkringsföretag från tredjeland eller ett blandat finansiellt holdingföretag, och\nb) vars huvudsakliga verksamhet är att förvärva och förvalta andelar i dotterföretag som uteslutande eller huvudsakligen är försäkringsföretag, EES-försäkringsgivare eller försäkringsgivare från tredjeland,\n9. försäkringsholdingföretag med blandad verksamhet: ett moderföretag som inte är ett försäkringsföretag, en EES-försäkringsgivare, en försäkringsgivare från tredjeland, ett blandat finansiellt holdingföretag eller ett försäkringsholdingföretag och som har minst ett dotterföretag som är försäkringsföretag,\n10. MTF-plattform, OTF-plattform och reglerad marknad: detsamma som i 1 kap. 4 b § lagen (2007:528) om värdepappersmarknaden, och\n11. uppdragsgivande företag: den som i egenskap av arbetsgivare betalar försäkringspremier till tjänstepensionsföretaget. Lag "
+      ],
+      [
+        "delete",
+        "(2021:462)."
+      ],
+      [
+        "insert",
+        "(2026:641)."
+      ]
+    ],
+    "chunkId": "riksdagen_sfs-2019-742_k1_p5_i20300110"
+  },
+  {
+    "id": 5579,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "section",
+    "chapter": "9",
+    "section": "6",
+    "upcoming": true,
+    "status": "MODIFIED",
+    "amendingAct": "SFS 2026:641",
+    "amendedDate": "2030-01-10",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": "Ett tjänstepensionsföretag ska regelbundet offentliggöra information om styrdokumentet för ersättningar.",
+    "newText": "Ett tjänstepensionsföretag ska regelbundet offentliggöra information om styrdokumentet för ersättningar. Tjänstepensionsföretaget ska samtidigt lämna informationen till Finansinspektionen. Lag (2026:641).",
+    "diff": [
+      [
+        "equal",
+        "Ett tjänstepensionsföretag ska regelbundet offentliggöra information om styrdokumentet för ersättningar. "
+      ],
+      [
+        "insert",
+        "Tjänstepensionsföretaget ska samtidigt lämna informationen till Finansinspektionen. Lag (2026:641)."
+      ]
+    ],
+    "chunkId": "riksdagen_sfs-2019-742_k9_p6_i20300110"
+  },
+  {
+    "id": 5578,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "section",
+    "chapter": "9",
+    "section": "27",
+    "upcoming": true,
+    "status": "MODIFIED",
+    "amendingAct": "SFS 2026:641",
+    "amendedDate": "2030-01-10",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": "Regeringen eller den myndighet som regeringen bestämmer får meddela föreskrifter om\n1. de krav som ska gälla för dem som är verksamma i ett tjänstepensionsföretag enligt 3, 12 och 13 §§,\n2. innehållet i styrdokumenten enligt 4 §,\n3. innehållet i det försäkringstekniska beräkningsunderlaget enligt 5 §,\n4. vad redogörelsen enligt 7 § ska innehålla,\n5. uppgifterna för funktionen för riskhantering enligt 10 §,\n6. uppgifterna för funktionen för regelefterlevnad enligt 11 §,\n7. uppgifterna för funktionen för internrevision enligt 12 §,\n8. uppgifterna för aktuariefunktionen enligt 13 §,\n9. innehållet i systemet för riskhantering enligt 15 § samt omfattningen av riskerna i detta system,\n10. kraven på de regelbundna utvärderingar som ska göras enligt 16 §,\n11. hur en bedömning av externa värderingar enligt 17 § ska genomföras,\n12. vad som ska ingå i risk- och solvensbedömningen enligt 20 § och rapporteringen av resultatet av denna enligt 22 §, och\n13. vad ett tjänstepensionsföretag ska beakta när ett uppdragsavtal ingås enligt 23 § och innehållet i ett sådant avtal.\n\nRegeringen eller den myndighet som regeringen bestämmer kan med stöd av 8 kap. 7 § regeringsformen meddela föreskrifter om hur information om styrdokumentet för ersättningar ska offentliggöras enligt 6 §.",
+    "newText": "Regeringen eller den myndighet som regeringen bestämmer får meddela föreskrifter om\n1. de krav som ska gälla för dem som är verksamma i ett tjänstepensionsföretag enligt 3, 12 och 13 §§,\n2. innehållet i styrdokumenten enligt 4 §,\n3. innehållet i det försäkringstekniska beräkningsunderlaget enligt 5 §,\n4. informationen om styrdokumentet för ersättningar som ska lämnas till Finansinspektionen enligt 6 §,\n5. redogörelsen enligt 7 §,\n6. uppgifterna för funktionen för riskhantering enligt 10 §,\n7. uppgifterna för funktionen för regelefterlevnad enligt 11 §,\n8. uppgifterna för funktionen för internrevision enligt 12 §,\n9. uppgifterna för aktuariefunktionen enligt 13 §,\n10. innehållet i systemet för riskhantering enligt 15 § samt omfattningen av riskerna i detta system,\n11. kraven på de regelbundna utvärderingar som ska göras enligt 16 §,\n12. hur en bedömning av externa värderingar enligt 17 § ska genomföras,\n13. vad som ska ingå i risk- och solvensbedömningen enligt 20 § och rapporteringen av resultatet av denna enligt 22 §, och\n14. vad ett tjänstepensionsföretag ska beakta när ett uppdragsavtal ingås enligt 23 § och innehållet i ett sådant avtal.\n\nRegeringen eller den myndighet som regeringen bestämmer kan med stöd av 8 kap. 7 § regeringsformen meddela föreskrifter om hur information om styrdokumentet för ersättningar ska offentliggöras enligt 6 §. Lag (2026:641).",
+    "diff": [
+      [
+        "equal",
+        "Regeringen eller den myndighet som regeringen bestämmer får meddela föreskrifter om\n1. de krav som ska gälla för dem som är verksamma i ett tjänstepensionsföretag enligt 3, 12 och 13 §§,\n2. innehållet i styrdokumenten enligt 4 §,\n3. innehållet i det försäkringstekniska beräkningsunderlaget enligt 5 §,\n4. "
+      ],
+      [
+        "delete",
+        "vad "
+      ],
+      [
+        "insert",
+        "informationen om styrdokumentet för ersättningar som ska lämnas till Finansinspektionen enligt 6 §,\n5. "
+      ],
+      [
+        "equal",
+        "redogörelsen enligt 7 "
+      ],
+      [
+        "delete",
+        "§ ska innehålla,\n5. "
+      ],
+      [
+        "insert",
+        "§,\n6. "
+      ],
+      [
+        "equal",
+        "uppgifterna för funktionen för riskhantering enligt 10 §,\n"
+      ],
+      [
+        "delete",
+        "6. "
+      ],
+      [
+        "insert",
+        "7. "
+      ],
+      [
+        "equal",
+        "uppgifterna för funktionen för regelefterlevnad enligt 11 §,\n"
+      ],
+      [
+        "delete",
+        "7. "
+      ],
+      [
+        "insert",
+        "8. "
+      ],
+      [
+        "equal",
+        "uppgifterna för funktionen för internrevision enligt 12 §,\n"
+      ],
+      [
+        "delete",
+        "8. "
+      ],
+      [
+        "insert",
+        "9. "
+      ],
+      [
+        "equal",
+        "uppgifterna för aktuariefunktionen enligt 13 §,\n"
+      ],
+      [
+        "delete",
+        "9. "
+      ],
+      [
+        "insert",
+        "10. "
+      ],
+      [
+        "equal",
+        "innehållet i systemet för riskhantering enligt 15 § samt omfattningen av riskerna i detta system,\n"
+      ],
+      [
+        "delete",
+        "10. "
+      ],
+      [
+        "insert",
+        "11. "
+      ],
+      [
+        "equal",
+        "kraven på de regelbundna utvärderingar som ska göras enligt 16 §,\n"
+      ],
+      [
+        "delete",
+        "11. "
+      ],
+      [
+        "insert",
+        "12. "
+      ],
+      [
+        "equal",
+        "hur en bedömning av externa värderingar enligt 17 § ska genomföras,\n"
+      ],
+      [
+        "delete",
+        "12. "
+      ],
+      [
+        "insert",
+        "13. "
+      ],
+      [
+        "equal",
+        "vad som ska ingå i risk- och solvensbedömningen enligt 20 § och rapporteringen av resultatet av denna enligt 22 §, och\n"
+      ],
+      [
+        "delete",
+        "13. "
+      ],
+      [
+        "insert",
+        "14. "
+      ],
+      [
+        "equal",
+        "vad ett tjänstepensionsföretag ska beakta när ett uppdragsavtal ingås enligt 23 § och innehållet i ett sådant avtal.\n\nRegeringen eller den myndighet som regeringen bestämmer kan med stöd av 8 kap. 7 § regeringsformen meddela föreskrifter om hur information om styrdokumentet för ersättningar ska offentliggöras enligt 6 §. "
+      ],
+      [
+        "insert",
+        "Lag (2026:641)."
+      ]
+    ],
+    "chunkId": "riksdagen_sfs-2019-742_k9_p27_i20300110"
+  },
+  {
+    "id": 5577,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "section",
+    "chapter": "13",
+    "section": "3",
+    "upcoming": true,
+    "status": "MODIFIED",
+    "amendingAct": "SFS 2026:641",
+    "amendedDate": "2030-01-10",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": "Den information som avses i 1 och 2 §§ ska hållas tillgänglig utan kostnad på tjänstepensionsföretagets webbplats. Om tjänstepensionsföretaget inte har en egen webbplats får informationen hållas tillgänglig på en annan webbplats som enkelt kan nås.\n\nInformationen ska uppdateras varje år. Tjänstepensionsföretaget får dock avstå från att göra en uppdatering om det inte har skett någon väsentlig förändring.",
+    "newText": "Den information som avses i 1 och 2 §§ ska hållas tillgänglig utan kostnad på tjänstepensionsföretagets webbplats. Om tjänstepensionsföretaget inte har en egen webbplats får informationen hållas tillgänglig på en annan webbplats som enkelt kan nås.\n\nInformationen ska uppdateras varje år. Tjänstepensionsföretaget får dock avstå från att göra en uppdatering om det inte har skett någon väsentlig förändring.\n\nInformationen ska även lämnas till Finansinspektionen.\nLag (2026:641).",
+    "diff": [
+      [
+        "equal",
+        "Den information som avses i 1 och 2 §§ ska hållas tillgänglig utan kostnad på tjänstepensionsföretagets webbplats. Om tjänstepensionsföretaget inte har en egen webbplats får informationen hållas tillgänglig på en annan webbplats som enkelt kan nås.\n\nInformationen ska uppdateras varje år. Tjänstepensionsföretaget får dock avstå från att göra en uppdatering om det inte har skett någon väsentlig förändring.\n\n"
+      ],
+      [
+        "insert",
+        "Informationen ska även lämnas till Finansinspektionen.\nLag (2026:641)."
+      ]
+    ],
+    "chunkId": "riksdagen_sfs-2019-742_k13_p3_i20300110"
+  },
+  {
+    "id": 5576,
+    "docId": "sfs-2019-742",
+    "code": "SFS 2019:742",
+    "title": "Lag (2019:742) om tjänstepensionsföretag",
+    "source": "riksdagen",
+    "level": "section",
+    "chapter": "13",
+    "section": "4",
+    "upcoming": true,
+    "status": "ADDED",
+    "amendingAct": "SFS 2026:641",
+    "amendedDate": "2030-01-10",
+    "fetchedAt": "2026-10-17T18:09:56.203808Z",
+    "oldText": null,
+    "newText": "Regeringen eller den myndighet som regeringen bestämmer får meddela föreskrifter om den information som ska lämnas till Finansinspektionen enligt 3 § tredje stycket.\nLag (2026:641).",
+    "diff": [],
+    "chunkId": "riksdagen_sfs-2019-742_k13_p4_i20300110"
+  },
+  {
+    "id": 5575,
+    "docId": "eu-2022-2554",
+    "code": "Regulation (EU) 2022/2554",
+    "title": "Regulation (EU) 2022/2554 of the European Parliament and of the Council of 14 December 2022 on digital operational resilience for the financial sector and amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU) No 600/2014, (EU) No 909/2014 and (EU) 2016/1011 (Text with EEA relevance)",
+    "source": "riksdagen",
+    "level": "document",
+    "chapter": null,
+    "section": null,
+    "upcoming": false,
+    "status": "ADDED",
+    "amendingAct": null,
+    "amendedDate": null,
+    "fetchedAt": "2026-10-17T11:25:35.377171Z",
+    "oldText": null,
+    "newText": null,
+    "diff": []
+  },
+  {
+    "id": 5574,
+    "docId": "fiva-2024-2",
+    "code": "Määräykset ja ohjeet 2/2024",
+    "title": "Kiinnitysluottopankkitoimintaa koskeva riskienhallinta",
+    "source": "fiva",
+    "level": "document",
+    "chapter": null,
+    "section": null,
+    "upcoming": false,
+    "status": "ADDED",
+    "amendingAct": null,
+    "amendedDate": "2025-01-01",
+    "fetchedAt": "2026-10-17T10:19:08.154032Z",
+    "oldText": null,
+    "newText": null,
+    "diff": []
+  },
+  {
     "id": 5573,
     "docId": "fffs-2002-11",
     "code": "FFFS 2002:11",

@@ -1,4 +1,5 @@
 import argparse
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -16,6 +17,8 @@ from regtech.models import LegalDocument
 from regtech.pdf.pymupdf_reader import PyMuPdfReader
 from regtech.sources.base import Source
 from regtech.sources.fffs import FffsSource
+from regtech.sources.eu import EuSource
+from regtech.sources.fiva import FivaSource
 from regtech.sources.riksdagen import RiksdagenSource
 from regtech.storage.sqlite_storage import SqliteStorage
 
@@ -32,16 +35,15 @@ def main(argv: list[str] | None = None) -> int:
 
     fetch = commands.add_parser(
         "fetch",
-        help="download and parse SFS Acts and Ordinances (Riksdagen) or FFFS regulations (fi.se)",
+        help="download and parse SFS, FFFS, Finnish FIVA or EU regulations",
     )
     fetch.add_argument("source", choices=SOURCES)
     picks = fetch.add_mutually_exclusive_group()
     picks.add_argument(
         "--number",
-        type=_number,
+        type=_source_number,
         action="append",
-        help="number such as 2007:528; repeat the flag for several documents "
-        "(without it, fffs gets the whole register)",
+        help="SFS/FFFS 2007:528, FIVA 2/2024 or EU CELEX 32022R2554; repeat for several",
     )
     picks.add_argument(
         "--all",
@@ -108,7 +110,29 @@ def _fffs_source(
     return FffsSource(args.number, downloader, PyMuPdfReader(), raw_dir, RegexExtractor())
 
 
-SOURCES = {"sfs": _sfs_source, "fffs": _fffs_source}
+def _fiva_source(
+    args: argparse.Namespace, downloader: Downloader, raw_base: Path, storage: SqliteStorage
+) -> Source:
+    if args.since is not None:
+        raise ValueError("--since is for fetch sfs only")
+    return FivaSource(
+        args.number,
+        downloader,
+        PyMuPdfReader(),
+        raw_base / FivaSource.name,
+        RegexExtractor(),
+    )
+
+
+def _eu_source(
+    args: argparse.Namespace, downloader: Downloader, raw_base: Path, storage: SqliteStorage
+) -> Source:
+    if args.since is not None:
+        raise ValueError("--since is for fetch sfs only")
+    return EuSource(args.number, downloader, raw_base / EuSource.name, RegexExtractor())
+
+
+SOURCES = {"sfs": _sfs_source, "fffs": _fffs_source, "fiva": _fiva_source, "eu": _eu_source}
 
 
 def _fetch(args: argparse.Namespace) -> int:
@@ -118,7 +142,7 @@ def _fetch(args: argparse.Namespace) -> int:
 
     json_dir = args.data_dir / "json" / source.name
     # Riksdagen marks repealed laws itself; its list leaves out laws of other ministries.
-    mark_unlisted = args.source == "fffs" and args.limit is None and args.number is None
+    mark_unlisted = args.source in ("fffs", "fiva") and args.limit is None and args.number is None
     # Saved downloads parsed again differ from the stored version only where the parser changed.
     compare_versions = not args.offline
     docs, failures = pipeline.run(
@@ -160,6 +184,14 @@ def _number(value: str) -> str:
     if not NUMBER_RE.match(value):
         raise argparse.ArgumentTypeError(f"not a number like 2007:528: {value}")
     return value
+
+
+def _source_number(value: str) -> str:
+    if re.fullmatch(r"\d{1,2}/\d{4}", value):
+        return value
+    if re.fullmatch(r"3\d{4}R\d{4,}", value):
+        return value
+    return _number(value)
 
 
 def _day(value: str) -> date:

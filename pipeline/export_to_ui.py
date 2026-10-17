@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Exports Swedish regulations and citation graphs from regtech.db (SQLite)
+Exports regulations and citation graphs from regtech.db (SQLite)
 directly into src/data/swedish_regulations.json and src/data/changes_feed.json
 for Nordic RegTech Studio.
 Preserves rich metadata: attachments (PDF, Besluts-PM memo, source URL),
@@ -174,7 +174,12 @@ def export():
             changes_map[(doc_id, chapter, section, bool(upcoming), ordinal)] = ch_info
 
             raw_src = id_to_source.get(doc_id, "")
-            src_val = "fffs" if raw_src in ("fi_fffs", "fffs") else "riksdagen"
+            if raw_src == "fiva":
+                src_val = "fiva"
+            elif raw_src in ("fi_fffs", "fffs"):
+                src_val = "fffs"
+            else:
+                src_val = "riksdagen"
             feed_events.append({
                 "id": cid,
                 "docId": doc_id,
@@ -256,10 +261,23 @@ def export():
         data = json.loads(doc_json_str)
 
         is_sfs = source == "riksdagen"
-        is_fffs = not is_sfs
-        jurisdiction = "Sweden (Riksdagen)" if is_sfs else "Sweden (Finansinspektionen)"
-        authority = "Riksdagen" if is_sfs else "Finansinspektionen (FI)"
-        doc_type = "national_act" if is_sfs else "fsa_regulation"
+        is_fffs = source == "fi_fffs"
+        is_fiva = source == "fiva"
+        is_eu = source == "eu"
+        jurisdiction = (
+            "Sweden (Riksdagen)" if is_sfs else
+            "Sweden (Finansinspektionen)" if is_fffs else
+            "European Union (EUR-Lex)" if is_eu else
+            "Finland (Finanssivalvonta)"
+        )
+        authority = (
+            "Riksdagen" if is_sfs else
+            "Finansinspektionen (FI)" if is_fffs else
+            "EUR-Lex (Publications Office)" if is_eu else
+            "Finanssivalvonta (FIVA)"
+        )
+        doc_type = ("national_act" if is_sfs else "fsa_regulation" if is_fffs else
+                    "eu_regulation" if is_eu else "fiva_regulation")
 
         # Group sections into chapters
         sections = data.get("sections", [])
@@ -297,7 +315,10 @@ def export():
             inc_refs = incoming_by_chunk.get(chunk_id, [])
 
             sec_num = sec.get("section") or "§"
-            if not sec_num.endswith("§"):
+            if is_eu:
+                if not str(sec_num).replace("\xa0", " ").lower().startswith("article "):
+                    sec_num = f"Article {sec_num}"
+            elif not sec_num.endswith("§"):
                 sec_num = f"{sec_num} §"
 
             # Check rule type and paragraphs
@@ -388,12 +409,18 @@ def export():
                 }
             )
 
-        tags = ["Sweden"]
+        tags = ["European Union"] if is_eu else ["Finland"] if is_fiva else ["Sweden"]
         if is_sfs:
             tags.append("SFS")
             tags.append("Statute")
-        else:
+        elif is_fffs:
             tags.append("FFFS")
+            tags.append("Regulation")
+        elif is_fiva:
+            tags.append("FIVA")
+            tags.append("Regulation")
+        else:
+            tags.append("EU")
             tags.append("Regulation")
 
         # Resolve authorizations
@@ -500,6 +527,13 @@ def export():
 
         docs.append(doc_obj)
 
+    # A focused source fetch should augment the existing library instead of
+    # dropping regulations that are not present in this local SQLite database.
+    if OUTPUT_PATH.is_file():
+        existing_docs = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+        exported_ids = {doc["id"] for doc in docs}
+        docs.extend(doc for doc in existing_docs if doc.get("id") not in exported_ids)
+
     # Sort docs by identifier
     docs.sort(key=lambda d: d["code"])
 
@@ -524,6 +558,36 @@ def export():
     # Sort feed_events in descending event ID order (newest first)
     feed_events.sort(key=lambda e: e["id"], reverse=True)
 
+    if FEED_OUTPUT_PATH.is_file():
+        existing_events = json.loads(FEED_OUTPUT_PATH.read_text(encoding="utf-8"))
+        existing_keys = {
+            (
+                event.get("source"), event.get("docId"), event.get("level"),
+                event.get("chapter"), event.get("section"), event.get("status"),
+                event.get("amendedDate"), event.get("fetchedAt"),
+            )
+            for event in existing_events
+        }
+        next_event_id = max((int(event["id"]) for event in existing_events), default=0)
+        merged_events = list(existing_events)
+        for event in feed_events:
+            key = (
+                event.get("source"), event.get("docId"), event.get("level"),
+                event.get("chapter"), event.get("section"), event.get("status"),
+                event.get("amendedDate"), event.get("fetchedAt"),
+            )
+            if key in existing_keys:
+                continue
+            if int(event["id"]) <= next_event_id:
+                next_event_id += 1
+                event["id"] = next_event_id
+            else:
+                next_event_id = int(event["id"])
+            existing_keys.add(key)
+            merged_events.append(event)
+        feed_events = merged_events
+
+    feed_events.sort(key=lambda event: int(event["id"]), reverse=True)
     with open(FEED_OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(feed_events, f, ensure_ascii=False, indent=2)
 

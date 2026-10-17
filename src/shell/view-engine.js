@@ -5,6 +5,7 @@ import { LABELS, PR, PRIOS, STATUSES } from '../core/constants.js';
 import {
   D,
   S,
+  REGULATIONS,
   canSee,
   isOver,
   mem,
@@ -16,6 +17,7 @@ import {
   REGULATION_AUTHORITIES,
   REGULATION_STATUSES,
   REGULATION_ERAS,
+  getRegulationCountry,
 } from '../core/store.js';
 import { av, prIcon, stIcon } from '../ui/helpers.js';
 
@@ -70,6 +72,11 @@ export const FIELDS = {
   },
 };
 export const REG_FIELDS = {
+  country: {
+    name: 'Country',
+    icon: 'globe-2',
+    opts: () => [...new Set(REGULATIONS.map(getRegulationCountry))].sort().map(country => ({ id: country, name: country })),
+  },
   domain: {
     name: 'Sector',
     icon: 'briefcase',
@@ -257,6 +264,8 @@ export function matchRegFilter(item, f) {
     hit = f.v.includes(item.regTier);
   } else if (f.f === 'authority') {
     hit = f.v.includes(item.regAuth);
+  } else if (f.f === 'country') {
+    hit = f.v.includes(item.country);
   } else if (f.f === 'status') {
     hit = f.v.some(val => {
       if (val === 'substantive') return !item.isRepeal;
