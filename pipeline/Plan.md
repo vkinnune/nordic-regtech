@@ -2,7 +2,7 @@
 
 Implementation plan for [Spec.md](Spec.md) (Phase 1) and [Specv2.md](Specv2.md) (Phase 2). Facts about Riksdagen and lagar.se were checked on the live sites on 2026-10-07; facts about fi.se come from Internet Archive copies, except [older FFFS PDFs](#older-fffs-pdfs-before-2006), fetched live on 2026-10-10.
 
-Open now: C7 (client), Q41, P11. All under [Open questions](#open-questions). Answered questions are folded into [Decisions](#decisions).
+Open now: C7, Q41, P11. All under [Open questions](#open-questions). Answered questions are folded into [Decisions](#decisions).
 
 ## Goal
 
@@ -14,26 +14,26 @@ A Python tool that downloads Swedish financial law (Acts and Ordinances from Rik
 | M2 | FFFS crawler and PDF parser: binding rules vs Allmänna råd, authorization clauses | `regtech fetch fffs` | built 2026-10-07; full live crawl not run |
 | M3 | Incoming and outgoing references for each section | `regtech link` | built 2026-10-07 |
 | M4 | SQLite with full-text search, browser viewer, test coverage over 80% | `regtech serve` | built 2026-10-07 |
-| M2.1 | Local copies of PDFs, memos and SFS pages served by the viewer; PR #1 | `regtech serve` | built 2026-10-10 |
+| M2.1 | Local copies of PDFs, memos and SFS pages served by the viewer | `regtech serve` | built 2026-10-10 |
 | M2.2 | Section-level changes between versions of a statute | `regtech fetch`, `regtech serve` | built 2026-10-10; two-wordings rule on trial |
 | M2.3 | All Finance Ministry SFS statutes in force, then daily updates in under 30 s | `regtech fetch sfs --all`, `regtech fetch sfs --since YYYY-MM-DD` | built 2026-10-10 |
 | M2.4 | Change feed: an API other platforms read new, changed and repealed law from, and a Changes page. Replaces Specv2.md's OCR milestone (no active FFFS PDF is a scan) | `regtech serve` | built 2026-10-10 |
 
 ## Decisions
 
-The data models and design are ours; Spec.md's and Specv2.md's models are suggestions. Questions about scope and content go to the client through you.
+The data models and design are ours; Spec.md's and Specv2.md's models are suggestions. Scope and content questions are recorded below.
 
 ### Scope
 
 | Topic | Decision |
 |---|---|
 | Sanctions | Not built (optional in Spec.md, gone from Specv2.md). |
-| FFFS set | All active rows of the register, base regulations and amendments, each its own document (client). |
-| Regulation PDF | Base regulation: the consolidated PDF, else the base PDF. Amendment: its own PDF. Correction sheets and other attachments skipped (client). |
-| Memos | Every memo, the base regulation's and each amendment's, each on the document whose page links it (client). |
+| FFFS set | All active rows of the register, base regulations and amendments, each its own document. |
+| Regulation PDF | Base regulation: the consolidated PDF, else the base PDF. Amendment: its own PDF. Correction sheets and other attachments skipped. |
+| Memos | Every memo, the base regulation's and each amendment's, each on the document whose page links it. |
 | SFS set (M2.3) | Statutes from the Ministry of Finance only: `organ` starts with "Finansdepartementet", which includes its units (`Finansdepartementet FMA V`). 2,558 on 2026-10-10, 1,223 of them in force (you). |
 | SFS in force | Not marked repealed in the list entry, or marked with a repeal date still in the future (24 laws on 2026-10-10). The mark: [Riksdagen](#riksdagen) (you). |
-| Sections shown twice | Keep both the wording in force today and the upcoming wording, as two entries (client). |
+| Sections shown twice | Keep both the wording in force today and the upcoming wording, as two entries. |
 | Citations | All of them: internal, SFS to SFS, FFFS to SFS, FFFS to FFFS, in every section and in the FFFS preamble. EU directives and regulations get a pill with no link. |
 | Bemyndigande | Real delegations only: "får … meddela (ytterligare) föreskrifter", not "om verkställighet". |
 | Reference chain | Direct references, plus the chain through bemyndigande sections, so an Act's section shows the FFFS rules that reach it through an Ordinance. Spec.md asks for "incoming supervisory rules" on Act sections. |
@@ -42,7 +42,7 @@ The data models and design are ours; Spec.md's and Specv2.md's models are sugges
 | Repealed documents | Kept and marked, never deleted, so their recorded version changes and the links to them stay (you). SFS: repeal date and repealing act from Riksdagen; a stored law that gets repealed is still fetched by `--all` and `--since`. FFFS: a full `fetch fffs` marks a regulation missing from the register with the day it first finds it missing (fi.se gives no repeal date). A regulation that comes back is unmarked by its next fetch. |
 | Local copies | Each document keeps both its online links and its local copies; the viewer opens the local copy when its file exists. |
 | SFS local copy | `fetch sfs` saves the document's `html` field as `sfs-2007-528.html` next to its JSON, so SFS pages are served like the PDFs. |
-| Daily SFS sync | Part of `fetch sfs` (`--all`, `--since`), not a separate `sync-sfs` command; the client is told the name differs from Specv2.md. Uses Riksdagen's list sorted by last change, because `f_sys_d1` is ignored. |
+| Daily SFS sync | Part of `fetch sfs` (`--all`, `--since`), not a separate `sync-sfs` command; the name differs from Specv2.md. Uses Riksdagen's list sorted by last change, because `f_sys_d1` is ignored. |
 | OCR | Not built: no active FFFS PDF is a scan. Specv2.md's M2.4 is replaced by the change feed (2026-10-10). |
 
 ### Version changes (M2.2)
@@ -82,7 +82,7 @@ The data models and design are ours; Spec.md's and Specv2.md's models are sugges
 | Failures | A failed item is reported and skipped; exit code 1 at the end. A number that is not found stops the command before any download. |
 | Linking | A separate command, `regtech link`, run after fetching. |
 | Network | Always IPv4; 1 second between requests; up to 3 retries when the connection fails. A full FFFS crawl is about 1,200 requests, 20 to 30 minutes. Add retries on 429 and 5xx only if a crawl hits them. |
-| Command names | `regtech fetch sfs`, `regtech fetch fffs`, `regtech link`, `regtech serve`. Spec.md names `fetch-sfs` and `crawl-fffs`; the client must be told. |
+| Command names | `regtech fetch sfs`, `regtech fetch fffs`, `regtech link`, `regtech serve`. Spec.md names `fetch-sfs` and `crawl-fffs`. |
 
 ### Storage, search and viewer
 
@@ -431,7 +431,7 @@ Tests ship with each milestone, on saved real pages and PDFs.
 ### M2.1: Local files (built 2026-10-10)
 
 - `fetch sfs` saves each law's page next to its JSON file. The viewer serves `data/raw/` at `/files/` and opens saved copies first.
-- PR #1 (`fix/fffs-blank-docs`, from the client) was merged on GitHub on 2026-10-08. Kept: its `serve --host` default of `0.0.0.0`, and its preamble display on every document. Its fixed 9.5 pt text limit let 10 pt footnotes into the section text; replaced on 2026-10-10 by the body-size rule under [FFFS (M2)](#fffs-m2), together with fixes for the 1991 to 1998 layouts.
+- The local viewer serves documents with a `serve --host` default of `0.0.0.0`, and preamble display on every document. Its fixed 9.5 pt text limit let 10 pt footnotes into the section text; replaced on 2026-10-10 by the body-size rule under [FFFS (M2)](#fffs-m2), together with fixes for the 1991 to 1998 layouts.
 
 ### Version changes (M2.2)
 
@@ -460,7 +460,7 @@ Specv2.md asks for each section of a statute to be marked UNCHANGED, MODIFIED, A
 
 Each gives the problem, the options with what they produce, my recommendation, and the current choice. When one is answered, its decision moves to [Decisions](#decisions) and the question is removed.
 
-### C7. The AML Ordinance's number (ask the client)
+### C7. The AML Ordinance's number
 
 Blocks M1's last priority statute. Current choice: **Open**.
 

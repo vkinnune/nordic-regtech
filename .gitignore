@@ -18,5 +18,4 @@ pipeline/.ruff_cache/
 
 # Agent orchestration artifacts
 .agents/
-
-
+.claude/

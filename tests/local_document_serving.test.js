@@ -22,7 +22,7 @@ test('Local Document Serving: swedish_regulations.json maps local assets for off
   assert.ok(withSource.length >= 400, `Expected >= 400 local source docs, got ${withSource.length}`);
 });
 
-test('Local Document Serving: vite.config.js proxies /files, /doc, and /api to regtech backend', () => {
+test('Local Document Serving: vite.config.js proxies /files, /doc, and /api to RegTech backend', () => {
   const viteConfig = fs.readFileSync(path.join(ROOT, 'vite.config.js'), 'utf-8');
 
   assert.ok(viteConfig.includes("'/files'"), 'vite.config.js must proxy /files');

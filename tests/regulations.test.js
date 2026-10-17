@@ -201,7 +201,7 @@ test('Regulations UI & View Engine: Nordic authority segmentation and country fi
   assert.ok(!regJs.includes('FRAMEWORK_MAPPINGS'), 'regulations.js must not contain FRAMEWORK_MAPPINGS');
 });
 
-test('Complete Purge of rss-mapper-poc: strictly 100% regtech Swedish law dataset and zero feed artifacts', () => {
+test('Complete Purge of rss-mapper-poc: strictly 100% RegTech Swedish law dataset and zero feed artifacts', () => {
   // 1. Verify files are completely deleted from filesystem
   assert.ok(!fs.existsSync(path.join(ROOT, 'src/pages/feed.js')), 'src/pages/feed.js must be deleted');
   assert.ok(!fs.existsSync(path.join(ROOT, 'src/data/feed.js')), 'src/data/feed.js must be deleted');

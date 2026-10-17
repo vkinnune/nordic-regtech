@@ -1,7 +1,7 @@
-# regtech — Sprint 2 Spec: Local File Serving & Regulatory Version-Control Diff
+# RegTech — Sprint 2 Spec: Local File Serving & Regulatory Version-Control Diff
 
 ## Context & Objectives
-In Sprint 1, `regtech` successfully implemented:
+In Sprint 1, `RegTech` successfully implemented:
 - Riksdagen SFS client (`fetch-sfs`)
 - Finansinspektionen FFFS crawler & PyMuPDF extractor (`crawl-fffs`) covering all 422 active principal regulations
 - SQLite FTS5 search and cross-document citation linking (`link`)

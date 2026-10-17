@@ -7,7 +7,7 @@ Core focus	Local document serving, statutory version diffing & automated increme
 1. Overview & Phase 1 Retrospective
 Phase 1 established a working baseline ingestion engine for Swedish financial law: Riksdagen SFS parsing (Acts and Ordinances), Finansinspektionen FFFS scraping with PyMuPDF text classification (binding rules vs. Allmänna råd), full SQLite persistence (414 active regulations), cross-document citation resolution (>16,000 links), and a lightweight browser viewer.
 Phase 2 productionizes this standalone pipeline for integration with compliance applications. The focus is solving local document serving (bypassing external geoblocking), building section-level statutory change diffing, automating bulk incremental synchronization, and adding OCR fallback for legacy regulations.
-Note on Scope: The client already operates an existing production ingestion pipeline for Finnish statutes (Finlex) and EU directives. Finnish regulation parsing is explicitly out of scope for this pipeline so we do not duplicate existing infrastructure.
+Note on Scope: This phase originally covered Swedish sources. The current pipeline also supports Finnish supervisory regulations and EU regulations; see README.md.
 2. Architectural Priorities (What we are building)
 2.1 Local Document Serving (PDF & HTML)
 In Phase 1, the visual viewer linked out to external URLs on fi.se. These official endpoints frequently block foreign IPs and enterprise firewalls.

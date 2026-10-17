@@ -1,6 +1,6 @@
-# regtech
+# Regulatory data pipeline
 
-regtech downloads financial regulation from Sweden and Finland and makes it searchable and linked:
+RegTech downloads financial regulation from Sweden and Finland and makes it searchable and linked:
 
 - Acts and Ordinances (SFS) from Riksdagen's open API, `data.riksdagen.se`.
 - FFFS regulations from Finansinspektionen's register on `fi.se`, read from their PDFs.
@@ -9,7 +9,7 @@ regtech downloads financial regulation from Sweden and Finland and makes it sear
 
 It splits each document into chapters and sections, finds the citations in the text (for example "25 kap. 4 § lagen (2007:528)"), links each citation to the section it points at, stores everything in one SQLite database file with full-text search, and shows it in a browser viewer.
 
-The client's requirements are in [Spec.md](Spec.md). Design decisions, facts about the sites and open questions are in [Plan.md](Plan.md).
+The original requirements are in [Spec.md](Spec.md). Design decisions, facts about the sites and open questions are in [Plan.md](Plan.md).
 
 ## Install
 
@@ -203,5 +203,5 @@ The tests use saved real files in `tests/fixtures/` and need no network.
 - **Version changes start now.** Changes are recorded from the first fetch after 2026-10-10; older versions are not rebuilt. A section changed between fetches by an act that takes effect in stages can show the wrong stage's date ([Plan.md](Plan.md#version-changes-m22)).
 - **Viewer styling needs internet.** The viewer loads its style sheet (Tailwind) from Tailwind's servers and its font (Inter) from Google Fonts.
 - **Open questions** (details in [Plan.md](Plan.md)):
-  - C7: the spec's AML Ordinance, SFS 2017:673, does not exist on Riksdagen. `regtech fetch sfs --number 2017:673` stops with "found 0 documents, not 1". Which number is meant is an open question for the client.
+  - C7: the spec's AML Ordinance, SFS 2017:673, does not exist on Riksdagen. `regtech fetch sfs --number 2017:673` stops with "found 0 documents, not 1". Which number is meant is an unresolved specification question.
   - Q41: possible additions (tests against the live sites, automatic test runs, parallel downloads) are not decided.
