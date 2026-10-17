@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve('.');
 
-test('Regulations Data Authenticity: 100% genuine Swedish regulations and ZERO mock acts', () => {
+test('Regulations Data Authenticity: genuine Nordic regulations and ZERO mock acts', () => {
   const regulationsJs = fs.readFileSync(path.join(ROOT, 'src/data/regulations.js'), 'utf-8');
   const swedishRegs = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/swedish_regulations.json'), 'utf-8'));
 
@@ -24,14 +24,14 @@ test('Regulations Data Authenticity: 100% genuine Swedish regulations and ZERO m
     assert.ok(!regulationsJs.includes(`id: '${mockId}'`), `regulations.js must not define mock act "${mockId}"`);
   }
 
-  // Ensure 100% of regulations belong to Swedish jurisdictions
-  const allowedJurisdictions = new Set(['Sweden (Finansinspektionen)', 'Sweden (Riksdagen)']);
+  // Ensure every regulation belongs to an explicitly supported jurisdiction.
+  const allowedJurisdictions = new Set(['Sweden (Finansinspektionen)', 'Sweden (Riksdagen)', 'Finland (Finanssivalvonta)', 'European Union (EUR-Lex)']);
   for (const reg of swedishRegs) {
     assert.ok(allowedJurisdictions.has(reg.jurisdiction), `Regulation ${reg.id} has non-Swedish jurisdiction: ${reg.jurisdiction}`);
   }
 
-  // Ensure 100% of regulations belong to Swedish authorities
-  const allowedAuthorities = new Set(['Finansinspektionen (FI)', 'Riksdagen']);
+  // Ensure every regulation belongs to an explicitly supported authority.
+  const allowedAuthorities = new Set(['Finansinspektionen (FI)', 'Riksdagen', 'Finanssivalvonta (FIVA)', 'EUR-Lex (Publications Office)']);
   for (const reg of swedishRegs) {
     assert.ok(allowedAuthorities.has(reg.authority), `Regulation ${reg.id} has non-Swedish authority: ${reg.authority}`);
   }
@@ -87,18 +87,19 @@ test('Regulations Shell & Reader Defaults: sfs-2004-46 as authentic default regu
   assert.ok(drawerJs.includes("reg ? reg.id : 'sfs-2004-46'"), 'drawer.js must fallback to sfs-2004-46');
 });
 
-test('Regulations Authorities & Legal Tiers: strictly Swedish supervisory authorities and national tiers', () => {
+test('Regulations Authorities & Legal Tiers: supported authorities and authentic legal tiers', () => {
   const regulationsJs = fs.readFileSync(path.join(ROOT, 'src/data/regulations.js'), 'utf-8');
 
-  // Ensure REGULATION_AUTHORITIES only has Swedish authorities
+  // Ensure the supported authorities are available in REGULATION_AUTHORITIES.
   assert.ok(regulationsJs.includes("id: 'fi', label: 'Finansinspektionen (FI)'"), 'Must include Finansinspektionen');
   assert.ok(regulationsJs.includes("id: 'riksdagen', label: 'Riksdagen / Parliament'"), 'Must include Riksdagen');
   assert.ok(!regulationsJs.includes("id: 'fin-fsa'"), 'Must not include FIN-FSA');
-  assert.ok(!regulationsJs.includes("id: 'eu'"), 'Must not include European Union in REGULATION_AUTHORITIES');
+  assert.ok(regulationsJs.includes("id: 'fiva', label: 'Finanssivalvonta (FIVA)'"), 'Must include FIN-FSA');
+  assert.ok(regulationsJs.includes("id: 'eu', label: 'EUR-Lex (European Union)'"), 'Must include EUR-Lex');
 
   // Ensure REGULATION_TIERS has authentic tiers
   assert.ok(regulationsJs.includes("id: 'act', label: 'Parliamentary Acts (SFS)'"), 'Must include Parliamentary Acts');
-  assert.ok(regulationsJs.includes("id: 'supervisory', label: 'Supervisory Regulations (FFFS)'"), 'Must include Supervisory Regulations');
+  assert.ok(regulationsJs.includes("id: 'supervisory', label: 'Supervisory Regulations (FFFS / FIVA)'"), 'Must include Supervisory Regulations');
   assert.ok(!regulationsJs.includes("id: 'eu', label: 'EU Directives"), 'Must not include EU Directives tier');
 });
 
@@ -165,19 +166,19 @@ test('Projects & Seed Integrity: 100% authentic Swedish statutes and ZERO Finnis
   assert.ok(seedJs.includes('SFS 2013:561 · Alternativa fonder'), 'Must include SFS 2013:561 project');
 });
 
-test('Regulations UI & View Engine: Swedish authority segmentation and ZERO Finnish/EU jurisdiction filters', () => {
+test('Regulations UI & View Engine: Nordic authority segmentation and country filters', () => {
   const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
   const viewEngineJs = fs.readFileSync(path.join(ROOT, 'src/shell/view-engine.js'), 'utf-8');
   const storeJs = fs.readFileSync(path.join(ROOT, 'src/core/store.js'), 'utf-8');
 
   // Verify UI copy and segmented controls in regulations.js
-  assert.ok(regPageJs.includes('Swedish financial statutory library and supervisory regulations'), 'Must have Swedish library subtitle');
-  assert.ok(regPageJs.includes('Swedish acts & FFFS circulars'), 'Must have Swedish acts metric label');
+  assert.ok(regPageJs.includes('Nordic financial regulations from Sweden and Finland'), 'Must have Nordic library subtitle');
+  assert.ok(regPageJs.includes('Swedish & Finnish rules'), 'Must have Nordic regulations metric label');
   assert.ok(regPageJs.includes('Finansinspektionen (${fffsCount})'), 'Must have Finansinspektionen segment tab');
   assert.ok(regPageJs.includes('Riksdagen Acts (${sfsCount})'), 'Must have Riksdagen Acts segment tab');
   assert.ok(regPageJs.includes('data-k="regLibAuth"'), 'Must use regLibAuth data-k attribute on segment buttons');
-  assert.ok(!regPageJs.includes('>Finland</button>'), 'Must not have Finland segment button');
-  assert.ok(!regPageJs.includes('>European Union</button>'), 'Must not have European Union segment button');
+  assert.ok(regPageJs.includes('Finanssivalvonta (FIVA) (${fivaCount})'), 'Must have FIN-FSA segment button');
+  assert.ok(regPageJs.includes('European Union (${euCount})'), 'Must have EU segment button');
 
   // Verify view-engine has no legacy jurisdiction field in REG_FIELDS
   assert.ok(!viewEngineJs.includes('jurisdiction: {'), 'view-engine.js must not define jurisdiction in REG_FIELDS');

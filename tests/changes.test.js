@@ -19,7 +19,7 @@ test('Changes Feed Authenticity: authentic dataset from regtech pipeline', () =>
     assert.ok(ev.docId, 'Event must have docId');
     assert.ok(ev.code, 'Event must have code');
     assert.ok(['MODIFIED', 'ADDED', 'REPEALED'].includes(ev.status), `Invalid status ${ev.status}`);
-    assert.ok(['riksdagen', 'fffs'].includes(ev.source), `Invalid source ${ev.source}`);
+    assert.ok(['riksdagen', 'fffs', 'fiva', 'eu'].includes(ev.source), `Invalid source ${ev.source}`);
     assert.ok(ev.fetchedAt, 'Event must have fetchedAt');
 
     if (ev.diff && ev.diff.length) {

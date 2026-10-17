@@ -28,7 +28,7 @@ test('Local Document Serving: vite.config.js proxies /files, /doc, and /api to r
   assert.ok(viteConfig.includes("'/files'"), 'vite.config.js must proxy /files');
   assert.ok(viteConfig.includes("'/doc'"), 'vite.config.js must proxy /doc');
   assert.ok(viteConfig.includes("'/api'"), 'vite.config.js must proxy /api');
-  assert.ok(viteConfig.includes('8000'), 'vite.config.js proxy target must be port 8000');
+  assert.ok(viteConfig.includes('8001'), 'vite.config.js document proxy target must be port 8001');
 });
 
 test('Local Document Serving: Cloudflare Pages Functions routes serve documents directly', () => {
@@ -52,7 +52,7 @@ test('Local Document Serving: Cloudflare Pages Functions routes serve documents 
   assert.ok(middlewareJs.includes("url.pathname.startsWith('/files/')"), 'Must bypass lock screen for /files/');
 });
 
-test('Local Document Serving: regulations reader renders clean local attachments with zero online external links', () => {
+test('Local Document Serving: regulations reader offers local and official source versions', () => {
   const regPageJs = fs.readFileSync(path.join(ROOT, 'src/pages/regulations.js'), 'utf-8');
 
   assert.ok(regPageJs.includes('/doc/${esc(curAct.id)}/pdf'), 'Must link to /doc/{id}/pdf');
@@ -60,9 +60,10 @@ test('Local Document Serving: regulations reader renders clean local attachments
   assert.ok(regPageJs.includes('/doc/${esc(curAct.id)}/raw'), 'Must link to /doc/{id}/raw');
   assert.ok(regPageJs.includes('data-a="previewDoc"'), 'Must provide previewDoc trigger');
 
-  // Verify zero external online links in the attachments toolbar
+  // Swedish acts keep both their downloaded local copy and the official Riksdagen page.
   assert.ok(!regPageJs.includes('finlex-attach-sublink'), 'Must not render online external sublinks');
-  assert.ok(!regPageJs.includes('Official Page'), 'Must not render external Official Page link in attachments');
+  assert.ok(regPageJs.includes('Downloaded Version'), 'Must label the local saved copy');
+  assert.ok(regPageJs.includes('Official Web Version'), 'Must link to the official source');
 });
 
 test('Local Document Serving: actions and modals support document previewer', () => {

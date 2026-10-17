@@ -1,12 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  POLICIES,
-  CONTROLS,
-  RISKS,
-  GovernanceMatrix,
-  createGovernanceMatrix,
-} from '../src/data/governance.js';
+import { POLICIES, CONTROLS, RISKS, GovernanceMatrix, createGovernanceMatrix } from '../src/data/governance.js';
 
 test('GovernanceMatrix: initialization and index creation', () => {
   const matrix = createGovernanceMatrix(POLICIES, CONTROLS, RISKS);
@@ -23,13 +17,22 @@ test('GovernanceMatrix: O(1) section obligations lookup', () => {
   const ob = matrix.getSectionObligations(secId);
 
   assert.ok(ob.policies.length >= 1, 'Should find linked policies');
-  assert.ok(ob.policies.some(p => p.id === 'pol-alg-01'), 'Should contain pol-alg-01');
+  assert.ok(
+    ob.policies.some(p => p.id === 'pol-alg-01'),
+    'Should contain pol-alg-01',
+  );
 
   assert.ok(ob.controls.length >= 1, 'Should find linked controls');
-  assert.ok(ob.controls.some(c => c.id === 'ctl-alg-01'), 'Should contain ctl-alg-01');
+  assert.ok(
+    ob.controls.some(c => c.id === 'ctl-alg-01'),
+    'Should contain ctl-alg-01',
+  );
 
   assert.ok(ob.risks.length >= 1, 'Should find linked risks');
-  assert.ok(ob.risks.some(r => r.id === 'rsk-alg-01'), 'Should contain rsk-alg-01');
+  assert.ok(
+    ob.risks.some(r => r.id === 'rsk-alg-01'),
+    'Should contain rsk-alg-01',
+  );
 
   // Non-existent or unlinked section returns empty arrays safely
   const emptySec = matrix.getSectionObligations('non-existent-section-id');

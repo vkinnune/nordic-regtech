@@ -560,22 +560,25 @@ def export():
 
     if FEED_OUTPUT_PATH.is_file():
         existing_events = json.loads(FEED_OUTPUT_PATH.read_text(encoding="utf-8"))
-        existing_keys = {
-            (
-                event.get("source"), event.get("docId"), event.get("level"),
-                event.get("chapter"), event.get("section"), event.get("status"),
-                event.get("amendedDate"), event.get("fetchedAt"),
-            )
-            for event in existing_events
-        }
+        event_key = lambda event: (
+            event.get("source"),
+            event.get("docId"),
+            event.get("chunkId") or (
+                event.get("level"), event.get("chapter"), event.get("section"),
+                event.get("status"), event.get("amendedDate"),
+            ),
+        )
+        existing_keys = set()
+        merged_events = []
+        for event in sorted(existing_events, key=lambda item: int(item["id"])):
+            key = event_key(event)
+            if key in existing_keys:
+                continue
+            existing_keys.add(key)
+            merged_events.append(event)
         next_event_id = max((int(event["id"]) for event in existing_events), default=0)
-        merged_events = list(existing_events)
         for event in feed_events:
-            key = (
-                event.get("source"), event.get("docId"), event.get("level"),
-                event.get("chapter"), event.get("section"), event.get("status"),
-                event.get("amendedDate"), event.get("fetchedAt"),
-            )
+            key = event_key(event)
             if key in existing_keys:
                 continue
             if int(event["id"]) <= next_event_id:

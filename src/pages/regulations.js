@@ -273,9 +273,12 @@ function renderRegulationsReader(u) {
   const allSecs = allSectionsOf(curAct);
   const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
   const chapters = allChaptersOf(curAct);
-  const isFffs = Boolean((curAct.jurisdiction && (curAct.jurisdiction.includes('Finansinspektionen') || curAct.jurisdiction.includes('Finanssivalvonta'))) || (curAct.code && curAct.code.startsWith('FFFS')));
+  const isFffs = Boolean(
+    (curAct.jurisdiction && (curAct.jurisdiction.includes('Finansinspektionen') || curAct.jurisdiction.includes('Finanssivalvonta'))) ||
+    (curAct.code && curAct.code.startsWith('FFFS')),
+  );
   const isRiksdagenAct = curAct.type === 'national_act' || curAct.code?.startsWith('SFS ');
-  const webVersionUrl = `/doc/${encodeURIComponent(curAct.id)}/raw`;
+  const webVersionUrl = `/doc/${esc(curAct.id)}/raw`;
 
   return `<div class="page flush">
     <div class="finlex-container">
@@ -439,14 +442,18 @@ function renderRegulationsReader(u) {
                       </a>
                       <button class="finlex-preview-btn" data-a="previewDoc" data-title="${isRiksdagenAct ? 'Downloaded Version' : 'Web Version'} · ${esc(curAct.code)}" data-url="${esc(webVersionUrl)}" title="Preview downloaded version">${ic('eye', 11)}</button>
                     </div>
-                    ${isRiksdagenAct && curAct.sourceUrl ? `
+                    ${
+                      isRiksdagenAct && curAct.sourceUrl
+                        ? `
                     <div class="finlex-attach-chip-group">
                       <a href="${esc(curAct.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="Open official Riksdagen page">
                         ${ic('globe', 12)}
                         <span>Official Web Version</span>
                       </a>
                     </div>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                   `
                       : ''
                   }
