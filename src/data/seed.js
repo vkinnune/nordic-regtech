@@ -1,6 +1,7 @@
 /* ---------- seed data: Nordic Financial Compliance ---------- */
 import { dOff, minsAgo, uid } from '../core/utils.js';
 import { POLICIES, CONTROLS, RISKS } from './governance.js';
+import { enrichGovernance } from './governance-demo.js';
 
 export function seed() {
   const members = [
@@ -723,7 +724,7 @@ export function seed() {
   const tmp = tk('t1');
   if (tmp) tmp.updated = minsAgo(35);
 
-  return {
+  return enrichGovernance({
     ws: { name: 'Nordic Sovereign Bank (Mock)', url: 'nordic-sovereign', c: '#0F52BA', brand: true },
     workspaces: [
       { id: 'w1', name: 'Nordic Sovereign Bank (Mock)', c: '#0F52BA', plan: 'Enterprise', brand: true },
@@ -734,9 +735,9 @@ export function seed() {
     members,
     projects,
     tasks: T,
-    policies: POLICIES.map(p => ({ ...p })),
-    controls: CONTROLS.map(c => ({ ...c })),
-    risks: RISKS.map(r => ({ ...r })),
+    policies: structuredClone(POLICIES),
+    controls: structuredClone(CONTROLS),
+    risks: structuredClone(RISKS),
     comments,
     activity,
     notifs,
@@ -766,5 +767,5 @@ export function seed() {
       mention_all: true,
       assign_self: true,
     },
-  };
+  });
 }

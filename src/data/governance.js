@@ -341,7 +341,7 @@ export class GovernanceMatrix {
     if (!ctls.length) {
       return { score: baseScore, gapStatus: r.gapStatus || 'AT_RISK' };
     }
-    const hasDeficient = ctls.some(c => c.status === 'DEFICIENT');
+    const hasDeficient = ctls.some(c => c.status !== 'EFFECTIVE');
     const gapStatus = hasDeficient ? 'OPEN_GAPS' : 'COVERED';
     return { score: baseScore, gapStatus };
   }

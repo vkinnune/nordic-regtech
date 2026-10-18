@@ -100,3 +100,10 @@ test('GovernanceMatrix: policy and risk relationships', () => {
   assert.ok(exposure.score > 0, 'Risk exposure score should be calculated');
   assert.ok(['COVERED', 'OPEN_GAPS', 'AT_RISK'].includes(exposure.gapStatus));
 });
+
+test('GovernanceMatrix: untested and archived controls cannot establish effective risk coverage', () => {
+  for (const status of ['UNIMPLEMENTED', 'RETIRED', 'DEFICIENT']) {
+    const matrix = createGovernanceMatrix([], [{ id: 'c', riskId: 'r', status }], [{ id: 'r' }]);
+    assert.equal(matrix.getRiskExposure({ id: 'r' }).gapStatus, 'OPEN_GAPS');
+  }
+});

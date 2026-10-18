@@ -271,7 +271,7 @@ function renderRegulationsReader(u) {
   const q = (u.regQ || '').toLowerCase().trim();
 
   const allSecs = allSectionsOf(curAct);
-  const activeSecId = u.regSec || (allSecs[0] ? allSecs[0].id : null);
+  const activeSecId = u.regSec || (!u.activeChapId && allSecs[0] ? allSecs[0].id : null);
   const chapters = allChaptersOf(curAct);
   const isFffs = Boolean(
     (curAct.jurisdiction && (curAct.jurisdiction.includes('Finansinspektionen') || curAct.jurisdiction.includes('Finanssivalvonta'))) ||
@@ -314,7 +314,7 @@ function renderRegulationsReader(u) {
               <span>Table of Contents</span>
             </h2>
             ${
-              chapters.length > 1
+              chapters.length > 1 && !q
                 ? `<div class="finlex-toc-actions">
                     <button class="finlex-toc-toggle-btn" data-a="toggleRegTocExpand" title="${u.regTocExpanded ? 'Collapse to chapter outline' : 'Expand all sections'}">
                       ${u.regTocExpanded ? 'Collapse' : 'Expand'}
@@ -332,24 +332,24 @@ function renderRegulationsReader(u) {
         </div>
 
         <!-- TOC Hierarchical Tree -->
-        <div class="finlex-toc-tree" data-keep="finlex-tree">
+        <div class="finlex-toc-tree" data-keep="finlex-tree-${esc(curAct.id)}">
           ${!allSecs.length ? `<div style="padding:16px;font-size:12px;color:var(--text-3);text-align:center">No chapters indexed</div>` : renderFinlexTree(curAct, chapters, activeSecId, q)}
         </div>
       </aside>
 
       <!-- RIGHT MAIN CONTENT: Finlex Document Reader -->
-      <main class="finlex-reader" id="finlex-doc-content" tabindex="-1">
+      <main class="finlex-reader" id="finlex-doc-content" data-keep="finlex-reader-${esc(curAct.id)}" tabindex="-1">
+        ${
+          u.regTocCollapsed
+            ? `<div class="finlex-toc-restore">
+                <button class="btn btn-secondary btn-sm" data-a="toggleRegToc" title="Show table of contents">
+                  ${ic('panel-left', 13)}
+                  <span>Table of Contents</span>
+                </button>
+              </div>`
+            : ''
+        }
         <div class="finlex-reader-inner">
-          ${
-            u.regTocCollapsed
-              ? `<div style="margin-bottom:14px">
-                  <button class="btn btn-secondary btn-sm" data-a="toggleRegToc" title="Show table of contents">
-                    ${ic('panel-left', 13)}
-                    <span>Table of Contents</span>
-                  </button>
-                </div>`
-              : ''
-          }
 
           <!-- Act Document Header -->
           <header class="finlex-doc-head">
@@ -533,7 +533,7 @@ function renderRegulationsReader(u) {
               ? `<div class="finlex-toolbar">
                   <span class="faint" style="font-size:12px">Filtered by "${esc(q)}"</span>
                   <span class="sp"></span>
-                  <button class="pillbtn" data-a="set" data-k="regQ" data-v="" style="font-size:11.5px">
+                  <button class="pillbtn" data-a="clearRegQ" style="font-size:11.5px">
                     ${ic('x', 12)}Clear search
                   </button>
                 </div>`
@@ -625,8 +625,9 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
       const cleanNum = formatChapterNo(ch.number);
       const title = formatChapterTitle(ch);
       const fullLabel = formatChapterFullLabel(ch);
-      const isChapActive = S.ui.activeChapId === cleanNum || matchingSecs.some(s => s.id === activeSecId);
-      const isExpanded = Boolean(q || globalExpanded || chapExpandedMap[cleanNum]);
+      const isChapActive = S.ui.activeChapId ? S.ui.activeChapId === cleanNum : matchingSecs.some(s => s.id === activeSecId);
+      const hasSelectedSec = matchingSecs.some(s => s.id === S.ui.regSec);
+      const isExpanded = Boolean(q || (chapExpandedMap[cleanNum] ?? (globalExpanded || hasSelectedSec)));
 
       let secItemsHtml = '';
       if (isExpanded || !hasMultipleChaps) {
@@ -640,7 +641,7 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
               lastSecHeading = rawHeading;
               const displayHeading = showHeading ? ` · ${rawHeading}` : '';
 
-              return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" data-a="selectSec" data-id="${s.id}" title="${esc(s.number)}${esc(displayHeading)}">
+              return `<button class="finlex-tree-sec ${isActive ? 'active' : ''}" ${isActive ? 'aria-current="location"' : ''} data-a="selectSec" data-id="${s.id}" title="${esc(s.number)}${esc(displayHeading)}">
                 <span class="finlex-sec-tree-num">${esc(s.number)}</span>
                 ${showHeading ? `<span class="finlex-sec-tree-title trunc">${esc(rawHeading)}</span>` : ''}
               </button>`;
@@ -657,13 +658,13 @@ function renderFinlexTree(act, chapters, activeSecId, q) {
         ${partHtml}
         <div class="finlex-outline-item">
           <div class="finlex-outline-header ${isChapActive ? 'active' : ''}">
-            <button class="finlex-outline-row ${isChapActive ? 'active' : ''}" data-a="scrollToChap" data-chap="${esc(cleanNum)}" title="${esc(fullLabel)}">
+            <button class="finlex-outline-row ${isChapActive ? 'active' : ''}" ${isChapActive ? 'aria-current="location"' : ''} data-a="scrollToChap" data-chap="${esc(cleanNum)}" title="${esc(fullLabel)}">
               <span class="finlex-outline-num">${esc(cleanNum)}</span>
               <span class="finlex-outline-title trunc">${esc(title)}</span>
             </button>
             ${
               matchingSecs.length
-                ? `<button class="finlex-outline-expander" data-a="toggleChapExpand" data-chap="${esc(cleanNum)}" title="${isExpanded ? 'Collapse sections' : 'Expand sections'}">
+                ? `<button class="finlex-outline-expander" data-a="toggleChapExpand" data-chap="${esc(cleanNum)}" aria-expanded="${isExpanded}" ${q ? 'disabled' : ''} title="${q ? 'Sections expanded while searching' : isExpanded ? 'Collapse sections' : 'Expand sections'}">
                     ${ic(isExpanded ? 'chevron-down' : 'chevron-right', 11)}
                   </button>`
                 : ''

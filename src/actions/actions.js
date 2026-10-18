@@ -1337,8 +1337,22 @@ A.setRegView = el => {
   }
 };
 A.toggleRegToc = () => {
+  const reader = document.getElementById('finlex-doc-content');
+  const readerTop = reader?.getBoundingClientRect().top || 0;
+  const anchor = [...(reader?.querySelectorAll('.finlex-chap-divider, .finlex-sec') || [])].find(el => el.getBoundingClientRect().bottom > readerTop);
+  const anchorOffset = anchor ? anchor.getBoundingClientRect().top - readerTop : 0;
+  if (!S.ui.regTocCollapsed) S.ui.regTocScroll = $('.finlex-toc-tree')?.scrollTop || 0;
   S.ui.regTocCollapsed = !S.ui.regTocCollapsed;
   render();
+  // Changing the reader width reflows long provisions. Keep the visible passage,
+  // as well as the outline's place, when the pane is hidden or restored.
+  const nextReader = document.getElementById('finlex-doc-content');
+  const nextAnchor = anchor && document.getElementById(anchor.id);
+  if (nextReader && nextAnchor) {
+    nextReader.scrollTop += nextAnchor.getBoundingClientRect().top - nextReader.getBoundingClientRect().top - anchorOffset;
+  }
+  const tree = $('.finlex-toc-tree');
+  if (!S.ui.regTocCollapsed && tree) tree.scrollTop = S.ui.regTocScroll || 0;
 };
 A.clearRegLibQ = () => {
   S.ui.regLibQ = '';
@@ -1380,22 +1394,19 @@ A.selectSec = el => {
 A.scrollToChap = el => {
   const chapNum = el.dataset.chap;
   if (!chapNum) return;
-  const target = document.getElementById(`chap-${chapNum}`);
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    S.ui.activeChapId = chapNum;
-    render();
-  }
+  const regId = S.ui.regSel || S.ui.params?.id || 'sfs-2004-46';
+  go('regulations', { id: regId, chap: chapNum });
 };
 A.toggleRegTocExpand = () => {
   S.ui.regTocExpanded = !S.ui.regTocExpanded;
+  S.ui.regChapExpanded = Object.fromEntries($$('[data-a="toggleChapExpand"]').map(el => [el.dataset.chap, S.ui.regTocExpanded]));
   render();
 };
 A.toggleChapExpand = el => {
   const chapNum = el.dataset.chap;
   if (!chapNum) return;
   if (!S.ui.regChapExpanded) S.ui.regChapExpanded = {};
-  S.ui.regChapExpanded[chapNum] = !S.ui.regChapExpanded[chapNum];
+  S.ui.regChapExpanded[chapNum] = el.getAttribute('aria-expanded') !== 'true';
   render();
 };
 A.toggleDiffPlain = () => {
@@ -1404,6 +1415,14 @@ A.toggleDiffPlain = () => {
 };
 IN.regQ = el => {
   S.ui.regQ = el.value;
+  S.ui.pendingRegScrollTop = true;
+  render();
+};
+A.clearRegQ = () => {
+  S.ui.regQ = '';
+  S.ui.pendingScrollSec = S.ui.regSec;
+  S.ui.pendingScrollChap = S.ui.activeChapId;
+  S.ui.pendingRegScrollTop = true;
   render();
 };
 
@@ -1424,6 +1443,9 @@ A.openGovDrawer = el => {
   delete S.ui.drawer;
   delete S.ui.changeDrawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
+  S.ui.govTab = 'overview';
+  S.ui.govError = '';
+  S.ui.govDraft = null;
   S.ui.drawerFull = false;
   fxSet({ drawer: true });
   render();
@@ -1432,33 +1454,6 @@ A.openGovDrawer = el => {
 A.closeGovDrawer = () => {
   delete S.ui.govDrawer;
   render();
-};
-
-A.resolveGap = el => {
-  const c = control(el.dataset.id);
-  if (c) {
-    c.status = 'EFFECTIVE';
-    c.signedOffAt = Date.now();
-    c.signedOffBy = D().me;
-    delete c.impactedByAmendment;
-    logAct('resolved', null, `Signed off compliance gap on ${c.code}`);
-    toast(`Control ${c.code} marked effective.`);
-    save();
-    render();
-  }
-};
-
-A.signOffPolicy = el => {
-  const p = policy(el.dataset.id);
-  if (p) {
-    p.status = 'ACTIVE';
-    p.reviewedAt = Date.now();
-    p.reviewedBy = D().me;
-    logAct('resolved', null, `Signed off policy review for ${p.code}`);
-    toast(`Policy ${p.code} signed off as reviewed.`);
-    save();
-    render();
-  }
 };
 
 function dispatchGovTask({ key, title, desc, project, labels, logMessage, toastMessage, onBeforeCommit }) {

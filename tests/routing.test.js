@@ -606,6 +606,52 @@ test('Router: Regulations deep linking and library restoration', () => {
   assert.equal(S.ui.pendingScrollSec, undefined);
 });
 
+test('Router: chapter links round-trip and replace the previous section selection', () => {
+  const route = { route: 'regulations', params: { id: 'sfs-2019-742', chap: '6' }, auth: null };
+  const hash = routeToHash(route);
+  assert.equal(hash, '#/regulations/sfs-2019-742/chapter/6');
+  assert.deepEqual(hashToRoute(hash), route);
+  assert.deepEqual(hashToRoute('#/regulation/sfs-2019-742/chapter/1%20a').params, { id: 'sfs-2019-742', chap: '1 a' });
+
+  restoreRoute('#/regulations/sfs-2019-742/sec-1');
+  S.ui.fx = { route: true, tabs: true };
+  restoreRoute(hash);
+  assert.equal(S.ui.activeChapId, '6');
+  assert.equal(S.ui.pendingScrollChap, '6');
+  assert.equal(S.ui.regSec, undefined);
+  assert.equal(S.ui.pendingScrollSec, undefined);
+  assert.equal(S.ui.fx.route, undefined, 'anchor navigation must not animate the reader layout');
+
+  restoreRoute('#/regulations/sfs-2019-742/sec-2');
+  assert.equal(S.ui.regSec, 'sec-2');
+  assert.equal(S.ui.pendingScrollSec, 'sec-2');
+  assert.equal(S.ui.activeChapId, undefined);
+  assert.equal(S.ui.pendingScrollChap, undefined);
+});
+
+test('Router: reader search and outline state stay within their document', () => {
+  restoreRoute('#/regulations/sfs-2019-742/chapter/6');
+  S.ui.regQ = 'risk';
+  S.ui.regChapExpanded = { 6: true, 7: false };
+  S.ui.regTocExpanded = true;
+  restoreRoute('#/regulations/sfs-2019-742/sec-3');
+  assert.equal(S.ui.regQ, 'risk');
+  assert.deepEqual(S.ui.regChapExpanded, { 6: true, 7: false });
+
+  restoreRoute('#/regulations/sfs-2004-46');
+  assert.equal(S.ui.regQ, '');
+  assert.deepEqual(S.ui.regChapExpanded, {});
+  assert.equal(S.ui.regTocExpanded, false);
+  assert.equal(S.ui.activeChapId, undefined);
+  assert.equal(S.ui.regSec, undefined);
+  assert.equal(S.ui.pendingRegScrollTop, true);
+  assert.equal(S.ui.pendingScrollSec, undefined);
+  assert.equal(S.ui.pendingScrollChap, undefined);
+
+  restoreRoute('#/regulations');
+  assert.equal(S.ui.pendingRegScrollTop, undefined);
+});
+
 test('Router: Normalization of hashbangs, consecutive slashes, and trailing slashes', () => {
   assert.equal(normalizeHash('#!/inbox'), 'inbox');
   assert.equal(normalizeHash('#!/settings/workspace/'), 'settings/workspace');

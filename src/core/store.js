@@ -2,6 +2,7 @@
 import { TODAY, diffD, iso, parse, uid } from './utils.js';
 import { PCOLORS, TEAMS_SEED } from './constants.js';
 import { seed } from '../data/seed.js';
+import { enrichGovernance } from '../data/governance-demo.js';
 
 export const STORE_KEY = 'regtech.studio.v8';
 export const DEFAULT_PREFS = {
@@ -50,7 +51,7 @@ export function load() {
 }
 export const saved = load();
 export const S = {
-  data: saved?.data || seed(),
+  data: enrichGovernance(saved?.data || seed()),
   prefs: Object.assign({}, DEFAULT_PREFS, saved?.prefs || {}),
   views: saved?.views || {},
   ui: {
@@ -215,13 +216,15 @@ export { POLICIES, CONTROLS, RISKS, GovernanceMatrix, createGovernanceMatrix, de
 
 let _activeMatrix = null;
 let _matrixVersion = null;
+let _matrixData = null;
 
 export function getGovernanceMatrix() {
   const d = D();
-  const ver = `${d.policies?.length}_${d.controls?.length}_${d.risks?.length}`;
-  if (!_activeMatrix || _matrixVersion !== ver) {
+  const ver = JSON.stringify([d.policies, d.controls, d.risks].map(list => list?.map(x => [x.id, x.policyId, x.riskId, x.statuteSections, x.controlIds])));
+  if (!_activeMatrix || _matrixVersion !== ver || _matrixData !== d) {
     _activeMatrix = createGovernanceMatrix(allPolicies(), allControls(), allRisks());
     _matrixVersion = ver;
+    _matrixData = d;
   }
   return _activeMatrix;
 }
@@ -257,7 +260,7 @@ export function isSectionAmended(sec) {
 }
 
 export function isControlImpacted(c) {
-  if (!c) return false;
+  if (!c || ['RETIRED', 'UNIMPLEMENTED'].includes(c.status)) return false;
   if (c.status === 'DEFICIENT') return true;
   if (c.impactedByAmendment && !c.signedOffAt) return true;
   const sections = c.statuteSections || [];
@@ -268,7 +271,7 @@ export function isControlImpacted(c) {
 }
 
 export function isPolicyImpacted(p) {
-  if (!p) return false;
+  if (!p || ['RETIRED', 'DRAFT'].includes(p.status)) return false;
   if (p.status === 'NEEDS_REVIEW') return true;
   if (p.impactedByAmendment && !p.reviewedAt) return true;
   const sections = p.statuteSections || [];
@@ -306,7 +309,7 @@ export function riskControls(r) {
 export function riskGapStatus(r) {
   const ctls = riskControls(r);
   if (!ctls.length) return r.gapStatus || 'AT_RISK';
-  const hasGaps = ctls.some(isControlImpacted);
+  const hasGaps = ctls.some(c => c.status !== 'EFFECTIVE' || isControlImpacted(c));
   return hasGaps ? 'OPEN_GAPS' : 'COVERED';
 }
 

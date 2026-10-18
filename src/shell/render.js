@@ -94,7 +94,7 @@ export function fxSet(o) {
 }
 export const fxc = (kind, id) => (S.ui.fx && S.ui.fx[kind] === id ? ' fx-' + kind : '');
 /* Focus survives full re-renders: every control is addressable by its data-* identity. */
-export const FKEYS = ['a', 'id', 'r', 'tab', 'pop', 'ctx', 'k', 'v', 'sec', 'i', 'field', 'sid', 'key', 'e', 'f', 'dragCard', 'taskRow'];
+export const FKEYS = ['a', 'id', 'r', 'tab', 'pop', 'ctx', 'k', 'v', 'sec', 'chap', 'i', 'field', 'sid', 'key', 'e', 'f', 'dragCard', 'taskRow'];
 export function focusKey(el) {
   if (!el || el === document.body || !el.tagName) return null;
   if (el.id) return '#' + CSS.escape(el.id);
@@ -220,11 +220,24 @@ export function afterRender() {
   const pal = $('#pal-in');
   if (pal && document.activeElement !== pal && !S.ui.pop) pal.focus();
   if ((S.ui.route === 'project' && S.ui.params.tab === 'timeline') || S.ui.route === 'timeline') tlAfter();
-  if (S.ui.pendingScrollSec) {
-    const targetEl = document.getElementById(`sec-${S.ui.pendingScrollSec}`) || document.getElementById(S.ui.pendingScrollSec);
-    if (targetEl?.scrollIntoView) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    delete S.ui.pendingScrollSec;
+  const reader = document.getElementById('finlex-doc-content');
+  if (reader) {
+    const targetEl = S.ui.pendingScrollSec
+      ? document.getElementById(`sec-${S.ui.pendingScrollSec}`)
+      : S.ui.pendingScrollChap
+        ? document.getElementById(`chap-${S.ui.pendingScrollChap}`)
+        : null;
+    if (targetEl && reader.contains(targetEl)) {
+      // Scroll the newly rendered reader, keeping the outline and page stationary.
+      const top = reader.scrollTop + targetEl.getBoundingClientRect().top - reader.getBoundingClientRect().top - 16;
+      reader.scrollTo({ top: Math.max(0, top), behavior: reduceMotion() ? 'instant' : 'smooth' });
+    } else if (S.ui.pendingRegScrollTop) {
+      reader.scrollTop = 0;
+    }
   }
+  delete S.ui.pendingScrollSec;
+  delete S.ui.pendingScrollChap;
+  delete S.ui.pendingRegScrollTop;
 }
 /* Headline numbers count up once when a dashboard is entered. */
 export function countUp() {

@@ -165,6 +165,10 @@ export function hashToRoute(hash, options = {}) {
     }
     if (parts[1]) {
       const params = { id: parts[1] };
+      if (parts[2] === 'chapter' && parts[3]) {
+        params.chap = parts[3];
+        return { route: 'regulations', params, auth: null };
+      }
       if (parts[2]) params.sec = parts[2];
       if (parts[3]) {
         if (parts[3].toLowerCase() === 'diff') {
@@ -255,6 +259,9 @@ export function routeToHash(state = null, options = {}) {
       const diffSuffix = s.params?.diff ? '/diff' : '';
       return `#/regulations/${encodeURIComponent(s.params.id)}/${encodeURIComponent(s.params.sec)}${diffSuffix}`;
     }
+    if (s.params?.id && s.params?.chap) {
+      return `#/regulations/${encodeURIComponent(s.params.id)}/chapter/${encodeURIComponent(s.params.chap)}`;
+    }
     if (s.params?.id) {
       return `#/regulations/${encodeURIComponent(s.params.id)}`;
     }
@@ -300,26 +307,39 @@ export function applyRoute(target, opt = {}) {
     const prevParams = S.ui.params || {};
     const same = prevRoute === target.route && JSON.stringify(prevParams) === JSON.stringify(target.params) && S.ui.auth === null;
     const tabOnly = opt.tab || (target.route === 'project' && prevRoute === 'project' && prevParams.id === target.params?.id);
+    const readerAnchor = (target.route === 'regulations' || target.route === 'regulation') && target.params?.id && (target.params.sec || target.params.chap);
 
     S.ui.auth = null;
     S.ui.route = target.route;
     S.ui.params = target.params || {};
 
     if (target.route === 'regulations' || target.route === 'regulation') {
+      // Selection belongs to the route; outline/search state belongs to one document.
+      delete S.ui.activeChapId;
+      delete S.ui.regSec;
+      delete S.ui.pendingScrollSec;
+      delete S.ui.pendingScrollChap;
+      delete S.ui.pendingRegScrollTop;
+      if (prevRoute !== target.route || prevParams.id !== target.params?.id) {
+        S.ui.regQ = '';
+        S.ui.regChapExpanded = {};
+        S.ui.regTocExpanded = false;
+        delete S.ui.regTocScroll;
+      }
       if (target.params?.id) {
         S.ui.regSel = target.params.id;
         S.ui.regView = 'reader';
         if (target.params.sec) {
           S.ui.regSec = target.params.sec;
           S.ui.pendingScrollSec = target.params.sec;
+        } else if (target.params.chap) {
+          S.ui.activeChapId = target.params.chap;
+          S.ui.pendingScrollChap = target.params.chap;
         } else {
-          delete S.ui.regSec;
-          delete S.ui.pendingScrollSec;
+          S.ui.pendingRegScrollTop = true;
         }
       } else {
         S.ui.regView = 'library';
-        delete S.ui.regSec;
-        delete S.ui.pendingScrollSec;
       }
     }
 
@@ -340,7 +360,12 @@ export function applyRoute(target, opt = {}) {
     S.ui.loading = false;
 
     if (!same && S.ui.fx) {
-      if (tabOnly) {
+      if (readerAnchor) {
+        // Entrance transforms create temporary scrollbars and change line wrapping
+        // while an anchor's position is being measured.
+        delete S.ui.fx.route;
+        delete S.ui.fx.tabs;
+      } else if (tabOnly) {
         S.ui.fx.tab = true;
         S.ui.fx.tabs = true;
       } else {
