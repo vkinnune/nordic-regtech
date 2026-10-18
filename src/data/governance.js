@@ -279,9 +279,9 @@ export class GovernanceMatrix {
         if (!this._policyControls.has(c.policyId)) this._policyControls.set(c.policyId, []);
         this._policyControls.get(c.policyId).push(c);
       }
-      if (c.riskId) {
-        if (!this._riskControls.has(c.riskId)) this._riskControls.set(c.riskId, []);
-        this._riskControls.get(c.riskId).push(c);
+      for (const riskId of new Set([c.riskId, ...(c.riskIds || [])].filter(Boolean))) {
+        if (!this._riskControls.has(riskId)) this._riskControls.set(riskId, []);
+        this._riskControls.get(riskId).push(c);
       }
     }
 

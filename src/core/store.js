@@ -2,6 +2,7 @@
 import { TODAY, diffD, iso, parse, uid } from './utils.js';
 import { PCOLORS, TEAMS_SEED } from './constants.js';
 import { seed } from '../data/seed.js';
+import { riskScore, linkedRiskControls, controlAssurance } from '../features/risk-model.js';
 import { enrichGovernance } from '../data/governance-demo.js';
 
 export const STORE_KEY = 'regtech.studio.v8';
@@ -220,7 +221,9 @@ let _matrixData = null;
 
 export function getGovernanceMatrix() {
   const d = D();
-  const ver = JSON.stringify([d.policies, d.controls, d.risks].map(list => list?.map(x => [x.id, x.policyId, x.riskId, x.statuteSections, x.controlIds])));
+  const ver = JSON.stringify(
+    [d.policies, d.controls, d.risks].map(list => list?.map(x => [x.id, x.policyId, x.riskId, x.riskIds, x.statuteSections, x.controlIds])),
+  );
   if (!_activeMatrix || _matrixVersion !== ver || _matrixData !== d) {
     _activeMatrix = createGovernanceMatrix(allPolicies(), allControls(), allRisks());
     _matrixVersion = ver;
@@ -303,21 +306,19 @@ export function impactedControlsForSection(secId) {
 
 export function riskControls(r) {
   if (!r) return [];
-  return getGovernanceMatrix().getRiskControls(r.id);
+  return linkedRiskControls(r, allControls());
 }
 
 export function riskGapStatus(r) {
   const ctls = riskControls(r);
-  if (!ctls.length) return r.gapStatus || 'AT_RISK';
-  const hasGaps = ctls.some(c => c.status !== 'EFFECTIVE' || isControlImpacted(c));
+  if (!ctls.length) return 'AT_RISK';
+  const hasGaps = ctls.some(c => controlAssurance(c, undefined, isControlImpacted(c)) !== 'Current');
   return hasGaps ? 'OPEN_GAPS' : 'COVERED';
 }
 
 export function riskExposureScore(r) {
-  const base = r.exposureScore || 70;
-  const status = riskGapStatus(r);
-  if (status === 'COVERED') return Math.max(10, Math.round(base * 0.35));
-  return base;
+  const score = riskScore(r.residualLikelihood, r.residualImpact);
+  return score == null ? null : score * 4;
 }
 
 export function regulationOfSection(secId) {

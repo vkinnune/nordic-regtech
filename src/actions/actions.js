@@ -1444,6 +1444,9 @@ A.openGovDrawer = el => {
   delete S.ui.changeDrawer;
   S.ui.govDrawer = { type: el.dataset.type, id: el.dataset.id };
   S.ui.govTab = 'overview';
+  S.ui.riskTab = 'overview';
+  S.ui.riskError = '';
+  S.ui.riskDraft = null;
   S.ui.govError = '';
   S.ui.govDraft = null;
   S.ui.drawerFull = false;

@@ -1,3 +1,4 @@
+import { enrichRisks } from './risk-demo.js';
 // Fictional workspace examples. These are not legal requirements or live assurance results.
 const examples = [
   [
@@ -73,7 +74,7 @@ const examples = [
 ];
 
 export function enrichGovernance(data) {
-  if (data.governanceDemoVersion === 1) return data;
+  if (data.governanceDemoVersion === 1) return enrichRisks(data);
   data.policies ||= [];
   data.controls ||= [];
   for (const [key, title, category, owner, status, due, summary, ctlTitle, type, ctlStatus, frequency, specification] of examples) {
@@ -141,5 +142,5 @@ export function enrichGovernance(data) {
     c.demo = true;
   }
   data.governanceDemoVersion = 1;
-  return data;
+  return enrichRisks(data);
 }

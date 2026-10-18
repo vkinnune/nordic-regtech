@@ -32,6 +32,7 @@ import { cellAssignee, cellDue, cellPrio, cellProject, cellStatus } from '../com
 import { modalHtml } from './modals.js';
 import { popHtml } from './popovers.js';
 import { paletteHtml } from './palette.js';
+import { riskDrawer } from '../features/risk-ui.js';
 import { governanceDrawer } from '../features/governance-ui.js';
 import { subtaskHtml } from '../features/subtasks.js';
 
@@ -287,6 +288,7 @@ function renderControlRow(c) {
 }
 
 export function govDrawerHtml(gov) {
+  if (gov.type === 'risk') return riskDrawer(gov);
   if (['policy', 'control'].includes(gov.type)) return governanceDrawer(gov);
   const { type, id } = gov;
   const u = S.ui;

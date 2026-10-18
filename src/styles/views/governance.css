@@ -664,3 +664,239 @@
     padding-bottom: 90px;
   }
 }
+
+/* Risk register and assessment workspace */
+.risk-toolbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.risk-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 11px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.risk-low {
+  color: var(--green);
+  background: var(--green-soft);
+}
+.risk-moderate {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+.risk-high {
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+}
+.risk-critical {
+  color: var(--red);
+  background: var(--red-soft);
+}
+.risk-unassessed {
+  color: var(--text-3);
+  background: var(--surface-2);
+}
+.risk-row-state {
+  margin-top: 8px;
+}
+.risk-score-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 20px;
+}
+.risk-score-pair > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px;
+}
+.risk-score-pair > div + div {
+  border-left: 1px solid var(--border);
+}
+.risk-score-pair > div > span:first-child {
+  color: var(--text-2);
+  font-size: 12px;
+}
+.risk-score-pair small {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.risk-score-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin: 0 0 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+}
+.risk-acceptance {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm);
+  padding: 16px;
+  margin: 20px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.risk-acceptance h3 {
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+.risk-links-picker {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px;
+  margin: 18px 0;
+  max-height: 240px;
+  overflow: auto;
+}
+.risk-links-picker legend {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 5px;
+}
+.risk-links-picker label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.risk-links-picker input {
+  flex-shrink: 0;
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+.risk-links-picker .mono {
+  font-size: 10px;
+}
+.risk-action-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 14px;
+}
+.risk-action-heading h3 {
+  margin: 0;
+}
+.risk-action .row {
+  align-items: flex-start;
+}
+.risk-action .row > strong {
+  flex: 1;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.risk-action .row > .gov-badge {
+  flex-shrink: 0;
+}
+.risk-matrix-panel {
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) minmax(220px, 1fr);
+  gap: 36px;
+  padding: 24px;
+  margin-top: 18px;
+}
+.risk-matrix-panel h2 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+.risk-matrix-panel p {
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.7;
+}
+.risk-matrix-layout {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.risk-axis-y {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+  padding-bottom: 24px;
+}
+.risk-matrix-grid {
+  display: grid;
+  grid-template-columns: 20px repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  flex: 1;
+}
+.risk-matrix-cell {
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.risk-matrix-cell.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.risk-matrix-cell:hover {
+  border-color: currentColor;
+}
+.risk-axis-number {
+  color: var(--text-3);
+  font-size: 11px;
+  align-self: center;
+  text-align: center;
+}
+.risk-axis-x {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+  padding-top: 8px;
+}
+.risk-method {
+  align-self: center;
+  max-width: 430px;
+}
+.risk-method h3 {
+  font-size: 12px;
+}
+.risk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0;
+}
+@media (max-width: 700px) {
+  .risk-matrix-panel {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+  .risk-score-pair > div {
+    padding: 12px;
+  }
+  .risk-detail .gov-detail-tabs button {
+    padding: 6px 5px;
+    font-size: 10px;
+  }
+  .risk-detail .gov-linked {
+    flex-wrap: wrap;
+  }
+  .risk-detail .gov-linked .gov-record-link {
+    flex-basis: 65%;
+  }
+}

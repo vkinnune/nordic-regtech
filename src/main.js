@@ -55,6 +55,7 @@ import './actions/teams.js';
 import './actions/subtasks.js';
 import './actions/archive.js';
 import './actions/governance.js';
+import './actions/risks.js';
 import './shell/router.js';
 import { S, D } from './core/store.js';
 import { A } from './actions/actions.js';
