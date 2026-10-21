@@ -152,6 +152,7 @@ export function getRegulationTier(r) {
   if (t === 'national_act' || (code.startsWith('SFS') && !title.includes('förordning')) || /act\b/i.test(title) || title.startsWith('lag (')) return 'act';
   if (t === 'fsa_regulation' || t === 'fiva_regulation' || code.startsWith('FFFS')) return 'supervisory';
   if (t === 'eu_regulation') return 'eu';
+  if (t === 'government_proposition') return 'proposition';
   return 'other';
 }
 
@@ -197,6 +198,7 @@ export const REGULATION_TIERS = [
   { id: 'supervisory', label: 'Supervisory Regulations (FFFS / FIVA)' },
   { id: 'eu', label: 'EU Regulations' },
   { id: 'ordinance', label: 'Government Ordinances' },
+  { id: 'proposition', label: 'Government Propositions' },
 ];
 
 export const REGULATION_AUTHORITIES = [

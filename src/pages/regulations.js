@@ -277,8 +277,10 @@ function renderRegulationsReader(u) {
     (curAct.jurisdiction && (curAct.jurisdiction.includes('Finansinspektionen') || curAct.jurisdiction.includes('Finanssivalvonta'))) ||
     (curAct.code && curAct.code.startsWith('FFFS')),
   );
-  const isRiksdagenAct = curAct.type === 'national_act' || curAct.code?.startsWith('SFS ');
-  const webVersionUrl = `/doc/${esc(curAct.id)}/raw`;
+  const isGovernmentProposition = curAct.type === 'government_proposition';
+  const isRiksdagenDocument = isGovernmentProposition || curAct.type === 'national_act' || curAct.code?.startsWith('SFS ');
+  const webVersionUrl = curAct.localSourceUrl || (isGovernmentProposition ? curAct.sourceUrl : `/doc/${esc(curAct.id)}/raw`);
+  const pdfUrl = curAct.pdfUrl?.startsWith('/') ? curAct.pdfUrl : `/doc/${esc(curAct.id)}/pdf`;
 
   return `<div class="page flush">
     <div class="finlex-container">
@@ -369,10 +371,9 @@ function renderRegulationsReader(u) {
             }
 
             <div class="finlex-doc-meta">
-              ${curAct.issueDate ? `<span>Issued: <b>${esc(curAct.issueDate)}</b></span><span>·</span>` : ''}
-              <span>In force: <b>${esc(curAct.effectiveDate || curAct.inForce || 'In force')}</b></span>
-              <span>·</span>
-              <span>Supervisory authority: <b>${esc(curAct.authority)}</b></span>
+              ${curAct.issueDate ? `<span>${isGovernmentProposition ? 'Submitted to the Riksdag' : 'Issued'}: <b>${esc(curAct.issueDate)}</b></span><span>·</span>` : ''}
+              ${!isGovernmentProposition ? `<span>In force: <b>${esc(curAct.effectiveDate || curAct.inForce || 'In force')}</b></span><span>·</span>` : ''}
+              <span>${isGovernmentProposition ? 'Publisher' : 'Supervisory authority'}: <b>${esc(curAct.authority)}</b></span>
               ${curAct.latestAmendment ? `<span>·</span><span>Latest amendment: <b>${esc(curAct.latestAmendment)}</b></span>` : ''}
               ${
                 curAct.amends
@@ -406,11 +407,11 @@ function renderRegulationsReader(u) {
                     curAct.localPdf || curAct.pdfUrl
                       ? `
                     <div class="finlex-attach-chip-group">
-                      <a href="/doc/${esc(curAct.id)}/pdf" target="_blank" class="finlex-attach-chip pdf" title="Open PDF document">
+                      <a href="${esc(pdfUrl)}" target="_blank" class="finlex-attach-chip pdf" title="Open PDF document">
                         ${ic('file-text', 12)}
                         <span>Original PDF</span>
                       </a>
-                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Original PDF · ${esc(curAct.code)}" data-url="/doc/${esc(curAct.id)}/pdf" title="Preview PDF inline in reader">
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="Original PDF · ${esc(curAct.code)}" data-url="${esc(pdfUrl)}" title="Preview PDF inline in reader">
                         ${ic('eye', 11)}
                       </button>
                     </div>
@@ -436,14 +437,14 @@ function renderRegulationsReader(u) {
                     curAct.localSource || curAct.sourceUrl
                       ? `
                     <div class="finlex-attach-chip-group">
-                      <a href="${esc(webVersionUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="${isRiksdagenAct ? 'Open downloaded local copy' : 'Open web version'}">
+                      <a href="${esc(webVersionUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="${curAct.localSourceUrl || curAct.localSource ? 'Open downloaded local copy' : 'Open web version'}">
                         ${ic('globe', 12)}
-                        <span>${isRiksdagenAct ? 'Downloaded Version' : 'Web Version'}</span>
+                        <span>${curAct.localSourceUrl || curAct.localSource ? 'Downloaded Version' : 'Web Version'}</span>
                       </a>
-                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="${isRiksdagenAct ? 'Downloaded Version' : 'Web Version'} · ${esc(curAct.code)}" data-url="${esc(webVersionUrl)}" title="Preview downloaded version">${ic('eye', 11)}</button>
+                      <button class="finlex-preview-btn" data-a="previewDoc" data-title="${curAct.localSourceUrl || curAct.localSource ? 'Downloaded Version' : 'Web Version'} · ${esc(curAct.code)}" data-url="${esc(webVersionUrl)}" title="Preview document version">${ic('eye', 11)}</button>
                     </div>
                     ${
-                      isRiksdagenAct && curAct.sourceUrl
+                      isRiksdagenDocument && curAct.sourceUrl && (curAct.localSourceUrl || curAct.localSource)
                         ? `
                     <div class="finlex-attach-chip-group">
                       <a href="${esc(curAct.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="finlex-attach-chip" title="Open official Riksdagen page">
