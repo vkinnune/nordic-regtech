@@ -25,13 +25,25 @@ test('Regulations Data Authenticity: genuine Nordic regulations and ZERO mock ac
   }
 
   // Ensure every regulation belongs to an explicitly supported jurisdiction.
-  const allowedJurisdictions = new Set(['Sweden (Finansinspektionen)', 'Sweden (Riksdagen)', 'Finland (Finanssivalvonta)', 'European Union (EUR-Lex)']);
+  const allowedJurisdictions = new Set([
+    'Sweden (Finansinspektionen)',
+    'Sweden (Riksdagen)',
+    'Sweden (Government proposition)',
+    'Finland (Finanssivalvonta)',
+    'European Union (EUR-Lex)',
+  ]);
   for (const reg of swedishRegs) {
     assert.ok(allowedJurisdictions.has(reg.jurisdiction), `Regulation ${reg.id} has non-Swedish jurisdiction: ${reg.jurisdiction}`);
   }
 
   // Ensure every regulation belongs to an explicitly supported authority.
-  const allowedAuthorities = new Set(['Finansinspektionen (FI)', 'Riksdagen', 'Finanssivalvonta (FIVA)', 'EUR-Lex (Publications Office)']);
+  const allowedAuthorities = new Set([
+    'Finansinspektionen (FI)',
+    'Riksdagen',
+    'Government of Sweden (Ministry of Finance)',
+    'Finanssivalvonta (FIVA)',
+    'EUR-Lex (Publications Office)',
+  ]);
   for (const reg of swedishRegs) {
     assert.ok(allowedAuthorities.has(reg.authority), `Regulation ${reg.id} has non-Swedish authority: ${reg.authority}`);
   }
